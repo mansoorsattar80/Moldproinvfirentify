@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moulding Production & Billing Software (Cloud Synced)</title>
+    
+    <!-- Firebase SDK Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --border-color: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        /* Live Notification Banner/Toast */
+        #liveToast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h2 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 20px;
+        }
+
+        .sync-status {
+            text-align: center;
+            font-size: 11px;
+            color: var(--success-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-top: 20px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #475569;
+        }
+
+        input, select {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 600px) {
+            .cards-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .item-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .item-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 4px;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            flex: 1;
+            min-width: 120px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button.btn-success {
+            background-color: var(--success-color);
+        }
+        button.btn-warning {
+            background-color: var(--warning-color);
+        }
+        button.btn-danger {
+            background-color: var(--danger-color);
+        }
+        button.btn-danger:hover {
+            background-color: #c0392b;
+        }
+        button.btn-print {
+            background-color: #8e44ad;
+        }
+
+        .summary-box {
+            background-color: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .summary-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-label {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .summary-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 2px;
+        }
+
+        .inventory-panel {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .remove-card-btn {
+            background: var(--danger-color) !important;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            font-size: 11px;
+            border-radius: 4px;
+            min-width: auto !important;
+            flex: none !important;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: auto !important;
+            flex: none !important;
+        }
+        .action-btn:hover {
+            background-color: #2980b9;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+            button, .no-print, .btn-container, .remove-card-btn, .action-btn, #liveToast {
+                display: none !important;
+            }
+            input, select {
+                border: none;
+                background: transparent;
+                appearance: none;
+                font-size: 13px;
+                padding: 0;
+            }
+            table {
+                border: 1px solid #000;
+            }
+            th, td {
+                border: 1px solid #000;
+            }
+            th {
+                background-color: #ddd !important;
+                color: black !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Live Floating Notification Toast -->
+<div id="liveToast">🔄 Data updated by another user/device</div>
+
+<div class="container">
+    <h2>Moulding Production & Billing Software</h2>
+    <div id="syncStatus" class="sync-status">Connecting to Cloud Database...</div>
+
+    <div class="section-title no-print">
+        <span>Raw Material Inventory Ledger</span>
+        <div style="display: flex; gap: 6px;">
+            <button type="button" class="btn-success" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="addNewMaterialType()">+ Add New Material</button>
+            <button type="button" class="btn-warning" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="openPurchaseModal()">+ Purchase</button>
+            <button type="button" class="btn-danger" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="confirmResetInventory()">Reset Inventory</button>
+        </div>
+    </div>
+    
+    <div class="inventory-panel">
+        <div class="form-grid" style="margin-bottom: 10px;">
+            <div class="input-group">
+                <label for="stockFromDate">From Date</label>
+                <input type="date" id="stockFromDate" onchange="filterInventory()">
+            </div>
+            <div class="input-group">
+                <label for="stockToDate">To Date</label>
+                <input type="date" id="stockToDate" onchange="filterInventory()">
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Opening</th>
+                        <th>Purch.</th>
+                        <th>Cons.</th>
+                        <th>Closing</th>
+                        <th class="no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section-title">Job & Machine Specs</div>
+    <div class="form-grid">
+        <div class="input-group">
+            <label for="slipNo">Slip / Item #</label>
+            <input type="text" id="slipNo" value="963" oninput="saveSpecFields()">
+        </div>
+        <div class="input-group">
+            <label for="itemName">Item Name</label>
+            <input type="text" id="itemName" value="Stick" oninput="saveSpecFields()">
+        </div>
+        <div class="input-group">
+            <label for="materialType">PP Granules</label>
+            <select id="materialType" onchange="saveSpecFields(); calculateBilling()">
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="machineNo">Machine No</label>
+            <input type="text" id="machineNo" value="M/C No-06" oninput="saveSpecFields()">
+        </div>
+        <div class="input-group">
+            <label for="cycleTime">Cycle Time (Sec)</label>
+            <input type="number" id="cycleTime" value="20" step="0.1" oninput="saveSpecFields(); calculateBilling()">
+        </div>
+        <div class="input-group">
+            <label for="mouldCavity">Mould Cavity</label>
+            <input type="number" id="mouldCavity" value="2" step="1" oninput="saveSpecFields(); calculateBilling()">
+        </div>
+        <div class="input-group">
+            <label for="rateType">Rate Type</label>
+            <select id="rateType" onchange="saveSpecFields(); calculateBilling()">
+                <option value="hourly" selected>Per Hour Rate</option>
+                <option value="fixed">Fixed Rate</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label for="rateValue">Rate (PKR)</label>
+            <input type="number" id="rateValue" value="1000" step="0.01" oninput="saveSpecFields(); calculateBilling()">
+        </div>
+        <div class="input-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" value="2026-08-15" onchange="saveSpecFields()">
+        </div>
+        <div class="input-group">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" value="2026-08-15" onchange="saveSpecFields()">
+        </div>
+    </div>
+
+    <div class="section-title">Color Variations & Production Grid</div>
+    <div id="cardsContainer" class="cards-container">
+    </div>
+
+    <div class="btn-container">
+        <button onclick="addRow()">Add Color Card</button>
+        <button class="btn-success" onclick="calculateBilling()">Calculate & Deduct</button>
+        <button class="btn-print" onclick="window.print()">Print / PDF</button>
+    </div>
+
+    <div class="section-title">Billing Summary</div>
+    <div class="summary-box">
+        <div class="summary-grid">
+            <div class="summary-item">
+                <span class="summary-label">Total Quantity</span>
+                <span class="summary-value" id="totalQty">6000 Pcs</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total Gross Wt</span>
+                <span class="summary-value" id="totalGrossDisp">32.65 Kg</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total Net Wt (Cons.)</span>
+                <span class="summary-value" id="totalNetDisp">32.45 Kg</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total Hours</span>
+                <span class="summary-value" id="totalHours">16.67 Hrs</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Rate / Pc</span>
+                <span class="summary-value" id="dispRate">6.38 PKR</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total Amount</span>
+                <span class="summary-value" id="totalAmount" style="color: var(--success-color);">38,280.00 PKR</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // FIREBASE SETUP & REAL-TIME SYNC CONFIG
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyAdcwHrPb_Sdna7eTeIhjvHmYmD6X4woxg",
+        authDomain: "moldproinvfirentify.firebaseapp.com",
+        databaseURL: "https://moldproinvfirentify-default-rtdb.firebaseio.com",
+        projectId: "moldproinvfirentify",
+        storageBucket: "moldproinvfirentify.appspot.com",
+        messagingSenderId: "627192096664",
+        appId: "1:627192096664:android:af4d3bed7e2e4da204eded"
+    };
+
+    let db;
+    try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        document.getElementById('syncStatus').innerText = "🟢 Connected to Real-Time Cloud Database";
+    } catch (e) {
+        document.getElementById('syncStatus').innerText = "⚠️ Running Offline (Firebase Config Needed)";
+        document.getElementById('syncStatus').style.color = "var(--warning-color)";
+    }
+
+    let inventoryData = {
+        "Black PP": { opening: 500, purchased: 200 }
+    };
+    let itemsData = [
+        { color: "Stick Green", qty: 3000, bags: 2, gross: 16.30, net: 16.20 },
+        { color: "Pink", qty: 3000, bags: 2, gross: 16.35, net: 16.25 }
+    ];
+
+    let isRemoteUpdate = false;
+    let toastTimeout;
+    let syncTimer = null; // Debounce timer variable
+
+    function showToast(message) {
+        const toast = document.getElementById('liveToast');
+        toast.innerText = message;
+        toast.style.display = 'flex';
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => {
+            toast.style.display = 'none';
+        }, 3500);
+    }
+
+    // Listen to real-time changes from any other device/user
+    if (db) {
+        db.ref('mouldingApp').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data && !window.isLocalSaving) {
+                isRemoteUpdate = true;
+                showToast("📥 Live Update: Data changed by another user/device");
+                
+                if (data.inventoryData) inventoryData = data.inventoryData;
+                if (data.itemsData) itemsData = data.itemsData;
+                
+                if (data.specs) {
+                    if (document.getElementById('slipNo')) document.getElementById('slipNo').value = data.specs.slipNo || '';
+                    if (document.getElementById('itemName')) document.getElementById('itemName').value = data.specs.itemName || '';
+                    if (document.getElementById('machineNo')) document.getElementById('machineNo').value = data.specs.machineNo || '';
+                    if (document.getElementById('cycleTime')) document.getElementById('cycleTime').value = data.specs.cycleTime || 20;
+                    if (document.getElementById('mouldCavity')) document.getElementById('mouldCavity').value = data.specs.mouldCavity || 2;
+                    if (document.getElementById('rateType')) document.getElementById('rateType').value = data.specs.rateType || 'hourly';
+                    if (document.getElementById('rateValue')) document.getElementById('rateValue').value = data.specs.rateValue || 1000;
+                    if (document.getElementById('startDate')) document.getElementById('startDate').value = data.specs.startDate || '';
+                    if (document.getElementById('endDate')) document.getElementById('endDate').value = data.specs.endDate || '';
+                }
+
+                updateMaterialDropdown();
+                if (data.specs && data.specs.materialType) {
+                    document.getElementById('materialType').value = data.specs.materialType;
+                }
+                renderCardsWithoutTrigger();
+                isRemoteUpdate = false;
+            }
+        });
+    }
+
+    // Debounced Firebase Sync to prevent high-frequency write calls while typing
+    function syncToFirebase() {
+        if (!db || isRemoteUpdate) return;
+        
+        clearTimeout(syncTimer);
+        syncTimer = setTimeout(() => {
+            window.isLocalSaving = true;
+            showToast("💾 Saving & updating cloud...");
+
+            const specs = {
+                slipNo: document.getElementById('slipNo').value,
+                itemName: document.getElementById('itemName').value,
+                materialType: document.getElementById('materialType').value,
+                machineNo: document.getElementById('machineNo').value,
+                cycleTime: document.getElementById('cycleTime').value,
+                mouldCavity: document.getElementById('mouldCavity').value,
+                rateType: document.getElementById('rateType').value,
+                rateValue: document.getElementById('rateValue').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value
+            };
+
+            db.ref('mouldingApp').set({
+                inventoryData: inventoryData,
+                itemsData: itemsData,
+                specs: specs
+            }).then(() => {
+                setTimeout(() => { window.isLocalSaving = false; }, 500);
+            });
+        }, 600); // Waits 600ms after last keystroke/change before writing to database
+    }
+
+    function updateMaterialDropdown() {
+        const select = document.getElementById('materialType');
+        let currentSelected = select.value;
+        select.innerHTML = '';
+        
+        let keys = Object.keys(inventoryData);
+        if (keys.length === 0) {
+            let opt = document.createElement('option');
+            opt.value = "";
+            opt.textContent = "-- No Material Added --";
+            select.appendChild(opt);
+            return;
+        }
+
+        keys.forEach(material => {
+            let opt = document.createElement('option');
+            opt.value = material;
+            opt.textContent = material;
+            if (material === currentSelected) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+    }
+
+    function addNewMaterialType() {
+        let newMat = prompt("Enter new Raw Material / Granule type name (e.g., Pure PP, Black PP):", "");
+        if (!newMat) return;
+        newMat = newMat.trim();
+        if (!newMat) return;
+
+        if (inventoryData[newMat]) {
+            alert("This material already exists in inventory.");
+            return;
+        }
+        let opStr = prompt(`Enter Opening Stock (Kg) for ${newMat}:`, "0");
+        let purStr = prompt(`Enter Purchased Stock (Kg) for ${newMat}:`, "0");
+        
+        let opening = parseFloat(opStr) || 0;
+        let purchased = parseFloat(purStr) || 0;
+
+        inventoryData[newMat] = { opening: opening, purchased: purchased };
+        updateMaterialDropdown();
+        document.getElementById('materialType').value = newMat;
+        calculateBilling();
+        syncToFirebase();
+    }
+
+    function renderCards() {
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = '';
+        itemsData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div class="item-card-header">
+                    <span>#${index + 1} - Color Details</span>
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" class="action-btn no-print" onclick="editCard(${index})">Edit</button>
+                        <button type="button" class="remove-card-btn no-print" onclick="removeCard(${index})">X</button>
+                    </div>
+                </div>
+                <div class="card-grid">
+                    <div class="input-group" style="grid-column: span 2;">
+                        <label>Color / Description</label>
+                        <input type="text" class="card-color" value="${item.color}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Quantity (Pcs)</label>
+                        <input type="number" class="card-qty qty-input" value="${item.qty}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Boray / Bags</label>
+                        <input type="number" class="card-bag bag-input" value="${item.bags}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Gross Wt (Kg)</label>
+                        <input type="number" class="card-gross gross-input" value="${item.gross}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Net Wt (Kg)</label>
+                        <input type="number" class="card-net net-input" value="${item.net}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        calculateBilling();
+        syncToFirebase();
+    }
+
+    function renderCardsWithoutTrigger() {
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = '';
+        itemsData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div class="item-card-header">
+                    <span>#${index + 1} - Color Details</span>
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" class="action-btn no-print" onclick="editCard(${index})">Edit</button>
+                        <button type="button" class="remove-card-btn no-print" onclick="removeCard(${index})">X</button>
+                    </div>
+                </div>
+                <div class="card-grid">
+                    <div class="input-group" style="grid-column: span 2;">
+                        <label>Color / Description</label>
+                        <input type="text" class="card-color" value="${item.color}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Quantity (Pcs)</label>
+                        <input type="number" class="card-qty qty-input" value="${item.qty}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Boray / Bags</label>
+                        <input type="number" class="card-bag bag-input" value="${item.bags}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Gross Wt (Kg)</label>
+                        <input type="number" class="card-gross gross-input" value="${item.gross}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Net Wt (Kg)</label>
+                        <input type="number" class="card-net net-input" value="${item.net}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        calculateBillingOnly();
+    }
+
+    function updateDataFromCards() {
+        const cards = document.querySelectorAll('.item-card');
+        cards.forEach((card, index) => {
+            if (itemsData[index]) {
+                itemsData[index].color = card.querySelector('.card-color').value;
+                itemsData[index].qty = parseFloat(card.querySelector('.card-qty').value) || 0;
+                itemsData[index].bags = parseFloat(card.querySelector('.card-bag').value) || 0;
+                itemsData[index].gross = parseFloat(card.querySelector('.card-gross').value) || 0;
+                itemsData[index].net = parseFloat(card.querySelector('.card-net').value) || 0;
+            }
+        });
+        calculateBilling();
+        syncToFirebase();
+    }
+
+    function addRow() {
+        itemsData.push({ color: "New Color", qty: 0, bags: 0, gross: 0.00, net: 0.00 });
+        renderCards();
+    }
+
+    function removeCard(index) {
+        itemsData.splice(index, 1);
+        renderCards();
+    }
+
+    function editCard(index) {
+        let item = itemsData[index];
+        let newColor = prompt("Edit Color / Description:", item.color);
+        if (newColor !== null) {
+            let newQty = prompt("Edit Quantity (Pcs):", item.qty);
+            let newBags = prompt("Edit Boray / Bags:", item.bags);
+            let newGross = prompt("Edit Gross Wt (Kg):", item.gross);
+            let newNet = prompt("Edit Net Wt (Kg):", item.net);
+
+            if (newColor.trim() !== "") item.color = newColor;
+            if (newQty !== null && !isNaN(parseFloat(newQty))) item.qty = parseFloat(newQty);
+            if (newBags !== null && !isNaN(parseFloat(newBags))) item.bags = parseFloat(newBags);
+            if (newGross !== null && !isNaN(parseFloat(newGross))) item.gross = parseFloat(newGross);
+            if (newNet !== null && !isNaN(parseFloat(newNet))) item.net = parseFloat(newNet);
+
+            renderCards();
+        }
+    }
+
+    function openPurchaseModal() {
+        let keys = Object.keys(inventoryData);
+        if (keys.length === 0) {
+            alert("Please add a material first using the '+ Add New Material' button.");
+            return;
+        }
+        let materialsList = keys.join(", ");
+        let material = prompt(`Enter Granule Type to Purchase (${materialsList}):`, keys[0]);
+        if (!material || !inventoryData[material]) {
+            if (material) alert("Invalid material type.");
+            return;
+        }
+        let qtyStr = prompt(`Enter purchase quantity in Kg for ${material}:`, "100");
+        let qty = parseFloat(qtyStr);
+        if (!isNaN(qty) && qty > 0) {
+            inventoryData[material].purchased += qty;
+            alert(`Added ${qty} Kg to ${material}!`);
+            calculateBilling();
+            syncToFirebase();
+        }
+    }
+
+    function editInventory(material) {
+        let data = inventoryData[material];
+        let opStr = prompt(`Edit Opening Stock (Kg) for ${material}:`, data.opening);
+        let purStr = prompt(`Edit Purchased Stock (Kg) for ${material}:`, data.purchased);
+
+        let newOp = parseFloat(opStr);
+        let newPur = parseFloat(purStr);
+
+        if (!isNaN(newOp)) data.opening = newOp;
+        if (!isNaN(newPur)) data.purchased = newPur;
+
+        calculateBilling();
+        syncToFirebase();
+    }
+
+    function deleteMaterial(material) {
+        if (confirm(`Are you sure you want to delete ${material} from inventory?`)) {
+            delete inventoryData[material];
+            updateMaterialDropdown();
+            calculateBilling();
+            syncToFirebase();
+        }
+    }
+
+    function confirmResetInventory() {
+        let firstConfirm = confirm("⚠️ WARNING: Are you sure you want to clear all inventory types and data?");
+        if (firstConfirm) {
+            inventoryData = {};
+            updateMaterialDropdown();
+            alert("Inventory has been completely cleared.");
+            calculateBilling();
+            syncToFirebase();
+        }
+    }
+
+    function updateInventoryDisplay(consumedMap) {
+        const tbody = document.getElementById('inventoryTableBody');
+        tbody.innerHTML = "";
+
+        let keys = Object.keys(inventoryData);
+        if (keys.length === 0) {
+            let row = tbody.insertRow();
+            row.innerHTML = `<td colspan="6" style="color: #64748b; padding: 15px;">No inventory items added yet. Click "+ Add New Material" above.</td>`;
+            return;
+        }
+
+        keys.forEach(material => {
+            let opening = inventoryData[material].opening;
+            let purchased = inventoryData[material].purchased;
+            let consumed = consumedMap[material] || 0;
+            let closing = (opening + purchased) - consumed;
+
+            let row = tbody.insertRow();
+            row.innerHTML = `
+                <td style="font-weight: 600; text-align: left; padding-left: 8px;">${material}</td>
+                <td>${opening.toFixed(1)}</td>
+                <td style="color: var(--success-color);">+${purchased.toFixed(1)}</td>
+                <td style="color: var(--danger-color);">-${consumed.toFixed(1)}</td>
+                <td style="font-weight: bold; color: ${closing < 0 ? 'var(--danger-color)' : 'var(--primary-color)'};">${closing.toFixed(1)}</td>
+                <td class="no-print" style="display: flex; gap: 4px; justify-content: center; border: none; align-items: center; padding-top: 10px;">
+                    <button type="button" class="action-btn" onclick="editInventory('${material}')">Edit</button>
+                    <button type="button" class="remove-card-btn" onclick="deleteMaterial('${material}')">X</button>
+                </td>
+            `;
+        });
+    }
+
+    function calculateBilling() {
+        calculateBillingOnly();
+        syncToFirebase();
+    }
+
+    function calculateBillingOnly() {
+        let totalQty = 0;
+        let totalBags = 0;
+        let totalGross = 0;
+        let totalNet = 0;
+
+        itemsData.forEach(item => {
+            totalQty += item.qty;
+            totalBags += item.bags;
+            totalGross += item.gross;
+            totalNet += item.net;
+        });
+
+        let selectedMaterial = document.getElementById('materialType').value;
+        let consumedMap = {};
+        if (selectedMaterial) {
+            consumedMap[selectedMaterial] = totalNet;
+        }
+
+        updateInventoryDisplay(consumedMap);
+
+        let mouldPcs = parseFloat(document.getElementById('mouldCavity').value) || 1;
+        let cycleTimeSec = parseFloat(document.getElementById('cycleTime').value) || 0;
+        let rateType = document.getElementById('rateType').value;
+        let rateVal = parseFloat(document.getElementById('rateValue').value) || 0;
+
+        let totalHours = 0;
+        if (mouldPcs > 0) {
+            totalHours = (totalQty * cycleTimeSec) / (mouldPcs * 3600);
+        }
+
+        let effectiveRate = 0;
+        let totalAmount = 0;
+
+        if (rateType === 'hourly') {
+            effectiveRate = (rateVal / 60 / 60) * cycleTimeSec;
+            totalAmount = effectiveRate * totalQty;
+        } else {
+            effectiveRate = rateVal;
+            totalAmount = totalQty * effectiveRate;
+        }
+
+        document.getElementById('totalQty').innerText = totalQty.toLocaleString() + ' Pcs';
+        document.getElementById('totalGrossDisp').innerText = totalGross.toFixed(2) + ' Kg';
+        document.getElementById('totalNetDisp').innerText = totalNet.toFixed(2) + ' Kg';
+        document.getElementById('totalHours').innerText = totalHours.toFixed(2) + ' Hrs';
+        document.getElementById('dispRate').innerText = effectiveRate.toFixed(2) + ' PKR';
+        document.getElementById('totalAmount').innerText = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' PKR';
+    }
+
+    function saveSpecFields() {
+        calculateBilling();
+    }
+
+    function filterInventory() {
+        calculateBilling();
+    }
+
+    window.onload = function() {
+        let today = new Date();
+        let firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+        let lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+        document.getElementById('stockFromDate').value = firstDay;
+        document.getElementById('stockToDate').value = lastDay;
+
+        updateMaterialDropdown();
+        renderCardsWithoutTrigger();
+    };
+</script>
+
+</body>
+</html>
