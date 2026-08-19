@@ -142,7 +142,7 @@
     <div id="page3" class="page">
         <h3>BILLING SUMMARY & REPORTS</h3>
         
-        <!-- Job & Machine Info Summary Box -->
+        <!-- Job & Machine Info Summary Box (Included in Print) -->
         <div style="background:#f8f9fa; border:1px solid #ddd; padding:10px; border-radius:4px; margin-bottom:10px; font-size:12px;">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
                 <span><b>CUSTOMER:</b> <span id="displayPartyName">---</span></span>
@@ -348,19 +348,9 @@
         let cycleTime = parseFloat(document.getElementById('cycleTime').value) || 0;
         let cavities = parseFloat(document.getElementById('cavities').value) || 1;
         
-        document.getElementById('displayPartyName').textContent = partyName;
-        document.getElementById('displaySlipNo').textContent = slipNo;
-        document.getElementById('displayItemName').textContent = itemName;
-        document.getElementById('displayMachineNo').textContent = machineNo;
-        document.getElementById('displayCycleTime').textContent = cycleTime;
-        document.getElementById('displayCavities').textContent = cavities;
-        document.getElementById('displayRate').textContent = ratePerHour;
-
         let colorCards = document.querySelectorAll('#colorCardsContainer > div');
-        let billingBody = document.getElementById('billingTableBody');
-        billingBody.innerHTML = '';
-        let grandTotal = 0;
         let tempItems = [];
+        let grandTotal = 0;
 
         colorCards.forEach(card => {
             let color = card.querySelector('.card-color').value || 'UNSPECIFIED';
@@ -375,23 +365,11 @@
             grandTotal += amount;
 
             tempItems.push({ color, pcs, bags, grossWt, netWt, scrap, amount });
-
-            billingBody.innerHTML += `
-                <tr>
-                    <td>${color}</td>
-                    <td>${pcs}</td>
-                    <td>${bags}</td>
-                    <td>${grossWt.toFixed(2)}</td>
-                    <td>${netWt.toFixed(2)}</td>
-                    <td>${scrap.toFixed(2)}</td>
-                    <td>${amount.toFixed(2)}</td>
-                </tr>`;
         });
 
-        document.getElementById('grandTotalAmount').textContent = grandTotal.toFixed(2);
-        
         savedBillingData = { partyName, slipNo, itemName, machineNo, cycleTime, cavities, ratePerHour, items: tempItems, grandTotal };
         localStorage.setItem('moulding_billingData', JSON.stringify(savedBillingData));
+        renderBilling();
     }
 
     function renderBilling() {
@@ -686,7 +664,7 @@
     function renderLotTracker() {
         let tbody = document.getElementById('lotTrackerTableBody');
         tbody.innerHTML = '';
-        if (lotTrackers.length === 0) {
+        if (lotTracker.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" style="color:red; font-weight:bold;">NO LOT RECORDS FOUND</td></tr>`;
             return;
         }
