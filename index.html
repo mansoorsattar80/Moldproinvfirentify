@@ -279,6 +279,23 @@
         renderLotTracker();
     });
 
+    // Automatically clear Page 2 (Job Specs) inputs after printing
+    window.addEventListener('afterprint', () => {
+        document.getElementById('slipNo').value = '';
+        document.getElementById('itemName').value = '';
+        document.getElementById('partyName').value = '';
+        document.getElementById('machineNo').value = '';
+        
+        // Clear color cards container and add a fresh blank card
+        document.getElementById('colorCardsContainer').innerHTML = '';
+        addColorCard();
+        
+        // Reset billing display
+        document.getElementById('displayPartyName').textContent = '---';
+        document.getElementById('billingTableBody').innerHTML = '';
+        document.getElementById('grandTotalAmount').textContent = '0.00';
+    });
+
     function switchPage(pageNum) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
