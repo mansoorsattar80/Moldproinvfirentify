@@ -14,42 +14,55 @@
             --bg: #f8f9fa;
             --border: #cbd5e1;
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; color: #334155; margin: 0; padding: 15px; }
-        .container { max-width: 950px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; color: #334155; margin: 0; padding: 10px; }
+        
+        /* Layout mode container wrapper */
+        .viewport-wrapper { max-width: 950px; margin: 0 auto; transition: all 0.3s ease; }
+        .viewport-wrapper.desktop-mode { max-width: 1200px !important; }
+
+        .container { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         
         /* Login Screen */
         #loginScreen { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; }
         #appContainer { display: none; }
 
+        /* Top Header Control bar */
+        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        .view-mode-toggle { background: var(--warning); color: white; padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; }
+
         /* 3-Page Navigation Tabs */
-        .tab-nav { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
-        .tab-btn { background: #e2e8f0; color: #475569; border: none; padding: 10px 16px; font-weight: 600; border-radius: 6px; cursor: pointer; flex: 1; min-width: 130px; text-align: center; }
+        .tab-nav { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 8px; flex-wrap: wrap; }
+        .tab-btn { background: #e2e8f0; color: #475569; border: none; padding: 8px 12px; font-weight: 600; border-radius: 6px; cursor: pointer; flex: 1; min-width: 100px; text-align: center; font-size: 12px; }
         .tab-btn.active { background: var(--secondary); color: white; }
         
         .page-content { display: none; }
         .page-content.active { display: block; }
 
-        h2 { color: var(--primary); margin-top: 0; font-size: 20px; border-bottom: 2px solid var(--secondary); padding-bottom: 6px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 15px; }
+        h2 { color: var(--primary); margin-top: 0; font-size: 18px; border-bottom: 2px solid var(--secondary); padding-bottom: 6px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
         .input-group { display: flex; flex-direction: column; }
-        label { font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569; }
-        input, select { padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; text-transform: uppercase; }
+        label { font-size: 11px; font-weight: 600; margin-bottom: 3px; color: #475569; }
+        input, select { padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; text-transform: uppercase; width: 100%; box-sizing: border-box; background: #fff; }
         
-        .table-container { overflow-x: auto; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 13px; }
+        .table-container { width: 100%; overflow-x: auto; margin-bottom: 15px; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; min-width: 500px; }
         th, td { border: 1px solid var(--border); padding: 8px; text-align: center; }
-        th { background-color: var(--primary); color: white; font-weight: 500; }
+        th { background-color: var(--primary); color: white; font-weight: 500; font-size: 11px; }
         
         .btn-container { display: flex; gap: 8px; justify-content: flex-start; margin-bottom: 15px; flex-wrap: wrap; }
-        button { background-color: var(--secondary); color: white; border: none; padding: 9px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; }
+        button { background-color: var(--secondary); color: white; border: none; padding: 9px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; }
         .btn-success { background-color: var(--success); }
         .btn-danger { background-color: var(--danger); }
         .btn-warning { background-color: var(--warning); }
         
-        .summary-box { background: var(--bg); border: 1px solid var(--border); padding: 12px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+        .summary-box { background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
         .summary-item { display: flex; flex-direction: column; }
-        .summary-label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; }
-        .summary-value { font-size: 15px; font-weight: bold; color: var(--primary); margin-top: 2px; }
+        .summary-label { font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        .summary-value { font-size: 14px; font-weight: bold; color: var(--primary); margin-top: 2px; }
+
+        /* Desktop Mode Forced Overrides */
+        .viewport-wrapper.desktop-mode .form-grid { grid-template-columns: repeat(4, 1fr); }
+        .viewport-wrapper.desktop-mode table { min-width: 100%; }
     </style>
 </head>
 <body>
@@ -68,174 +81,178 @@
         <button class="btn-success" onclick="handleLogin()" style="width:100%;">Login to System</button>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <div class="container" id="appContainer">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h2 style="border:none; margin:0;">Moulding Management Software</h2>
-            <button class="btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="handleLogout()">Logout</button>
-        </div>
-        
-        <!-- 3 Main Navigation Pages -->
-        <div class="tab-nav">
-            <button class="tab-btn active" onclick="switchPage('inventoryPage', this)">1. Inventory</button>
-            <button class="tab-btn" onclick="switchPage('billingPage', this)">2. Billing</button>
-            <button class="tab-btn" onclick="switchPage('productionPage', this)">3. Production</button>
-        </div>
-
-        <!-- PAGE 1: INVENTORY -->
-        <div id="inventoryPage" class="page-content active">
-            <h2>Raw Material Inventory Ledger</h2>
-            <div class="btn-container" style="justify-content: flex-start;">
-                <button class="btn-success" onclick="addMaterial()">+ Add Material Type</button>
-                <button onclick="addPurchase()">+ Record Purchase</button>
+    <!-- MAIN APP CONTAINER WRAPPER -->
+    <div class="viewport-wrapper" id="viewportWrapper">
+        <div class="container" id="appContainer">
+            <div class="app-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <h2 style="border:none; margin:0; font-size:16px;">Moulding Software</h2>
+                    <button class="view-mode-toggle" id="modeToggleBtn" onclick="toggleDesktopMode()">🖥️ Desktop View</button>
+                </div>
+                <button class="btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="handleLogout()">Logout</button>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Material Name</th>
-                            <th>Opening (Kg)</th>
-                            <th>Purchased (Kg)</th>
-                            <th>Consumed (Net Wt)</th>
-                            <th>Closing (Kg)</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryTableBody"></tbody>
-                </table>
+            
+            <!-- 3 Main Navigation Pages -->
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchPage('inventoryPage', this)">1. Inventory</button>
+                <button class="tab-btn" onclick="switchPage('billingPage', this)">2. Billing</button>
+                <button class="tab-btn" onclick="switchPage('productionPage', this)">3. Production</button>
             </div>
-        </div>
 
-        <!-- PAGE 2: BILLING -->
-        <div id="billingPage" class="page-content">
-            <h2>Job Billing & Specs</h2>
-            <div class="form-grid">
-                <div class="input-group">
-                    <label>Slip / Job #</label>
-                    <input type="text" id="billSlip" value="101" oninput="calculateBilling()">
+            <!-- PAGE 1: INVENTORY -->
+            <div id="inventoryPage" class="page-content active">
+                <h2>Raw Material Inventory Ledger</h2>
+                <div class="btn-container">
+                    <button class="btn-success" onclick="addMaterial()">+ Add Material</button>
+                    <button onclick="addPurchase()">+ Purchase</button>
                 </div>
-                <div class="input-group">
-                    <label>Item Name</label>
-                    <input type="text" id="billItem" value="CAP" oninput="calculateBilling()">
-                </div>
-                <div class="input-group">
-                    <label>Assigned Machine</label>
-                    <select id="billMachine"></select>
-                </div>
-                <div class="input-group">
-                    <label>PP Granules Material</label>
-                    <select id="billMaterial" onchange="calculateBilling()"></select>
-                </div>
-                <div class="input-group">
-                    <label>Cycle Time (Sec)</label>
-                    <input type="number" id="billCycle" value="20" step="0.1" oninput="calculateBilling()">
-                </div>
-                <div class="input-group">
-                    <label>Mould Cavity</label>
-                    <input type="number" id="billCavity" value="2" step="1" oninput="calculateBilling()">
-                </div>
-                <div class="input-group">
-                    <label>Rate Per Hour (PKR)</label>
-                    <input type="number" id="billRate" value="1200" step="0.01" oninput="calculateBilling()">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Opening</th>
+                                <th>Purch.</th>
+                                <th>Cons.</th>
+                                <th>Closing</th>
+                                <th>Act</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody"></tbody>
+                    </table>
                 </div>
             </div>
 
-            <h3 style="font-size: 14px; margin-top: 15px; color: var(--primary);">Production Breakdown (Colors & Weights)</h3>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Color</th>
-                            <th>Bags</th>
-                            <th>Quantity (Pcs)</th>
-                            <th>Gross Weight (Kg)</th>
-                            <th>Net Weight (Kg)</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="billingRows"></tbody>
-                </table>
-            </div>
-            <button class="btn-success" onclick="addBillingRow()" style="margin-bottom: 15px;">+ Add Color Row</button>
+            <!-- PAGE 2: BILLING -->
+            <div id="billingPage" class="page-content">
+                <h2>Job Billing & Specs</h2>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Slip / Job #</label>
+                        <input type="text" id="billSlip" value="101" oninput="calculateBilling()">
+                    </div>
+                    <div class="input-group">
+                        <label>Item Name</label>
+                        <input type="text" id="billItem" value="CAP" oninput="calculateBilling()">
+                    </div>
+                    <div class="input-group">
+                        <label>Machine</label>
+                        <select id="billMachine"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>PP Material</label>
+                        <select id="billMaterial" onchange="calculateBilling()"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>Cycle (Sec)</label>
+                        <input type="number" id="billCycle" value="20" step="0.1" oninput="calculateBilling()">
+                    </div>
+                    <div class="input-group">
+                        <label>Cavity</label>
+                        <input type="number" id="billCavity" value="2" step="1" oninput="calculateBilling()">
+                    </div>
+                    <div class="input-group">
+                        <label>Rate / Hr (PKR)</label>
+                        <input type="number" id="billRate" value="1200" step="0.01" oninput="calculateBilling()">
+                    </div>
+                </div>
 
-            <div class="summary-box">
-                <div class="summary-item"><span class="summary-label">Total Qty</span><span class="summary-value" id="sumQty">0 Pcs</span></div>
-                <div class="summary-item"><span class="summary-label">Total Gross Wt</span><span class="summary-value" id="sumGross">0.00 Kg</span></div>
-                <div class="summary-item"><span class="summary-label">Total Net Wt</span><span class="summary-value" id="sumNet">0.00 Kg</span></div>
-                <div class="summary-item"><span class="summary-label">Total Hours</span><span class="summary-value" id="sumHours">0.00 Hrs</span></div>
-                <div class="summary-item"><span class="summary-label">Amount Payable</span><span class="summary-value" id="sumAmount" style="color: var(--success);">0.00 PKR</span></div>
-            </div>
-        </div>
+                <h3 style="font-size: 13px; margin-top: 15px; color: var(--primary);">Production Breakdown (Colors & Weights)</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Color</th>
+                                <th>Bags</th>
+                                <th>Qty (Pcs)</th>
+                                <th>Gross (Kg)</th>
+                                <th>Net (Kg)</th>
+                                <th>Act</th>
+                            </tr>
+                        </thead>
+                        <tbody id="billingRows"></tbody>
+                    </table>
+                </div>
+                <button class="btn-success" onclick="addBillingRow()" style="margin-bottom: 15px;">+ Add Color Row</button>
 
-        <!-- PAGE 3: PRODUCTION -->
-        <div id="productionPage" class="page-content">
-            <h2>Daily Production Database</h2>
-            <div class="form-grid">
-                <div class="input-group">
-                    <label>Production Date</label>
-                    <input type="date" id="prodDate">
+                <div class="summary-box">
+                    <div class="summary-item"><span class="summary-label">Total Qty</span><span class="summary-value" id="sumQty">0 Pcs</span></div>
+                    <div class="summary-item"><span class="summary-label">Total Gross</span><span class="summary-value" id="sumGross">0.00 Kg</span></div>
+                    <div class="summary-item"><span class="summary-label">Total Net</span><span class="summary-value" id="sumNet">0.00 Kg</span></div>
+                    <div class="summary-item"><span class="summary-label">Total Hours</span><span class="summary-value" id="sumHours">0.00 Hrs</span></div>
+                    <div class="summary-item"><span class="summary-label">Payable</span><span class="summary-value" id="sumAmount" style="color: var(--success);">0.00 PKR</span></div>
                 </div>
-                <div class="input-group">
-                    <label>Shift</label>
-                    <select id="prodShift">
-                        <option>MORNING</option>
-                        <option>EVENING</option>
-                        <option>NIGHT</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Machine No</label>
-                    <select id="prodMachine"></select>
-                </div>
-                <div class="input-group">
-                    <label>Parts Produced (Pcs)</label>
-                    <input type="number" id="prodPcs" value="1000">
-                </div>
-                <div class="input-group">
-                    <label>Scrap / Waste (Kg)</label>
-                    <input type="number" id="prodScrap" value="1.5" step="0.1">
-                </div>
-                <div class="input-group">
-                    <label>Previous Reading</label>
-                    <input type="number" id="prodPrevReading" value="12000" step="0.1" oninput="calculateMeterDiff()">
-                </div>
-                <div class="input-group">
-                    <label>Current Reading</label>
-                    <input type="number" id="prodCurrReading" value="12250" step="0.1" oninput="calculateMeterDiff()">
-                </div>
-                <div class="input-group">
-                    <label>Meter Diff (Consumed)</label>
-                    <input type="number" id="prodMeterDiff" value="250" step="0.1" readonly style="background:#e2e8f0; font-weight:bold;">
-                </div>
-            </div>
-            <div class="btn-container">
-                <button class="btn-success" onclick="saveProductionEntry()">Save Entry to Production DB</button>
-                <button class="btn-warning" onclick="addNewMachine()">+ Add Machine</button>
             </div>
 
-            <div class="table-container" style="margin-top: 15px;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Shift</th>
-                            <th>Machine</th>
-                            <th>Output (Pcs)</th>
-                            <th>Scrap (Kg)</th>
-                            <th>Prev Read</th>
-                            <th>Curr Read</th>
-                            <th>Diff</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productionTableBody"></tbody>
-                </table>
+            <!-- PAGE 3: PRODUCTION -->
+            <div id="productionPage" class="page-content">
+                <h2>Daily Production Database</h2>
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Date</label>
+                        <input type="date" id="prodDate">
+                    </div>
+                    <div class="input-group">
+                        <label>Shift</label>
+                        <select id="prodShift">
+                            <option>MORNING</option>
+                            <option>EVENING</option>
+                            <option>NIGHT</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Machine No</label>
+                        <select id="prodMachine"></select>
+                    </div>
+                    <div class="input-group">
+                        <label>Output (Pcs)</label>
+                        <input type="number" id="prodPcs" value="1000">
+                    </div>
+                    <div class="input-group">
+                        <label>Scrap (Kg)</label>
+                        <input type="number" id="prodScrap" value="1.5" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Prev Read</label>
+                        <input type="number" id="prodPrevReading" value="12000" step="0.1" oninput="calculateMeterDiff()">
+                    </div>
+                    <div class="input-group">
+                        <label>Curr Read</label>
+                        <input type="number" id="prodCurrReading" value="12250" step="0.1" oninput="calculateMeterDiff()">
+                    </div>
+                    <div class="input-group">
+                        <label>Meter Diff</label>
+                        <input type="number" id="prodMeterDiff" value="250" step="0.1" readonly style="background:#e2e8f0; font-weight:bold;">
+                    </div>
+                </div>
+                <div class="btn-container">
+                    <button class="btn-success" onclick="saveProductionEntry()">Save Entry</button>
+                    <button class="btn-warning" onclick="addNewMachine()">+ Add Machine</button>
+                </div>
+
+                <div class="table-container" style="margin-top: 15px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Shift</th>
+                                <th>Machine</th>
+                                <th>Pcs</th>
+                                <th>Scrap</th>
+                                <th>Prev</th>
+                                <th>Curr</th>
+                                <th>Diff</th>
+                                <th>Act</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productionTableBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
 <script>
-    // --- DATABASE STORAGE ---
     let inventoryData = JSON.parse(localStorage.getItem('db_inventory')) || {
         "BLACK PP": { opening: 400, purchased: 100 },
         "PP PURE": { opening: 500, purchased: 0 }
@@ -252,7 +269,17 @@
         { id: 1, date: "2026-08-19", shift: "MORNING", machine: "M/C NO-01", pcs: 2500, scrap: 0.8, prevRead: 12000, currRead: 12250, diff: 250 }
     ];
 
-    // --- LOGIN LOGIC ---
+    function toggleDesktopMode() {
+        let wrapper = document.getElementById('viewportWrapper');
+        let btn = document.getElementById('modeToggleBtn');
+        wrapper.classList.toggle('desktop-mode');
+        if(wrapper.classList.contains('desktop-mode')) {
+            btn.innerHTML = "📱 Mobile View";
+        } else {
+            btn.innerHTML = "🖥️ Desktop View";
+        }
+    }
+
     function handleLogin() {
         let u = document.getElementById('loginUser').value.trim();
         let p = document.getElementById('loginPass').value.trim();
@@ -270,7 +297,6 @@
         document.getElementById('loginScreen').style.display = 'block';
     }
 
-    // Page Switching Function
     function switchPage(pageId, btn) {
         document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -289,7 +315,6 @@
         }
     }
 
-    // --- PAGE 1: INVENTORY LOGIC ---
     function addMaterial() {
         let name = prompt("Enter new material name (e.g. WHITE PP):");
         if(!name) return;
@@ -335,7 +360,7 @@
                     <td style="color:var(--success)">+${item.purchased.toFixed(1)}</td>
                     <td style="color:var(--danger)">-${consumed.toFixed(1)}</td>
                     <td style="font-weight:bold">${closing.toFixed(1)}</td>
-                    <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteMaterial('${mat}')">Delete</button></td>
+                    <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteMaterial('${mat}')">X</button></td>
                 </tr>
             `;
         });
@@ -348,9 +373,7 @@
         renderInventory();
     }
 
-    // --- PAGE 2: BILLING LOGIC ---
     function updateAllDropdowns() {
-        // Material Dropdown
         let matSelect = document.getElementById('billMaterial');
         let currentMat = matSelect.value;
         matSelect.innerHTML = "";
@@ -362,7 +385,6 @@
             matSelect.appendChild(opt);
         });
 
-        // Machine Dropdowns (Billing & Production)
         let billMacSelect = document.getElementById('billMachine');
         let prodMacSelect = document.getElementById('prodMachine');
         let currentBillMac = billMacSelect.value;
@@ -395,10 +417,10 @@
             tbody.innerHTML += `
                 <tr>
                     <td><input type="text" value="${row.color}" oninput="billingRowsData[${idx}].color = this.value.toUpperCase(); saveAllData(); calculateBilling()"></td>
-                    <td><input type="number" style="width:70px;" value="${row.bags}" oninput="billingRowsData[${idx}].bags = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
-                    <td><input type="number" value="${row.qty}" oninput="billingRowsData[${idx}].qty = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
-                    <td><input type="number" step="0.01" value="${row.gross}" oninput="billingRowsData[${idx}].gross = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
-                    <td><input type="number" step="0.01" value="${row.net}" oninput="billingRowsData[${idx}].net = parseFloat(this.value)||0; saveAllData(); calculateBilling(); renderInventory()"></td>
+                    <td><input type="number" style="width:50px;" value="${row.bags}" oninput="billingRowsData[${idx}].bags = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
+                    <td><input type="number" style="width:75px;" value="${row.qty}" oninput="billingRowsData[${idx}].qty = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
+                    <td><input type="number" style="width:65px;" step="0.01" value="${row.gross}" oninput="billingRowsData[${idx}].gross = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
+                    <td><input type="number" style="width:65px;" step="0.01" value="${row.net}" oninput="billingRowsData[${idx}].net = parseFloat(this.value)||0; saveAllData(); calculateBilling(); renderInventory()"></td>
                     <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="billingRowsData.splice(${idx},1); saveAllData(); renderBillingRows(); renderInventory()">X</button></td>
                 </tr>
             `;
@@ -435,7 +457,6 @@
         document.getElementById('sumAmount').innerText = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' PKR';
     }
 
-    // --- PAGE 3: PRODUCTION & METER LOGIC ---
     function addNewMachine() {
         let newMac = prompt("Enter new machine name/number (e.g. M/C NO-07):");
         if(!newMac) return;
@@ -465,11 +486,11 @@
                     <td>${p.shift}</td>
                     <td>${p.machine}</td>
                     <td>${p.pcs.toLocaleString()}</td>
-                    <td>${p.scrap.toFixed(1)} Kg</td>
+                    <td>${p.scrap.toFixed(1)}</td>
                     <td>${p.prevRead !== undefined ? p.prevRead : '-'}</td>
                     <td>${p.currRead !== undefined ? p.currRead : '-'}</td>
                     <td style="font-weight:bold; color:var(--secondary);">${p.diff !== undefined ? p.diff : '-'}</td>
-                    <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteProductionEntry(${idx})">Delete</button></td>
+                    <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteProductionEntry(${idx})">X</button></td>
                 </tr>
             `;
         });
@@ -488,7 +509,7 @@
         productionDatabase.unshift({ id: Date.now(), date, shift, machine, pcs, scrap, prevRead, currRead, diff });
         saveAllData();
         renderProductionDatabase();
-        alert("Production entry successfully saved to database!");
+        alert("Production entry successfully saved!");
     }
 
     function deleteProductionEntry(idx) {
@@ -497,7 +518,6 @@
         renderProductionDatabase();
     }
 
-    // Global Database Save Helper
     function saveAllData() {
         localStorage.setItem('db_inventory', JSON.stringify(inventoryData));
         localStorage.setItem('db_billing', JSON.stringify(billingRowsData));
