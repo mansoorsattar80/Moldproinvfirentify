@@ -43,6 +43,7 @@
         th { background: var(--primary); color: white; }
         .table-responsive { overflow-x: auto; }
         .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .header-elec-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -106,7 +107,7 @@
         <input type="text" id="partyName" placeholder="CUSTOMER NAME">
         <label>MACHINE RATE PER HOUR (PKR):</label>
         <input type="number" id="ratePerHour" value="1250" oninput="calculateBillingOnly()">
-        <label>SELECT PP GRANULES:</label>
+        <label>SELECT PP GRANULES (USED FOR INVENTORY DEDUCTION):</label>
         <select id="materialType">
             <option value="BLACK PP">BLACK PP</option>
             <option value="PURE PP">PURE PP</option>
@@ -123,7 +124,7 @@
         <h4 style="margin-top:15px; border-bottom:2px solid var(--secondary); padding-bottom:3px;">COLOR VARIATIONS</h4>
         <div id="colorCardsContainer"></div>
         <button class="btn-warning" onclick="addColorCard()">+ ADD COLOR CARD</button>
-        <button class="btn-success" style="margin-top:15px;" onclick="switchPage(3)">SAVE & VIEW BILLING</button>
+        <button class="btn-success" style="margin-top:15px;" onclick="saveJobAndDeductInventory()">SAVE & DEDUCT INVENTORY</button>
     </div>
 
     <!-- PAGE 3: BILLING -->
@@ -156,48 +157,59 @@
     <!-- PAGE 4: DAILY PROD -->
     <div id="page4" class="page">
         <h3>DAILY PRODUCTION & ELECTRICITY LOG</h3>
+
+        <!-- HEADER: MAIN ELECTRICITY METER UNITS FOR ENTIRE PLANT -->
+        <div class="header-elec-box">
+            <h4 style="margin:0 0 5px 0; color:#856404; font-size:14px;">⚡ MAIN ELECTRICAL METER (ALL MACHINES)</h4>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex:1;">
+                    <label style="margin-top:4px;">PREVIOUS UNITS:</label>
+                    <input type="number" id="elecPrevUnits" placeholder="0.00">
+                </div>
+                <div style="flex:1;">
+                    <label style="margin-top:4px;">CURRENT UNITS:</label>
+                    <input type="number" id="elecCurrUnits" placeholder="0.00">
+                </div>
+            </div>
+        </div>
+
+        <hr style="border:0; border-top:1px solid #ccc; margin:15px 0;">
+
+        <!-- MACHINE PRODUCTION FORM -->
+        <h4 style="color:var(--primary); margin-bottom:5px;">ADD MACHINE PRODUCTION</h4>
         <label>MACHINE NO:</label>
         <input type="text" id="prodMachineNo" placeholder="E.G. 160 TON">
         <label>OPERATOR:</label>
         <input type="text" id="prodOperator" placeholder="OPERATOR NAME">
 
-        <!-- ELECTRICITY METER UNITS -->
-        <div class="shift-box" style="background:#fff3cd; border-color:#ffeeba;">
-            <h4 style="margin:0 0 5px 0; color:#856404;">ELECTRICITY METER UNITS</h4>
-            <label>PREVIOUS UNITS:</label>
-            <input type="number" id="elecPrevUnits" placeholder="0.00">
-            <label>CURRENT UNITS:</label>
-            <input type="number" id="elecCurrUnits" placeholder="0.00">
-        </div>
-
         <!-- SHIFT A -->
         <div class="shift-box">
             <h4 style="margin:0 0 5px 0; color:var(--secondary);">SHIFT A</h4>
-            <label>SCREEN SHOT (A):</label>
+            <label>SCREEN SHOT:</label>
             <input type="number" id="prodShotsA" placeholder="0">
-            <label>GOOD SHOT (A):</label>
+            <label>GOOD SHOT:</label>
             <input type="number" id="prodGoodPcsA" placeholder="0">
         </div>
 
         <!-- SHIFT B -->
         <div class="shift-box">
             <h4 style="margin:0 0 5px 0; color:var(--secondary);">SHIFT B</h4>
-            <label>SCREEN SHOT (B):</label>
+            <label>SCREEN SHOT:</label>
             <input type="number" id="prodShotsB" placeholder="0">
-            <label>GOOD SHOT (B):</label>
+            <label>GOOD SHOT:</label>
             <input type="number" id="prodGoodPcsB" placeholder="0">
         </div>
 
-        <button class="btn-success" id="prodBtn" style="margin-top:15px;" onclick="addDailyProduction()">ADD MACHINE PRODUCTION</button>
+        <button class="btn-success" id="prodBtn" style="margin-top:15px;" onclick="addDailyProduction()">ADD MACHINE</button>
 
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
                         <th>DATE</th>
+                        <th>MAIN ELEC (PREV-CURR)</th>
                         <th>MACHINE</th>
                         <th>OPERATOR</th>
-                        <th>UNITS (PREV - CURR)</th>
                         <th>SHIFTS (A / B)</th>
                         <th>GOOD PCS (A / B)</th>
                         <th>ACTION</th>
@@ -325,6 +337,34 @@
         document.getElementById('grandTotalAmount').textContent = grandTotal.toFixed(2);
     }
 
+    function saveJobAndDeductInventory() {
+        let materialType = document.getElementById('materialType').value;
+        let colorCards = document.querySelectorAll('#colorCardsContainer > div');
+        let totalNetWt = 0;
+        let totalScrap = 0;
+
+        colorCards.forEach(card => {
+            totalNetWt += parseFloat(card.querySelector('.card-netwt').value) || 0;
+            totalScrap += parseFloat(card.querySelector('.card-scrap').value) || 0;
+        });
+
+        let totalConsumption = totalNetWt + totalScrap;
+
+        if (totalConsumption > 0) {
+            // Automatically push a consumption transaction to the inventory ledger
+            transactions.push({
+                material: materialType,
+                type: 'CONSUMPTION',
+                qty: totalConsumption,
+                date: document.getElementById('startDate').value || new Date().toISOString().split('T')[0]
+            });
+            saveData();
+            renderInventory();
+        }
+
+        switchPage(3); // Go to billing
+    }
+
     function addInventoryTransaction() {
         let material = document.getElementById('invMaterialName').value.trim().toUpperCase();
         let type = document.getElementById('invType').value;
@@ -400,10 +440,10 @@
     }
 
     function addDailyProduction() {
-        let machineNo = document.getElementById('prodMachineNo').value.toUpperCase();
-        let operator = document.getElementById('prodOperator').value.toUpperCase();
         let elecPrevUnits = parseFloat(document.getElementById('elecPrevUnits').value) || 0;
         let elecCurrUnits = parseFloat(document.getElementById('elecCurrUnits').value) || 0;
+        let machineNo = document.getElementById('prodMachineNo').value.toUpperCase();
+        let operator = document.getElementById('prodOperator').value.toUpperCase();
         let shotsA = parseFloat(document.getElementById('prodShotsA').value) || 0;
         let goodPcsA = parseFloat(document.getElementById('prodGoodPcsA').value) || 0;
         let shotsB = parseFloat(document.getElementById('prodShotsB').value) || 0;
@@ -413,19 +453,17 @@
         let consumedUnits = elecCurrUnits - elecPrevUnits;
 
         if (editingProdIndex !== null) {
-            dailyProductions[editingProdIndex] = { date: dailyProductions[editingProdIndex].date, machineNo, operator, elecPrevUnits, elecCurrUnits, consumedUnits, shotsA, goodPcsA, shotsB, goodPcsB };
+            dailyProductions[editingProdIndex] = { date, elecPrevUnits, elecCurrUnits, consumedUnits, machineNo, operator, shotsA, goodPcsA, shotsB, goodPcsB };
             editingProdIndex = null;
-            document.getElementById('prodBtn').textContent = "ADD MACHINE PRODUCTION";
+            document.getElementById('prodBtn').textContent = "ADD MACHINE";
         } else {
-            dailyProductions.push({ date, machineNo, operator, elecPrevUnits, elecCurrUnits, consumedUnits, shotsA, goodPcsA, shotsB, goodPcsB });
+            dailyProductions.push({ date, elecPrevUnits, elecCurrUnits, consumedUnits, machineNo, operator, shotsA, goodPcsA, shotsB, goodPcsB });
         }
 
         saveData();
         renderDailyProduction();
         document.getElementById('prodMachineNo').value = '';
         document.getElementById('prodOperator').value = '';
-        document.getElementById('elecPrevUnits').value = '';
-        document.getElementById('elecCurrUnits').value = '';
         document.getElementById('prodShotsA').value = '';
         document.getElementById('prodGoodPcsA').value = '';
         document.getElementById('prodShotsB').value = '';
@@ -434,29 +472,29 @@
 
     function editProduction(index) {
         let p = dailyProductions[index];
-        document.getElementById('prodMachineNo').value = p.machineNo || '';
-        document.getElementById('prodOperator').value = p.operator || '';
         document.getElementById('elecPrevUnits').value = p.elecPrevUnits || '';
         document.getElementById('elecCurrUnits').value = p.elecCurrUnits || '';
+        document.getElementById('prodMachineNo').value = p.machineNo || '';
+        document.getElementById('prodOperator').value = p.operator || '';
         document.getElementById('prodShotsA').value = p.shotsA || '';
         document.getElementById('prodGoodPcsA').value = p.goodPcsA || '';
         document.getElementById('prodShotsB').value = p.shotsB || '';
         document.getElementById('prodGoodPcsB').value = p.goodPcsB || '';
         editingProdIndex = index;
-        document.getElementById('prodBtn').textContent = "UPDATE MACHINE PRODUCTION";
+        document.getElementById('prodBtn').textContent = "UPDATE MACHINE";
     }
 
     function renderDailyProduction() {
         let tbody = document.getElementById('dailyProdTableBody');
         tbody.innerHTML = '';
         dailyProductions.forEach((p, index) => {
-            let unitsText = (p.elecCurrUnits !== undefined && p.elecPrevUnits !== undefined) ? `${p.elecPrevUnits} - ${p.elecCurrUnits}<br><b style="color:#d9534f;">(Diff: ${p.consumedUnits || (p.elecCurrUnits - p.elecPrevUnits)})</b>` : '---';
+            let unitsText = (p.elecCurrUnits !== undefined && p.elecPrevUnits !== undefined) ? `${p.elecPrevUnits} - ${p.elecCurrUnits}<br><b style="color:#d9534f;">(Diff: ${p.consumedUnits !== undefined ? p.consumedUnits : (p.elecCurrUnits - p.elecPrevUnits)})</b>` : '---';
             tbody.innerHTML += `
                 <tr>
                     <td>${p.date}</td>
+                    <td>${unitsText}</td>
                     <td>${p.machineNo || '---'}</td>
                     <td>${p.operator || '---'}</td>
-                    <td>${unitsText}</td>
                     <td>A: ${p.shotsA || 0}<br>B: ${p.shotsB || 0}</td>
                     <td>A: ${p.goodPcsA || 0}<br>B: ${p.goodPcsB || 0}</td>
                     <td>
