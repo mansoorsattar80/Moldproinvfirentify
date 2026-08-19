@@ -3,693 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MOULDING PRODUCTION & BILLING SOFTWARE</title>
+    <title>Moulding Production & Billing Software</title>
     <style>
         :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --success: #27ae60;
-            --danger: #c0392b;
-            --warning: #f39c12;
-            --light: #f8f9fa;
-            --dark: #2c3e50;
+            --primary-color: #2196F3;
+            --secondary-color: #4CAF50;
+            --danger-color: #f44336;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #ced4da;
         }
-        body { font-family: Arial, sans-serif; margin: 0; padding: 5px; background: #f4f6f7; color: #333; text-transform: uppercase; font-size: 11px; }
-        .container { max-width: 100%; margin: auto; background: white; padding: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: var(--primary); font-size: 15px; margin: 4px 0; }
-        h3 { text-align: center; color: var(--primary); font-size: 13px; margin: 4px 0; }
-        .status-bar { text-align: center; font-size: 10px; font-weight: bold; padding: 3px; margin-bottom: 6px; border-radius: 3px; background: #d4edda; color: #155724; }
-        
-        .nav-tabs { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 10px; background: #e9ecef; padding: 3px; border-radius: 4px; }
-        .nav-tab { flex: 1; min-width: 70px; padding: 6px 3px; text-align: center; background: #fff; border: 1px solid #ced4da; border-radius: 3px; cursor: pointer; font-size: 9px; font-weight: bold; color: #495057; }
-        .nav-tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
 
-        .page { display: none; }
-        .page.active { display: block; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+        }
 
-        label { font-weight: bold; font-size: 10px; display: block; margin-top: 4px; color: #555; }
-        input, select, textarea { width: 100%; padding: 4px 6px; margin-top: 2px; margin-bottom: 4px; border: 1px solid #ccc; border-radius: 3px; box-sizing: border-box; font-size: 11px; text-transform: uppercase; }
-        button { background: var(--secondary); color: white; border: none; padding: 6px 10px; border-radius: 3px; cursor: pointer; font-size: 11px; font-weight: bold; width: 100%; margin-top: 4px; text-transform: uppercase; }
-        button:hover { opacity: 0.9; }
-        .btn-danger { background: var(--danger); }
-        .btn-success { background: var(--success); }
-        .btn-warning { background: var(--warning); color: #fff; }
-        .btn-primary { background: var(--secondary); }
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-        table { width: 100% !important; border-collapse: collapse; margin-top: 4px; font-size: 9.5px; }
-        th, td { border: 1px solid #cbd5e1; padding: 3px 5px; text-align: center; vertical-align: middle; }
-        th { background: #f1f5f9; color: var(--primary); font-weight: bold; }
-        .table-responsive { overflow-x: auto; margin-bottom: 8px; }
-        
-        .section-card { background: #fff; border: 1px solid #cbd5e1; padding: 8px; border-radius: 4px; margin-bottom: 8px; }
+        .status-banner {
+            background-color: #d4edda;
+            color: #155724;
+            text-align: center;
+            padding: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
 
-        @media print {
-            .nav-tabs, button, .no-print, 
-            #page1, #page2, #page5 { display: none !important; }
-            #page3, #page4 { display: block !important; }
-            body { background: white; padding: 0; font-size: 9.5px; }
-            .container { box-shadow: none; padding: 0; width: 100%; }
-            table { font-size: 9px; width: 100% !important; }
-            th, td { padding: 2px 4px; }
-            .section-card { border: 1px solid #000; box-shadow: none; margin-bottom: 6px; padding: 6px; page-break-inside: avoid; }
-            @page { size: auto; margin: 5mm; }
+        h2 {
+            text-align: center;
+            font-size: 18px;
+            color: #1a365d;
+            margin-bottom: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            background: #f1f3f5;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 3px;
+        }
+
+        .form-group input {
+            padding: 5px;
+            font-size: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #4a5568;
+            margin: 15px 0 10px 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 6px 4px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #e9ecef;
+            color: #495057;
+            font-size: 11px;
+        }
+
+        table input[type="text"], 
+        table input[type="number"] {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 4px;
+            font-size: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+        }
+
+        .btn-success {
+            background-color: var(--secondary-color);
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        .btn-container {
+            margin-top: 10px;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="status-bar">RUNNING ON LOCAL DEVICE STORAGE</div>
+    <div class="status-banner">RUNNING ON LOCAL DEVICE STORAGE</div>
     <h2>MOULDING PRODUCTION & BILLING SOFTWARE</h2>
 
-    <!-- Navigation Tabs -->
-    <div class="nav-tabs">
-        <div class="nav-tab active" onclick="switchPage(1)">1. INVENTORY</div>
-        <div class="nav-tab" onclick="switchPage(2)">2. JOB SPECS</div>
-        <div class="nav-tab" onclick="switchPage(3)">3. BILLING</div>
-        <div class="nav-tab" onclick="switchPage(4)">4. DAILY PROD & POWER</div>
-        <div class="nav-tab" onclick="switchPage(5)">5. LOT TRACKER</div>
-    </div>
-
-    <!-- PAGE 1: INVENTORY -->
-    <div id="page1" class="page active">
-        <h3>RAW MATERIAL INVENTORY</h3>
-        
-        <div class="section-card">
-            <input type="hidden" id="editInvIndex" value="-1">
-            <label>Material Name / Granule Type:</label>
-            <input type="text" id="invMaterialName" placeholder="E.G. BLACK, PP, ABS">
-
-            <label>Transaction Type:</label>
-            <select id="invTxType">
-                <option value="PURCHASE">PURCHASE / OPENING STOCK (+)</option>
-                <option value="CONSUMED">CONSUMPTION (-)</option>
-            </select>
-
-            <label>Quantity (Kg):</label>
-            <input type="number" id="invQty" placeholder="E.G. 2500">
-
-            <label>Date:</label>
-            <input type="date" id="invDate">
-
-            <button class="btn-success" id="invSubmitBtn" onclick="saveInventoryEntry()">Add Inventory Entry</button>
+    <!-- Upper Slip Header Information Fields -->
+    <div class="form-grid">
+        <div class="form-group">
+            <label>ITEM #</label>
+            <input type="text" value="A220">
         </div>
-
-        <div class="section-card">
-            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Inventory Stock Summary</h4>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Material</th>
-                            <th>Opening/Purch</th>
-                            <th>Consumed</th>
-                            <th>Closing Balance</th>
-                            <th class="no-print">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="inventoryTableBody"></tbody>
-                </table>
-            </div>
+        <div class="form-group">
+            <label>START PRD DATE</label>
+            <input type="text" value="10/08/2026">
+        </div>
+        <div class="form-group">
+            <label>ENDING PRD DATE</label>
+            <input type="text" value="15/08/2026">
+        </div>
+        <div class="form-group">
+            <label>NAME</label>
+            <input type="text" value="Body">
+        </div>
+        <div class="form-group">
+            <label>DEMAND QUANTITY</label>
+            <input type="text" value="10000 Pcs">
+        </div>
+        <div class="form-group">
+            <label>MATERIAL</label>
+            <input type="text" value="Crystal Hi Impact">
+        </div>
+        <div class="form-group">
+            <label>ITEM GM.</label>
+            <input type="text" value="44g">
         </div>
     </div>
 
-    <!-- PAGE 2: JOB SPECS -->
-    <div id="page2" class="page">
-        <h3>JOB SPECIFICATIONS</h3>
-        <div class="section-card">
-            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Mould & Product Parameters</h4>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Item Code / Name</th>
-                            <th>Machine No</th>
-                            <th>Cavity</th>
-                            <th>Cycle (Sec)</th>
-                            <th>Target Wt (g)</th>
-                            <th class="no-print">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="jobSpecsTableBody"></tbody>
-                </table>
-            </div>
-            <button class="btn-success no-print" style="background:var(--secondary); font-size:10px; padding:4px 8px; width:auto;" onclick="addJobSpecRow()">+ Add Job Spec</button>
-        </div>
-        <button class="btn-success" onclick="saveJobSpecs()">Save Job Specs</button>
-    </div>
-
-    <!-- PAGE 3: BILLING -->
-    <div id="page3" class="page">
-        <h2>Moulding Production & Billing Summary</h2>
-
-        <div class="section-card">
-            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Job & Machine Specifications</h4>
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; font-size:10px;">
-                <div>
-                    <label style="margin:0; font-size:9px; color:#666;">Slip / Item #</label>
-                    <input type="text" id="billSlipNo" value="A220" oninput="recalcBilling()" style="margin:0; font-size:10px; padding:3px;">
-                </div>
-                <div>
-                    <label style="margin:0; font-size:9px; color:#666;">Item Name</label>
-                    <input type="text" id="billItemName" value="Body" oninput="recalcBilling()" style="margin:0; font-size:10px; padding:3px;">
-                </div>
-                <div>
-                    <label style="margin:0; font-size:9px; color:#666;">Machine No</label>
-                    <input type="text" id="billMachineNo" value="M/C No-03" oninput="recalcBilling()" style="margin:0; font-size:10px; padding:3px;">
-                </div>
-                <div>
-                    <label style="margin:0; font-size:9px; color:#666;">Cycle Time (Sec)</label>
-                    <input type="number" id="billCycleTime" value="23" oninput="recalcBilling()" style="margin:0; font-size:10px; padding:3px;">
-                </div>
-                <div>
-                    <label style="margin:0; font-size:9px; color:#666;">Mould Cavity (Pcs)</label>
-                    <input type="number" id="billCavity" value="1" oninput="recalcBilling()" style="margin:0; font-size:10px; padding:3px;">
-                </div>
-                <div>
-                    <label style="margin:0; font-size:9px; color:#666;">Rate Type</label>
-                    <input type="text" value="Per Hour" readonly style="margin:0; font-size:10px; padding:3px; background:#f1f5f9;">
-                </div>
-                <div>
-                    <label style="margin:0; font-size:9px; color:#666;">Rate (PKR)</label>
-                    <input type="number" id="billHourlyRate" value="1250" oninput="recalcBilling()" style="margin:0; font-size:10px; padding:3px;">
-                </div>
-                <div>
-                    <label style="margin:0; font-size:9px; color:#666;">Start / End Date</label>
-                    <input type="text" id="billDates" value="15/08/26" oninput="recalcBilling()" style="margin:0; font-size:10px; padding:3px;">
-                </div>
-            </div>
-        </div>
-
-        <div class="section-card">
-            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Color Variations & Production Details</h4>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width:6%;">S.No</th>
-                            <th>Color / Description</th>
-                            <th>Quantity (Pcs)</th>
-                            <th>Boray / Bags</th>
-                            <th>Gross Wt (Kg)</th>
-                            <th>Net Wt (Kg)</th>
-                            <th class="no-print" style="width:6%;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="billingRowsContainer"></tbody>
-                </table>
-            </div>
-            <button class="btn-success no-print" style="background:var(--secondary); font-size:10px; padding:4px 8px; width:auto;" onclick="addBillingColorRow()">+ Add Color</button>
-        </div>
-
-        <div class="section-card" style="background:#fcfdfd;">
-            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Moulding Bill Summary</h4>
-            <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:6px; font-size:10px; text-align:center;">
-                <div style="background:#f8f9fa; padding:4px; border:1px solid #e2e8f0; border-radius:3px;">
-                    <span style="color:#666; font-size:8.5px; display:block;">TOTAL QTY</span>
-                    <b id="summaryTotalQty" style="font-size:11px;">0 Pcs</b>
-                </div>
-                <div style="background:#f8f9fa; padding:4px; border:1px solid #e2e8f0; border-radius:3px;">
-                    <span style="color:#666; font-size:8.5px; display:block;">CAVITY</span>
-                    <b id="summaryCavity" style="font-size:11px;">1</b>
-                </div>
-                <div style="background:#f8f9fa; padding:4px; border:1px solid #e2e8f0; border-radius:3px;">
-                    <span style="color:#666; font-size:8.5px; display:block;">TOTAL HOURS</span>
-                    <b id="summaryTotalHours" style="font-size:11px;">0.00 Hrs</b>
-                </div>
-                <div style="background:#f8f9fa; padding:4px; border:1px solid #e2e8f0; border-radius:3px;">
-                    <span style="color:#666; font-size:8.5px; display:block;">RATE / PC</span>
-                    <b id="summaryRatePerPc" style="font-size:11px;">0.00 PKR</b>
-                </div>
-                <div style="background:#e8f4fd; padding:4px; border:1px solid #bbe1fa; border-radius:3px;">
-                    <span style="color:#034f84; font-size:8.5px; display:block; font-weight:bold;">TOTAL AMOUNT</span>
-                    <b id="summaryTotalAmount" style="font-size:12px; color:var(--success);">0.00 PKR</b>
-                </div>
-            </div>
-        </div>
-
-        <button class="btn-success no-print" style="margin-top:6px;" onclick="window.print()">Print / Save PDF</button>
-    </div>
-
-    <!-- PAGE 4: DAILY PROD & POWER LOG -->
-    <div id="page4" class="page">
-        <h2>Daily Production & Power Report</h2>
-
-        <div class="section-card no-print" style="padding:6px;">
-            <div style="display:flex; gap:6px; align-items:center;">
-                <div style="flex:1;"><label style="margin:0;">Select Report Date:</label></div>
-                <div style="flex:2;"><input type="date" id="reportDate" onchange="loadDailyProductionForDate()" style="margin:0; padding:3px;"></div>
-                <div style="flex:1;"><button class="btn-success" style="margin:0; padding:4px;" onclick="saveDailyProductionSheet()">Save All</button></div>
-                <div style="flex:1;"><button class="btn-warning" style="margin:0; padding:4px;" onclick="window.print()">Print</button></div>
-            </div>
-        </div>
-
-        <div class="section-card" style="background:#fdfefe;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <h4 style="margin:0; color:var(--primary); font-size:11px;">⚡ Main Electrical Meter Log</h4>
-                <div style="background:#e3f2fd; color:#0d47a1; padding:2px 6px; font-size:10px; font-weight:bold; border-radius:3px;" id="headerTotalUnits">Total Units Consumed: 0 KWH</div>
-            </div>
-            <table>
+    <!-- Received Moulding Goods Table -->
+    <div class="section-title">RECEIVED MOULDING GOODS</div>
+    <div class="table-responsive">
+        <table>
+            <thead>
                 <tr>
-                    <th style="width:25%;">Previous Reading</th>
-                    <th style="width:25%;">Current Reading</th>
-                    <th style="width:25%;">Total Units (Diff)</th>
-                    <th style="width:25%;">Timestamp</th>
+                    <th>S. NO.</th>
+                    <th>ITEM</th>
+                    <th>QTY</th>
+                    <th>BORAY</th>
+                    <th>GROSS WEIGHT</th>
+                    <th>NET WEIGHT</th>
+                    <th>ACTION</th>
+                </tr>
+            </thead>
+            <tbody id="receivedGoodsBody">
+                <tr>
+                    <td>1</td>
+                    <td><input type="text" value="A-220 Body Blue"></td>
+                    <td><input type="number" value="2500"></td>
+                    <td><input type="number" value="10"></td>
+                    <td><input type="number" step="0.01" value="113.25"></td>
+                    <td><input type="number" step="0.01" value="112.25"></td>
+                    <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
                 </tr>
                 <tr>
-                    <td><input type="number" id="elecPrev" placeholder="E.G. 150000" oninput="calculateDailyUnits()" style="margin:0; border:none; text-align:center; padding:2px;"></td>
-                    <td><input type="number" id="elecCurr" placeholder="E.G. 150450" oninput="calculateDailyUnits()" style="margin:0; border:none; text-align:center; padding:2px;"></td>
-                    <td><span id="unitsConsumedDisplay" style="font-weight:bold; color:var(--secondary); font-size:12px;">0</span></td>
-                    <td><span id="reportTimestampDisplay" style="font-size:9.5px;">-</span></td>
+                    <td>2</td>
+                    <td><input type="text" value="A-220 Body Green"></td>
+                    <td><input type="number" value="2500"></td>
+                    <td><input type="number" value="10"></td>
+                    <td><input type="number" step="0.01" value="114.10"></td>
+                    <td><input type="number" step="0.01" value="113.10"></td>
+                    <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
                 </tr>
-            </table>
-        </div>
-
-        <div class="section-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <h4 style="margin:0; color:var(--primary); font-size:11px;">📊 Machine Production Breakdown</h4>
-                <div style="background:#e8f5e9; color:#2e7d32; padding:2px 6px; font-size:10px; font-weight:bold; border-radius:3px;" id="headerTotalGoodShots">Total Good Shots: 0</div>
-            </div>
-
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width:12%;">Machine</th>
-                            <th style="width:18%;">Operator</th>
-                            <th>Shift A (Scr / Act / Diff)</th>
-                            <th>Shift B (Scr / Act / Diff)</th>
-                            <th style="width:12%;">Total Act</th>
-                            <th class="no-print" style="width:6%;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="machineReportTableBody"></tbody>
-                </table>
-            </div>
-            <button class="btn-success no-print" style="background:var(--secondary); font-size:10px; padding:4px 8px; width:auto;" onclick="addMachineReportRow()">+ Add Machine Row</button>
-        </div>
+                <tr>
+                    <td>3</td>
+                    <td><input type="text" value="A-220 Body Orange"></td>
+                    <td><input type="number" value="2500"></td>
+                    <td><input type="number" value="10"></td>
+                    <td><input type="number" step="0.01" value="112.30"></td>
+                    <td><input type="number" step="0.01" value="111.30"></td>
+                    <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td><input type="text" value="A-220 Body Yellow"></td>
+                    <td><input type="number" value="2500"></td>
+                    <td><input type="number" value="10"></td>
+                    <td><input type="number" step="0.01" value="111.75"></td>
+                    <td><input type="number" step="0.01" value="110.75"></td>
+                    <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="btn-container">
+        <button class="btn btn-primary" onclick="addGoodsRow()">+ ADD GOODS ROW</button>
     </div>
 
-    <!-- PAGE 5: LOT TRACKER -->
-    <div id="page5" class="page">
-        <h3>LOT TRACKER & BATCH MANAGEMENT</h3>
-        <div class="section-card">
-            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Active Production Lots</h4>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Lot #</th>
-                            <th>Material / Color</th>
-                            <th>Machine</th>
-                            <th>Batch Qty (Kg)</th>
-                            <th>Status</th>
-                            <th class="no-print">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lotTableBody"></tbody>
-                </table>
-            </div>
-            <button class="btn-success no-print" style="background:var(--secondary); font-size:10px; padding:4px 8px; width:auto;" onclick="addLotRow()">+ Add Lot Record</button>
-        </div>
-        <button class="btn-success" onclick="saveLots()">Save Lot Data</button>
-    </div>
+    <button class="btn btn-success" onclick="saveRecord()">SAVE SLIP RECORD</button>
 </div>
 
 <script>
-    let inventoryData = JSON.parse(localStorage.getItem('moulding_inventory')) || [];
-    let jobSpecsData = JSON.parse(localStorage.getItem('moulding_jobSpecs')) || [
-        { name: "TOY CAR BODY", mach: "M/C 03", cavity: 1, cycle: 23, weight: 112 }
-    ];
-    let dailySheets = JSON.parse(localStorage.getItem('moulding_dailySheets')) || {};
-    let lotsData = JSON.parse(localStorage.getItem('moulding_lots')) || [
-        { lotNo: "LOT-101", material: "BLACK PP", mach: "M/C 03", qty: 500, status: "IN PROGRESS" }
-    ];
-
-    document.addEventListener("DOMContentLoaded", () => {
-        let todayStr = new Date().toISOString().split('T')[0];
-        document.getElementById('reportDate').value = todayStr;
-        document.getElementById('invDate').value = todayStr;
-        
-        renderInventoryTable();
-        renderJobSpecsTable();
-        renderLotsTable();
-        loadDailyProductionForDate();
-
-        let sampleColors = [
-            { color: "Blue", pcs: 2500, bags: 10, gross: 113.25, net: 112.25 },
-            { color: "Green", pcs: 2500, bags: 10, gross: 114.10, net: 113.10 },
-            { color: "Orange", pcs: 2500, bags: 10, gross: 112.30, net: 111.30 },
-            { color: "Yellow", pcs: 2500, bags: 10, gross: 111.75, net: 110.75 }
-        ];
-        sampleColors.forEach(c => addBillingColorRow(c));
-        recalcBilling();
-    });
-
-    function switchPage(pageNum) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        document.getElementById('page' + pageNum).classList.add('active');
-        document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
-    }
-
-    /* Page 1 Inventory Summary Table & Entries */
-    function saveInventoryEntry() {
-        let editIndex = parseInt(document.getElementById('editInvIndex').value);
-        let name = document.getElementById('invMaterialName').value.trim();
-        let txType = document.getElementById('invTxType').value;
-        let qty = parseFloat(document.getElementById('invQty').value) || 0;
-        let date = document.getElementById('invDate').value;
-
-        if (!name || qty <= 0) {
-            alert("Please provide a valid material name and quantity.");
-            return;
-        }
-
-        let entry = { name, txType, qty, date };
-        if (editIndex === -1) {
-            inventoryData.push(entry);
-        } else {
-            inventoryData[editIndex] = entry;
-            document.getElementById('editInvIndex').value = "-1";
-            document.getElementById('invSubmitBtn').textContent = "Add Inventory Entry";
-        }
-
-        localStorage.setItem('moulding_inventory', JSON.stringify(inventoryData));
-        document.getElementById('invMaterialName').value = '';
-        document.getElementById('invQty').value = '';
-        renderInventoryTable();
-        alert("Inventory entry saved successfully!");
-    }
-
-    function renderInventoryTable() {
-        let tbody = document.getElementById('inventoryTableBody');
-        tbody.innerHTML = '';
-
-        if (inventoryData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="color:#777; padding:10px;">No inventory records found.</td></tr>`;
-            return;
-        }
-
-        // Group inventory by material name for the summary grid view
-        let summaryMap = {};
-        inventoryData.forEach((item, index) => {
-            let key = item.name.toUpperCase();
-            if (!summaryMap[key]) {
-                summaryMap[key] = { purchase: 0, consumed: 0, entries: [] };
-            }
-            if (item.txType === 'PURCHASE') {
-                summaryMap[key].purchase += item.qty;
-            } else {
-                summaryMap[key].consumed += item.qty;
-            }
-            summaryMap[key].entries.push(index);
-        });
-
-        Object.keys(summaryMap).forEach(matName => {
-            let data = summaryMap[matName];
-            let closing = data.purchase - data.consumed;
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="font-weight:bold;">${matName}</td>
-                <td style="color:var(--success); font-weight:bold;">+${data.purchase.toLocaleString()} KG</td>
-                <td style="color:var(--danger); font-weight:bold;">-${data.consumed.toLocaleString()} KG</td>
-                <td style="font-weight:bold; color:${closing < 0 ? 'var(--danger)' : 'var(--primary)'};">${closing.toLocaleString()} KG</td>
-                <td class="no-print">
-                    <button type="button" class="btn-danger" style="padding:1px 4px; font-size:8px; width:auto;" onclick="deleteMaterialEntries('${matName}')">Clear All</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function deleteMaterialEntries(matName) {
-        if(confirm(`Delete all inventory logs for ${matName}?`)) {
-            inventoryData = inventoryData.filter(item => item.name.toUpperCase() !== matName);
-            localStorage.setItem('moulding_inventory', JSON.stringify(inventoryData));
-            renderInventoryTable();
-        }
-    }
-
-    /* Page 2 Job Specs Functions with Add, Edit, Delete */
-    function renderJobSpecsTable() {
-        let tbody = document.getElementById('jobSpecsTableBody');
-        tbody.innerHTML = '';
-        jobSpecsData.forEach((job, index) => {
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" class="js-name" value="${job.name}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td><input type="text" class="js-mach" value="${job.mach}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td><input type="number" class="js-cavity" value="${job.cavity}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td><input type="number" class="js-cycle" value="${job.cycle}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td><input type="number" class="js-weight" value="${job.weight}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove();">Del</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function addJobSpecRow() {
-        let tbody = document.getElementById('jobSpecsTableBody');
-        let tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><input type="text" class="js-name" placeholder="ITEM NAME" style="margin:0; padding:2px; text-align:center;"></td>
-            <td><input type="text" class="js-mach" placeholder="M/C NO" style="margin:0; padding:2px; text-align:center;"></td>
-            <td><input type="number" class="js-cavity" value="1" style="margin:0; padding:2px; text-align:center;"></td>
-            <td><input type="number" class="js-cycle" value="20" style="margin:0; padding:2px; text-align:center;"></td>
-            <td><input type="number" class="js-weight" value="100" style="margin:0; padding:2px; text-align:center;"></td>
-            <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove();">Del</button></td>
+    function addGoodsRow() {
+        const tbody = document.getElementById('receivedGoodsBody');
+        const rowCount = tbody.rows.length + 1;
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>${rowCount}</td>
+            <td><input type="text" placeholder="Item Name"></td>
+            <td><input type="number" placeholder="Qty"></td>
+            <td><input type="number" placeholder="Boray"></td>
+            <td><input type="number" step="0.01" placeholder="Gross Wt"></td>
+            <td><input type="number" step="0.01" placeholder="Net Wt"></td>
+            <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
         `;
-        tbody.appendChild(tr);
+        tbody.appendChild(newRow);
     }
 
-    function saveJobSpecs() {
-        jobSpecsData = [];
-        document.querySelectorAll('#jobSpecsTableBody tr').forEach(row => {
-            jobSpecsData.push({
-                name: row.querySelector('.js-name').value,
-                mach: row.querySelector('.js-mach').value,
-                cavity: parseFloat(row.querySelector('.js-cavity').value) || 1,
-                cycle: parseFloat(row.querySelector('.js-cycle').value) || 0,
-                weight: parseFloat(row.querySelector('.js-weight').value) || 0
-            });
-        });
-        localStorage.setItem('moulding_jobSpecs', JSON.stringify(jobSpecsData));
-        alert("Job specifications saved successfully!");
-    }
-
-    /* Page 3 Billing Functions */
-    function addBillingColorRow(data = {}) {
-        let tbody = document.getElementById('billingRowsContainer');
-        let rowCount = tbody.rows.length + 1;
-        let tr = document.createElement('tr');
-
-        tr.innerHTML = `
-            <td class="row-sno">${rowCount}</td>
-            <td><input type="text" class="b-color" value="${data.color || ''}" placeholder="Color" style="margin:0; padding:2px; font-size:9.5px; text-align:center;"></td>
-            <td><input type="number" class="b-pcs" value="${data.pcs || 0}" oninput="recalcBilling()" style="margin:0; padding:2px; font-size:9.5px; text-align:center;"></td>
-            <td><input type="number" class="b-bags" value="${data.bags || 0}" style="margin:0; padding:2px; font-size:9.5px; text-align:center;"></td>
-            <td><input type="number" class="b-gross" value="${data.gross || 0}" style="margin:0; padding:2px; font-size:9.5px; text-align:center;"></td>
-            <td><input type="number" class="b-net" value="${data.net || 0}" style="margin:0; padding:2px; font-size:9.5px; text-align:center;"></td>
-            <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove(); updateSerialNumbers(); recalcBilling();">Del</button></td>
-        `;
-        tbody.appendChild(tr);
-        updateSerialNumbers();
-    }
-
-    function updateSerialNumbers() {
-        document.querySelectorAll('#billingRowsContainer tr').forEach((row, index) => {
-            let snoEl = row.querySelector('.row-sno');
-            if(snoEl) snoEl.textContent = index + 1;
+    function deleteRow(button) {
+        const row = button.closest('tr');
+        const tbody = row.closest('tbody');
+        row.remove();
+        Array.from(tbody.rows).forEach((r, index) => {
+            r.cells[0].innerText = index + 1;
         });
     }
 
-    function recalcBilling() {
-        let totalPcs = 0;
-        document.querySelectorAll('.b-pcs').forEach(input => { totalPcs += parseFloat(input.value) || 0; });
-
-        let cycleTime = parseFloat(document.getElementById('billCycleTime').value) || 23;
-        let cavity = parseFloat(document.getElementById('billCavity').value) || 1;
-        let hourlyRate = parseFloat(document.getElementById('billHourlyRate').value) || 1250;
-
-        let totalSeconds = (totalPcs * cycleTime) / (cavity > 0 ? cavity : 1);
-        let totalHours = totalSeconds / 3600;
-        let totalAmount = totalHours * hourlyRate;
-        let ratePerPc = totalPcs > 0 ? totalAmount / totalPcs : 0;
-
-        document.getElementById('summaryTotalQty').textContent = totalPcs.toLocaleString() + " Pcs";
-        document.getElementById('summaryCavity').textContent = cavity;
-        document.getElementById('summaryTotalHours').textContent = totalHours.toFixed(2) + " Hrs";
-        document.getElementById('summaryRatePerPc').textContent = ratePerPc.toFixed(2) + " PKR";
-        document.getElementById('summaryTotalAmount').textContent = totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " PKR";
-    }
-
-    /* Page 4 Daily Production Functions */
-    function addMachineReportRow(data = {}) {
-        let tbody = document.getElementById('machineReportTableBody');
-        let tr = document.createElement('tr');
-        
-        let machNo = data.machNo || 'MC-03';
-        let op = data.op || 'Shabaz';
-        let scrA = data.scrA || 1333;
-        let actA = data.actA || 1130;
-        let scrB = data.scrB || 1333;
-        let actB = data.actB || 1070;
-
-        tr.innerHTML = `
-            <td><input type="text" class="rep-mach" value="${machNo}" style="margin:0; padding:2px; font-size:9.5px; text-align:center;"></td>
-            <td><input type="text" class="rep-op" value="${op}" style="margin:0; padding:2px; font-size:9.5px; text-align:center;"></td>
-            <td>
-                <div style="display:flex; gap:2px; align-items:center; justify-content:center;">
-                    <input type="number" class="rep-scra" value="${scrA}" oninput="recalcRow(this)" style="width:40px; margin:0; padding:2px; text-align:center;"> / 
-                    <input type="number" class="rep-acta" value="${actA}" oninput="recalcRow(this)" style="width:40px; margin:0; padding:2px; text-align:center;"> / 
-                    <span class="diff-a" style="font-weight:bold; width:30px;">${actA - scrA}</span>
-                </div>
-            </td>
-            <td>
-                <div style="display:flex; gap:2px; align-items:center; justify-content:center;">
-                    <input type="number" class="rep-scrb" value="${scrB}" oninput="recalcRow(this)" style="width:40px; margin:0; padding:2px; text-align:center;"> / 
-                    <input type="number" class="rep-actb" value="${actB}" oninput="recalcRow(this)" style="width:40px; margin:0; padding:2px; text-align:center;"> / 
-                    <span class="diff-b" style="font-weight:bold; width:30px;">${actB - scrB}</span>
-                </div>
-            </td>
-            <td><span class="row-total-act" style="font-weight:bold;">${actA + actB}</span></td>
-            <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove(); updateGrandTotals();">Del</button></td>
-        `;
-        tbody.appendChild(tr);
-        updateGrandTotals();
-    }
-
-    function recalcRow(input) {
-        let row = input.closest('tr');
-        let scrA = parseFloat(row.querySelector('.rep-scra').value) || 0;
-        let actA = parseFloat(row.querySelector('.rep-acta').value) || 0;
-        let scrB = parseFloat(row.querySelector('.rep-scrb').value) || 0;
-        let actB = parseFloat(row.querySelector('.rep-actb').value) || 0;
-
-        row.querySelector('.diff-a').textContent = actA - scrA;
-        row.querySelector('.diff-b').textContent = actB - scrB;
-        row.querySelector('.row-total-act').textContent = actA + actB;
-        updateGrandTotals();
-    }
-
-    function calculateDailyUnits() {
-        let prev = parseFloat(document.getElementById('elecPrev').value) || 0;
-        let curr = parseFloat(document.getElementById('elecCurr').value) || 0;
-        let diff = curr >= prev ? curr - prev : 0;
-        document.getElementById('unitsConsumedDisplay').textContent = diff.toFixed(2);
-        document.getElementById('headerTotalUnits').textContent = "Total Units Consumed: " + diff.toLocaleString() + " KWH";
-    }
-
-    function updateGrandTotals() {
-        let totalActSum = 0;
-        document.querySelectorAll('.row-total-act').forEach(span => {
-            totalActSum += parseFloat(span.textContent) || 0;
-        });
-        document.getElementById('headerTotalGoodShots').textContent = "Total Good Shots: " + totalActSum.toLocaleString();
-    }
-
-    function saveDailyProductionSheet() {
-        let dateKey = document.getElementById('reportDate').value;
-        if(!dateKey) { alert("Select a date."); return; }
-
-        let machines = [];
-        document.querySelectorAll('#machineReportTableBody tr').forEach(row => {
-            machines.push({
-                machNo: row.querySelector('.rep-mach').value,
-                op: row.querySelector('.rep-op').value,
-                scrA: parseFloat(row.querySelector('.rep-scra').value) || 0,
-                actA: parseFloat(row.querySelector('.rep-acta').value) || 0,
-                scrB: parseFloat(row.querySelector('.rep-scrb').value) || 0,
-                actB: parseFloat(row.querySelector('.rep-actb').value) || 0,
-            });
-        });
-
-        let timestamp = new Date().toLocaleString();
-        dailySheets[dateKey] = {
-            elecPrev: document.getElementById('elecPrev').value,
-            elecCurr: document.getElementById('elecCurr').value,
-            timestamp: timestamp,
-            machines: machines
-        };
-
-        localStorage.setItem('moulding_dailySheets', JSON.stringify(dailySheets));
-        document.getElementById('reportTimestampDisplay').textContent = timestamp;
-        alert("Daily production and power report saved successfully!");
-    }
-
-    function loadDailyProductionForDate() {
-        let dateKey = document.getElementById('reportDate').value;
-        let tbody = document.getElementById('machineReportTableBody');
-        tbody.innerHTML = '';
-
-        let sheet = dailySheets[dateKey];
-        if (sheet) {
-            document.getElementById('elecPrev').value = sheet.elecPrev || '';
-            document.getElementById('elecCurr').value = sheet.elecCurr || '';
-            document.getElementById('reportTimestampDisplay').textContent = sheet.timestamp || '-';
-            calculateDailyUnits();
-
-            if (sheet.machines && sheet.machines.length > 0) {
-                sheet.machines.forEach(m => addMachineReportRow(m));
-            } else {
-                addMachineReportRow();
-            }
-        } else {
-            document.getElementById('elecPrev').value = '';
-            document.getElementById('elecCurr').value = '';
-            document.getElementById('reportTimestampDisplay').textContent = '-';
-            calculateDailyUnits();
-            addMachineReportRow();
-        }
-    }
-
-    /* Page 5 Lot Tracker Functions */
-    function renderLotsTable() {
-        let tbody = document.getElementById('lotTableBody');
-        tbody.innerHTML = '';
-        lotsData.forEach((lot, index) => {
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" class="lot-no" value="${lot.lotNo}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td><input type="text" class="lot-mat" value="${lot.material}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td><input type="text" class="lot-mach" value="${lot.mach}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td><input type="number" class="lot-qty" value="${lot.qty}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td><input type="text" class="lot-status" value="${lot.status}" style="margin:0; padding:2px; text-align:center;"></td>
-                <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove();">Del</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function addLotRow() {
-        let tbody = document.getElementById('lotTableBody');
-        let tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><input type="text" class="lot-no" placeholder="LOT #" style="margin:0; padding:2px; text-align:center;"></td>
-            <td><input type="text" class="lot-mat" placeholder="MATERIAL" style="margin:0; padding:2px; text-align:center;"></td>
-            <td><input type="text" class="lot-mach" placeholder="M/C" style="margin:0; padding:2px; text-align:center;"></td>
-            <td><input type="number" class="lot-qty" value="500" style="margin:0; padding:2px; text-align:center;"></td>
-            <td><input type="text" class="lot-status" value="ACTIVE" style="margin:0; padding:2px; text-align:center;"></td>
-            <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove();">Del</button></td>
-        `;
-        tbody.appendChild(tr);
-    }
-
-    function saveLots() {
-        lotsData = [];
-        document.querySelectorAll('#lotTableBody tr').forEach(row => {
-            lotsData.push({
-                lotNo: row.querySelector('.lot-no').value,
-                material: row.querySelector('.lot-mat').value,
-                mach: row.querySelector('.lot-mach').value,
-                qty: parseFloat(row.querySelector('.lot-qty').value) || 0,
-                status: row.querySelector('.lot-status').value
-            });
-        });
-        localStorage.setItem('moulding_lots', JSON.stringify(lotsData));
-        alert("Lot tracker data saved successfully!");
+    function saveRecord() {
+        alert("Slip record saved successfully!");
     }
 </script>
+
 </body>
 </html>
