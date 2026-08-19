@@ -15,7 +15,7 @@
             --border: #cbd5e1;
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; color: #334155; margin: 0; padding: 15px; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .container { max-width: 950px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         
         /* 3-Page Navigation Tabs */
         .tab-nav { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
@@ -121,6 +121,7 @@
                     <tr>
                         <th>Color</th>
                         <th>Quantity (Pcs)</th>
+                        <th>Gross Weight (Kg)</th>
                         <th>Net Weight (Kg)</th>
                         <th>Action</th>
                     </tr>
@@ -132,6 +133,7 @@
 
         <div class="summary-box">
             <div class="summary-item"><span class="summary-label">Total Qty</span><span class="summary-value" id="sumQty">0 Pcs</span></div>
+            <div class="summary-item"><span class="summary-label">Total Gross Wt</span><span class="summary-value" id="sumGross">0.00 Kg</span></div>
             <div class="summary-item"><span class="summary-label">Total Net Wt</span><span class="summary-value" id="sumNet">0.00 Kg</span></div>
             <div class="summary-item"><span class="summary-label">Total Hours</span><span class="summary-value" id="sumHours">0.00 Hrs</span></div>
             <div class="summary-item"><span class="summary-label">Amount Payable</span><span class="summary-value" id="sumAmount" style="color: var(--success);">0.00 PKR</span></div>
@@ -213,8 +215,8 @@
     };
 
     let billingRowsData = JSON.parse(localStorage.getItem('db_billing')) || [
-        { color: "GREEN", qty: 2000, net: 10.5 },
-        { color: "BLUE", qty: 2000, net: 10.5 }
+        { color: "GREEN", qty: 2000, gross: 12.0, net: 10.5 },
+        { color: "BLUE", qty: 2000, gross: 12.0, net: 10.5 }
     ];
 
     let machineList = JSON.parse(localStorage.getItem('db_machines')) || ["M/C NO-01", "M/C NO-02", "M/C NO-06"];
@@ -316,12 +318,14 @@
         let tbody = document.getElementById('billingRows');
         tbody.innerHTML = "";
         billingRowsData.forEach((row, idx) => {
+            if(row.gross === undefined) row.gross = row.net; // Fallback for old data
             tbody.innerHTML += `
                 <tr>
                     <td><input type="text" value="${row.color}" oninput="billingRowsData[${idx}].color = this.value.toUpperCase(); saveAllData(); calculateBilling()"></td>
                     <td><input type="number" value="${row.qty}" oninput="billingRowsData[${idx}].qty = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
-                    <td><input type="number" step="0.01" value="${row.net}" oninput="billingRowsData[${idx}].net = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
-                    <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="billingRowsData.splice(${idx},1); saveAllData(); renderBillingRows()">X</button></td>
+                    <td><input type="number" step="0.01" value="${row.gross}" oninput="billingRowsData[${idx}].gross = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
+                    <td><input type="number" step="0.01" value="${row.net}" oninput="billingRowsData[${idx}].net = parseFloat(this.value)||0; saveAllData(); calculateBilling(); renderInventory()"></td>
+                    <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="billingRowsData.splice(${idx},1); saveAllData(); renderBillingRows(); renderInventory()">X</button></td>
                 </tr>
             `;
         });
@@ -329,15 +333,16 @@
     }
 
     function addBillingRow() {
-        billingRowsData.push({ color: "NEW", qty: 1000, net: 5.0 });
+        billingRowsData.push({ color: "NEW", qty: 1000, gross: 6.0, net: 5.0 });
         saveAllData();
         renderBillingRows();
     }
 
     function calculateBilling() {
-        let totalQty = 0, totalNet = 0;
+        let totalQty = 0, totalGross = 0, totalNet = 0;
         billingRowsData.forEach(r => {
             totalQty += r.qty;
+            totalGross += (r.gross || 0);
             totalNet += r.net;
         });
 
@@ -350,6 +355,7 @@
         let totalAmount = totalQty * effectiveRate;
 
         document.getElementById('sumQty').innerText = totalQty.toLocaleString() + ' Pcs';
+        document.getElementById('sumGross').innerText = totalGross.toFixed(2) + ' Kg';
         document.getElementById('sumNet').innerText = totalNet.toFixed(2) + ' Kg';
         document.getElementById('sumHours').innerText = totalHours.toFixed(2) + ' Hrs';
         document.getElementById('sumAmount').innerText = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' PKR';
