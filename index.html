@@ -78,7 +78,7 @@
             padding: 20px;
             border-radius: 10px;
             width: 90%;
-            max-width: 320px;
+            max-width: 340px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
         .custom-modal-content h4 {
@@ -112,13 +112,13 @@
         }
         .nav-tab {
             flex: 1;
-            padding: 8px 10px;
+            padding: 8px 6px;
             text-align: center;
             background: transparent;
             border: none;
             border-radius: 6px;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 11px;
             color: #475569;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -218,8 +218,9 @@
         .summary-label { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 600; }
         .summary-value { font-size: 16px; font-weight: bold; color: var(--primary-color); margin-top: 2px; }
         .inventory-panel { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 20px; }
-        .remove-card-btn { background: var(--danger-color) !important; padding: 2px 6px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; }
-        .action-btn { background-color: var(--secondary-color); padding: 4px 8px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; }
+        .remove-card-btn { background: var(--danger-color) !important; padding: 3px 7px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; }
+        .action-btn { background-color: var(--secondary-color); padding: 3px 7px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; }
+        .edit-action-btn { background-color: var(--warning-color); padding: 3px 7px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; color: white; }
     </style>
  </head>
  <body>
@@ -256,6 +257,60 @@
    </div>
   </div>
 
+  <!-- Edit Daily Production Modal -->
+  <div id="editDailyProdModal" class="custom-modal">
+   <div class="custom-modal-content">
+    <h4>✏️ Edit Daily Production</h4>
+    <input type="hidden" id="editDpIndex">
+    <div class="input-group" style="margin-bottom: 8px;">
+     <label>Machine No.</label> <input type="text" id="modalDpMachine">
+    </div>
+    <div class="input-group" style="margin-bottom: 8px;">
+     <label>Operator</label> <input type="text" id="modalDpOperator">
+    </div>
+    <div class="input-group" style="margin-bottom: 8px;">
+     <label>Shift A Actual</label> <input type="number" id="modalDpAActual">
+    </div>
+    <div class="input-group" style="margin-bottom: 8px;">
+     <label>Shift A Good</label> <input type="number" id="modalDpAGood">
+    </div>
+    <div class="input-group" style="margin-bottom: 8px;">
+     <label>Shift B Actual</label> <input type="number" id="modalDpBActual">
+    </div>
+    <div class="input-group" style="margin-bottom: 12px;">
+     <label>Shift B Good</label> <input type="number" id="modalDpBGood">
+    </div>
+    <div style="display: flex; gap: 8px;">
+     <button type="button" class="btn-danger" onclick="closeEditDailyProdModal()" style="padding: 8px;">Cancel</button>
+     <button type="button" class="btn-success" onclick="saveEditDailyProd()" style="padding: 8px;">Save Changes</button>
+    </div>
+   </div>
+  </div>
+
+  <!-- Edit Lot Tracker Modal -->
+  <div id="editLotModal" class="custom-modal">
+   <div class="custom-modal-content">
+    <h4>✏️ Edit Lot / Order Tracker</h4>
+    <input type="hidden" id="editLotIndex">
+    <div class="input-group" style="margin-bottom: 8px;">
+     <label>Lot / Slip #</label> <input type="text" id="modalLotNo">
+    </div>
+    <div class="input-group" style="margin-bottom: 8px;">
+     <label>Item / Description</label> <input type="text" id="modalLotItem">
+    </div>
+    <div class="input-group" style="margin-bottom: 8px;">
+     <label>Target Qty (Pcs)</label> <input type="number" id="modalLotTarget">
+    </div>
+    <div class="input-group" style="margin-bottom: 12px;">
+     <label>Actual Produced (Pcs)</label> <input type="number" id="modalLotActual">
+    </div>
+    <div style="display: flex; gap: 8px;">
+     <button type="button" class="btn-danger" onclick="closeEditLotModal()" style="padding: 8px;">Cancel</button>
+     <button type="button" class="btn-success" onclick="saveEditLot()" style="padding: 8px;">Save Changes</button>
+    </div>
+   </div>
+  </div>
+
   <div id="liveToast">✅ Synced to Cloud</div>
 
   <div class="container" id="appContainer">
@@ -270,12 +325,13 @@
    <div id="syncStatus" class="sync-status">🟢 Multi-User Cloud Database Connected via Firebase</div>
    <div id="visitCountDisplay" class="open-counter">📊 Total App Opens: Loading...</div>
    
-   <!-- Navigation Tabs (4 Pages) -->
+   <!-- Navigation Tabs (5 Pages including Lot Tracker) -->
    <div class="nav-tabs">
     <button class="nav-tab active" onclick="switchPage(1)">1. Inventory</button>
-    <button class="nav-tab" onclick="switchPage(2)">2. Job Specs &amp; Cards</button>
-    <button class="nav-tab" onclick="switchPage(3)">3. Billing Summary</button>
-    <button class="nav-tab" onclick="switchPage(4)">4. Daily Production</button>
+    <button class="nav-tab" onclick="switchPage(2)">2. Job Specs</button>
+    <button class="nav-tab" onclick="switchPage(3)">3. Billing</button>
+    <button class="nav-tab" onclick="switchPage(4)">4. Daily Prod</button>
+    <button class="nav-tab" onclick="switchPage(5)">5. Lot Tracker</button>
    </div>
 
    <!-- PAGE 1: INVENTORY LEDGER -->
@@ -304,10 +360,10 @@
        <thead>
         <tr>
          <th>Material</th>
-         <th>Opening</th>
-         <th>Purch.</th>
-         <th>Cons.</th>
-         <th>Closing</th>
+         <th>Stock (Opening)</th>
+         <th>Purchase</th>
+         <th>Consume</th>
+         <th>Balance (Closing)</th>
          <th>Action</th>
         </tr>
        </thead>
@@ -322,7 +378,7 @@
 
    <!-- PAGE 2: JOB SPECS & COLOR VARIATIONS -->
    <div id="page2" class="app-page">
-    <div class="section-title">Job &amp; Machine Specs</div>
+    <div class="section-title">Job &amp; Machine Specs (Fully Editable)</div>
     <div class="form-grid">
      <div class="input-group">
       <label for="slipNo">Slip / Item #</label> <input type="text" id="slipNo" value="963" oninput="saveSpecFields()">
@@ -334,7 +390,7 @@
       <label for="materialType">PP Granules</label> <select id="materialType" onchange="saveSpecFields(); calculateBilling()"></select>
      </div>
      <div class="input-group">
-      <label for="machineNo">Machine Number</label> <input type="text" id="machineNo" value="" placeholder="Type machine # here" oninput="saveSpecFields()">
+      <label for="machineNo">Machine Number</label> <input type="text" id="machineNo" value="M-06" placeholder="Type machine # here" oninput="saveSpecFields()">
      </div>
      <div class="input-group">
       <label for="cycleTime">Cycle Time (Sec)</label> <input type="number" id="cycleTime" value="20" step="0.1" oninput="saveSpecFields(); calculateBilling()">
@@ -353,6 +409,9 @@
      </div>
      <div class="input-group">
       <label for="startDate">Start Date</label> <input type="date" id="startDate" value="2026-08-15" onchange="saveSpecFields()">
+     </div>
+     <div class="input-group">
+      <label for="endDate">End Date</label> <input type="date" id="endDate" value="2026-08-15" onchange="saveSpecFields()">
      </div>
     </div>
     <div class="section-title">Color Variations, Production &amp; Scrap Grid</div>
@@ -409,6 +468,37 @@
     </div>
    </div>
 
+   <!-- PAGE 5: LOT MANAGEMENT & SHORT MOULDING TRACKER -->
+   <div id="page5" class="app-page">
+    <div class="section-title">
+     <span>Lot Management &amp; Short Molding Tracker</span>
+     <button type="button" class="btn-success" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="addLotTrackerRow()">+ Add New Lot / Order</button>
+    </div>
+    <div class="inventory-panel" style="margin-bottom: 10px;">
+     <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 10px;">Compare target order quantity against actual produced pieces to automatically calculate short molding / surplus variance and percentages.</p>
+     <div class="table-container">
+      <table>
+       <thead>
+        <tr>
+         <th>Lot / Slip #</th>
+         <th>Item / Description</th>
+         <th>Target Qty (Pcs)</th>
+         <th>Actual Produced (Pcs)</th>
+         <th>Variance (+ / - Pcs)</th>
+         <th>Short / Surplus (%)</th>
+         <th>Action</th>
+        </tr>
+       </thead>
+       <tbody id="lotTrackerTableBody"></tbody>
+      </table>
+     </div>
+    </div>
+    <div class="btn-container" style="margin-top: 20px;">
+     <button onclick="switchPage(4)">&larr; Back to Daily Production</button>
+     <button class="btn-success" onclick="saveToCloud(); showToast('Lot Tracker Saved')">Save Lot Tracker</button>
+    </div>
+   </div>
+
   </div>
   <script>
     // Firebase Initialization Configuration
@@ -426,14 +516,17 @@
     }
     const cloudDb = firebase.firestore();
 
-    let inventoryData = { "BLACK PP": { opening: 500, purchased: 200 } };
+    let inventoryData = { "PURE PP": { opening: 500, purchased: 200 } };
     let transactions = []; 
     let itemsData = [
         { color: "STICK GREEN", qty: 3000, bags: 2, gross: 16.30, scrap: 0.1, net: 16.20 },
         { color: "PINK", qty: 3000, bags: 2, gross: 16.35, scrap: 0.1, net: 16.25 }
     ];
     let dailyProductionData = [
-        { machineNo: "M-01", operator: "ALI", shiftAActual: 1200, shiftAProper: 1150, shiftBActual: 1300, shiftBProper: 1250 }
+        { machineNo: "M-06", operator: "ALI", shiftAActual: 1200, shiftAGood: 1150, shiftBActual: 1300, shiftBGood: 1250 }
+    ];
+    let lotTrackerData = [
+        { lotNo: "963", itemName: "STICK", targetQty: 6000, actualQty: 6000 }
     ];
     let toastTimeout;
     let isRemoteUpdate = false;
@@ -457,6 +550,7 @@
                     if (data.transactions) transactions = data.transactions;
                     if (data.itemsData) itemsData = data.itemsData;
                     if (data.dailyProductionData) dailyProductionData = data.dailyProductionData;
+                    if (data.lotTrackerData) lotTrackerData = data.lotTrackerData;
                     
                     if (data.specs) {
                         if (document.getElementById('slipNo')) document.getElementById('slipNo').value = data.specs.slipNo || '';
@@ -468,12 +562,14 @@
                         if (document.getElementById('rateValue')) document.getElementById('rateValue').value = data.specs.rateValue || 1000;
                         if (document.getElementById('extraOverhead')) document.getElementById('extraOverhead').value = data.specs.extraOverhead || 0;
                         if (document.getElementById('startDate')) document.getElementById('startDate').value = data.specs.startDate || '';
+                        if (document.getElementById('endDate')) document.getElementById('endDate').value = data.specs.endDate || '';
                         if (data.specs.materialType) document.getElementById('materialType').value = data.specs.materialType;
                     }
 
                     updateMaterialDropdown();
                     renderCardsWithoutTrigger();
                     renderDailyProductionWithoutTrigger();
+                    renderLotTrackerWithoutTrigger();
                     isRemoteUpdate = false;
                 }
             }, (error) => {
@@ -494,7 +590,8 @@
             rateType: document.getElementById('rateType').value,
             rateValue: document.getElementById('rateValue').value,
             extraOverhead: document.getElementById('extraOverhead').value,
-            startDate: document.getElementById('startDate').value
+            startDate: document.getElementById('startDate').value,
+            endDate: document.getElementById('endDate').value
         };
 
         cloudDb.collection("mouldingApp").doc("mainData").set({
@@ -502,6 +599,7 @@
             transactions: transactions,
             itemsData: itemsData,
             dailyProductionData: dailyProductionData,
+            lotTrackerData: lotTrackerData,
             specs: specs,
             lastUpdatedBy: document.getElementById('loginUser').value.toUpperCase(),
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -534,6 +632,7 @@
         updateMaterialDropdown();
         renderCardsWithoutTrigger();
         renderDailyProductionWithoutTrigger();
+        renderLotTrackerWithoutTrigger();
     }
 
     function handleLogout() {
@@ -585,7 +684,7 @@
         if (!newMat) return;
         newMat = newMat.trim().toUpperCase();
         if (!newMat || inventoryData[newMat]) return;
-        let opening = parseFloat(prompt(`ENTER OPENING STOCK (KG):`, "0")) || 0;
+        let opening = parseFloat(prompt(`ENTER INITIAL STOCK (KG):`, "0")) || 0;
         inventoryData[newMat] = { opening: opening, purchased: 0 };
         updateMaterialDropdown();
         document.getElementById('materialType').value = newMat;
@@ -602,7 +701,7 @@
                 <div class="item-card-header">
                     <span>#${index + 1} - COLOR DETAILS</span>
                     <div style="display: flex; gap: 4px;">
-                        <button type="button" class="action-btn" onclick="editCard(${index})">EDIT</button>
+                        <button type="button" class="edit-action-btn" onclick="editCard(${index})">EDIT</button>
                         <button type="button" class="remove-card-btn" onclick="removeCard(${index})">X</button>
                     </div>
                 </div>
@@ -628,7 +727,7 @@
                         <input type="number" class="card-scrap" value="${item.scrap || 0}" step="0.01" oninput="updateDataFromCards()">
                     </div>
                     <div class="input-group" style="grid-column: span 2;">
-                        <label>Net Finished Wt (Kg)</label>
+                        <label>Net Finished Wt (Kg) - Deducted from Inventory</label>
                         <input type="number" class="card-net" value="${item.net}" step="0.01" oninput="updateDataFromCards()">
                     </div>
                 </div>
@@ -648,7 +747,7 @@
                 <div class="item-card-header">
                     <span>#${index + 1} - COLOR DETAILS</span>
                     <div style="display: flex; gap: 4px;">
-                        <button type="button" class="action-btn" onclick="editCard(${index})">EDIT</button>
+                        <button type="button" class="edit-action-btn" onclick="editCard(${index})">EDIT</button>
                         <button type="button" class="remove-card-btn" onclick="removeCard(${index})">X</button>
                     </div>
                 </div>
@@ -674,7 +773,7 @@
                         <input type="number" class="card-scrap" value="${item.scrap || 0}" step="0.01" oninput="updateDataFromCards()">
                     </div>
                     <div class="input-group" style="grid-column: span 2;">
-                        <label>Net Finished Wt (Kg)</label>
+                        <label>Net Finished Wt (Kg) - Deducted from Inventory</label>
                         <input type="number" class="card-net" value="${item.net}" step="0.01" oninput="updateDataFromCards()">
                     </div>
                 </div>
@@ -702,8 +801,11 @@
             card.className = 'item-card';
             card.innerHTML = `
                 <div class="item-card-header">
-                    <span>MACHINE DAILY PRODUCTION #${index + 1}</span>
-                    <button type="button" class="remove-card-btn" onclick="removeDailyProdRow(${index})">X</button>
+                    <span>MACHINE DAILY PRODUCTION #${index + 1} (${row.machineNo})</span>
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" class="edit-action-btn" onclick="openEditDailyProdModal(${index})">EDIT</button>
+                        <button type="button" class="remove-card-btn" onclick="removeDailyProdRow(${index})">X</button>
+                    </div>
                 </div>
                 <div class="card-grid">
                     <div class="input-group">
@@ -719,21 +821,51 @@
                         <input type="number" class="dp-a-actual" value="${row.shiftAActual}" oninput="updateDataFromDailyProd()">
                     </div>
                     <div class="input-group">
-                        <label>Shift A - Proper Shot</label>
-                        <input type="number" class="dp-a-proper" value="${row.shiftAProper}" oninput="updateDataFromDailyProd()">
+                        <label>Shift A - Good Shot</label>
+                        <input type="number" class="dp-a-good" value="${row.shiftAGood}" oninput="updateDataFromDailyProd()">
                     </div>
                     <div class="input-group">
                         <label>Shift B - Actual Shot</label>
                         <input type="number" class="dp-b-actual" value="${row.shiftBActual}" oninput="updateDataFromDailyProd()">
                     </div>
                     <div class="input-group">
-                        <label>Shift B - Proper Shot</label>
-                        <input type="number" class="dp-b-proper" value="${row.shiftBProper}" oninput="updateDataFromDailyProd()">
+                        <label>Shift B - Good Shot</label>
+                        <input type="number" class="dp-b-good" value="${row.shiftBGood}" oninput="updateDataFromDailyProd()">
                     </div>
                 </div>
             `;
             container.appendChild(card);
         });
+    }
+
+    function openEditDailyProdModal(index) {
+        let row = dailyProductionData[index];
+        document.getElementById('editDpIndex').value = index;
+        document.getElementById('modalDpMachine').value = row.machineNo;
+        document.getElementById('modalDpOperator').value = row.operator;
+        document.getElementById('modalDpAActual').value = row.shiftAActual;
+        document.getElementById('modalDpAGood').value = row.shiftAGood;
+        document.getElementById('modalDpBActual').value = row.shiftBActual;
+        document.getElementById('modalDpBGood').value = row.shiftBGood;
+        document.getElementById('editDailyProdModal').style.display = 'flex';
+    }
+
+    function closeEditDailyProdModal() {
+        document.getElementById('editDailyProdModal').style.display = 'none';
+    }
+
+    function saveEditDailyProd() {
+        let index = parseInt(document.getElementById('editDpIndex').value);
+        if (!isNaN(index) && dailyProductionData[index]) {
+            dailyProductionData[index].machineNo = document.getElementById('modalDpMachine').value.toUpperCase();
+            dailyProductionData[index].operator = document.getElementById('modalDpOperator').value.toUpperCase();
+            dailyProductionData[index].shiftAActual = parseFloat(document.getElementById('modalDpAActual').value) || 0;
+            dailyProductionData[index].shiftAGood = parseFloat(document.getElementById('modalDpAGood').value) || 0;
+            dailyProductionData[index].shiftBActual = parseFloat(document.getElementById('modalDpBActual').value) || 0;
+            dailyProductionData[index].shiftBGood = parseFloat(document.getElementById('modalDpBGood').value) || 0;
+        }
+        closeEditDailyProdModal();
+        renderDailyProduction();
     }
 
     function updateDataFromDailyProd() {
@@ -743,22 +875,112 @@
                 dailyProductionData[index].machineNo = card.querySelector('.dp-machine').value.toUpperCase();
                 dailyProductionData[index].operator = card.querySelector('.dp-operator').value.toUpperCase();
                 dailyProductionData[index].shiftAActual = parseFloat(card.querySelector('.dp-a-actual').value) || 0;
-                dailyProductionData[index].shiftAProper = parseFloat(card.querySelector('.dp-a-proper').value) || 0;
+                dailyProductionData[index].shiftAGood = parseFloat(card.querySelector('.dp-a-good').value) || 0;
                 dailyProductionData[index].shiftBActual = parseFloat(card.querySelector('.dp-b-actual').value) || 0;
-                dailyProductionData[index].shiftBProper = parseFloat(card.querySelector('.dp-b-proper').value) || 0;
+                dailyProductionData[index].shiftBGood = parseFloat(card.querySelector('.dp-b-good').value) || 0;
             }
         });
         saveToCloud();
     }
 
     function addDailyProdRow() {
-        dailyProductionData.push({ machineNo: "", operator: "", shiftAActual: 0, shiftAProper: 0, shiftBActual: 0, shiftBProper: 0 });
+        dailyProductionData.push({ machineNo: "M-06", operator: "", shiftAActual: 0, shiftAGood: 0, shiftBActual: 0, shiftBGood: 0 });
         renderDailyProduction();
     }
 
     function removeDailyProdRow(index) {
         dailyProductionData.splice(index, 1);
         renderDailyProduction();
+    }
+
+    // Lot Tracker Rendering and Updates
+    function renderLotTracker() {
+        renderLotTrackerTable();
+        saveToCloud();
+    }
+
+    function renderLotTrackerWithoutTrigger() {
+        renderLotTrackerTable();
+    }
+
+    function renderLotTrackerTable() {
+        const tbody = document.getElementById('lotTrackerTableBody');
+        tbody.innerHTML = '';
+        if (lotTrackerData.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="color: #64748b; padding: 15px;">NO LOTS ADDED YET.</td></tr>`;
+            return;
+        }
+        lotTrackerData.forEach((lot, index) => {
+            let diff = lot.actualQty - lot.targetQty;
+            let percentage = lot.targetQty > 0 ? ((diff / lot.targetQty) * 100).toFixed(1) : 0;
+            let diffColor = diff < 0 ? 'var(--danger-color)' : (diff > 0 ? 'var(--success-color)' : 'var(--primary-color)');
+            let diffText = diff > 0 ? `+${diff.toLocaleString()} (${percentage}%)` : `${diff.toLocaleString()} (${percentage}%)`;
+
+            let row = tbody.insertRow();
+            row.innerHTML = `
+                <td><input type="text" class="lt-lot" value="${lot.lotNo}" oninput="updateDataFromLotTracker()" style="text-align: center;"></td>
+                <td><input type="text" class="lt-item" value="${lot.itemName}" oninput="updateDataFromLotTracker()" style="text-align: center;"></td>
+                <td><input type="number" class="lt-target" value="${lot.targetQty}" oninput="updateDataFromLotTracker()" style="text-align: center;"></td>
+                <td><input type="number" class="lt-actual" value="${lot.actualQty}" oninput="updateDataFromLotTracker()" style="text-align: center;"></td>
+                <td style="font-weight: bold; color: ${diffColor};">${diffText}</td>
+                <td style="font-weight: bold; color: ${diff < 0 ? 'var(--danger-color)' : 'var(--success-color)'};">${diff < 0 ? 'SHORT MOULDING' : (diff > 0 ? 'SURPLUS' : 'EXACT')}</td>
+                <td>
+                    <div style="display: flex; gap: 4px; justify-content: center;">
+                        <button type="button" class="edit-action-btn" onclick="openEditLotModal(${index})">EDIT</button>
+                        <button type="button" class="remove-card-btn" onclick="removeLotTrackerRow(${index})">X</button>
+                    </div>
+                </td>
+            `;
+        });
+    }
+
+    function openEditLotModal(index) {
+        let lot = lotTrackerData[index];
+        document.getElementById('editLotIndex').value = index;
+        document.getElementById('modalLotNo').value = lot.lotNo;
+        document.getElementById('modalLotItem').value = lot.itemName;
+        document.getElementById('modalLotTarget').value = lot.targetQty;
+        document.getElementById('modalLotActual').value = lot.actualQty;
+        document.getElementById('editLotModal').style.display = 'flex';
+    }
+
+    function closeEditLotModal() {
+        document.getElementById('editLotModal').style.display = 'none';
+    }
+
+    function saveEditLot() {
+        let index = parseInt(document.getElementById('editLotIndex').value);
+        if (!isNaN(index) && lotTrackerData[index]) {
+            lotTrackerData[index].lotNo = document.getElementById('modalLotNo').value.toUpperCase();
+            lotTrackerData[index].itemName = document.getElementById('modalLotItem').value.toUpperCase();
+            lotTrackerData[index].targetQty = parseFloat(document.getElementById('modalLotTarget').value) || 0;
+            lotTrackerData[index].actualQty = parseFloat(document.getElementById('modalLotActual').value) || 0;
+        }
+        closeEditLotModal();
+        renderLotTracker();
+    }
+
+    function updateDataFromLotTracker() {
+        const rows = document.querySelectorAll('#lotTrackerTableBody tr');
+        rows.forEach((row, index) => {
+            if (lotTrackerData[index]) {
+                lotTrackerData[index].lotNo = row.querySelector('.lt-lot').value.toUpperCase();
+                lotTrackerData[index].itemName = row.querySelector('.lt-item').value.toUpperCase();
+                lotTrackerData[index].targetQty = parseFloat(row.querySelector('.lt-target').value) || 0;
+                lotTrackerData[index].actualQty = parseFloat(row.querySelector('.lt-actual').value) || 0;
+            }
+        });
+        saveToCloud();
+    }
+
+    function addLotTrackerRow() {
+        lotTrackerData.push({ lotNo: "964", itemName: "NEW ITEM", targetQty: 5000, actualQty: 5000 });
+        renderLotTracker();
+    }
+
+    function removeLotTrackerRow(index) {
+        lotTrackerData.splice(index, 1);
+        renderLotTracker();
     }
 
     function updateDataFromCards() {
@@ -930,8 +1152,10 @@
                     <td style="color: var(--danger-color);">-${periodConsumption.toFixed(1)}</td>
                     <td style="font-weight: bold; color: ${closingStock < 0 ? 'var(--danger-color)' : 'var(--primary-color)'};">${closingStock.toFixed(1)}</td>
                     <td>
-                        <button type="button" class="action-btn" onclick="editInventory('${material}')">EDIT</button>
-                        <button type="button" class="remove-card-btn" onclick="deleteMaterial('${material}')">X</button>
+                        <div style="display: flex; gap: 4px; justify-content: center;">
+                            <button type="button" class="edit-action-btn" onclick="editInventory('${material}')">EDIT</button>
+                            <button type="button" class="remove-card-btn" onclick="deleteMaterial('${material}')">X</button>
+                        </div>
                     </td>
                 `;
             });
