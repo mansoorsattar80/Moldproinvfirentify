@@ -34,6 +34,7 @@
         .btn-danger { background: var(--danger); }
         .btn-success { background: var(--success); }
         .btn-warning { background: var(--warning); color: #fff; }
+        .btn-primary { background: var(--secondary); }
 
         table { width: 100% !important; border-collapse: collapse; margin-top: 4px; font-size: 9.5px; }
         th, td { border: 1px solid #cbd5e1; padding: 3px 5px; text-align: center; vertical-align: middle; }
@@ -61,7 +62,7 @@
     <div class="status-bar">RUNNING ON LOCAL DEVICE STORAGE</div>
     <h2>MOULDING PRODUCTION & BILLING SOFTWARE</h2>
 
-    <!-- Navigation Tabs (5 Tabs total) -->
+    <!-- Navigation Tabs -->
     <div class="nav-tabs">
         <div class="nav-tab active" onclick="switchPage(1)">1. INVENTORY</div>
         <div class="nav-tab" onclick="switchPage(2)">2. JOB SPECS</div>
@@ -75,6 +76,7 @@
         <h3>RAW MATERIAL INVENTORY</h3>
         
         <div class="section-card">
+            <input type="hidden" id="editInvIndex" value="-1">
             <label>Material Name / Granule Type:</label>
             <input type="text" id="invMaterialName" placeholder="E.G. BLACK, PP, ABS">
 
@@ -90,20 +92,20 @@
             <label>Date:</label>
             <input type="date" id="invDate">
 
-            <button class="btn-success" onclick="addInventoryEntry()">Add Inventory Entry</button>
+            <button class="btn-success" id="invSubmitBtn" onclick="saveInventoryEntry()">Add Inventory Entry</button>
         </div>
 
         <div class="section-card">
-            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Inventory Stock Summary</h4>
+            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Inventory Entries & History</h4>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
+                            <th>Date</th>
                             <th>Material</th>
-                            <th>Opening/Purch</th>
-                            <th>Consumed</th>
-                            <th>Closing Balance</th>
-                            <th class="no-print">Action</th>
+                            <th>Type</th>
+                            <th>Qty (Kg)</th>
+                            <th class="no-print">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="inventoryTableBody"></tbody>
@@ -115,7 +117,26 @@
     <!-- PAGE 2: JOB SPECS -->
     <div id="page2" class="page">
         <h3>JOB SPECIFICATIONS</h3>
-        <button class="btn-success" onclick="alert('Job specs saved')">SAVE</button>
+        <div class="section-card">
+            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Mould & Product Parameters</h4>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Code / Name</th>
+                            <th>Machine No</th>
+                            <th>Cavity</th>
+                            <th>Cycle (Sec)</th>
+                            <th>Target Wt (g)</th>
+                            <th class="no-print">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobSpecsTableBody"></tbody>
+                </table>
+            </div>
+            <button class="btn-success no-print" style="background:var(--secondary); font-size:10px; padding:4px 8px; width:auto;" onclick="addJobSpecRow()">+ Add Job Spec</button>
+        </div>
+        <button class="btn-success" onclick="saveJobSpecs()">Save Job Specs</button>
     </div>
 
     <!-- PAGE 3: BILLING -->
@@ -223,7 +244,6 @@
             </div>
         </div>
 
-        <!-- Integrated Main Electric Meter Log -->
         <div class="section-card" style="background:#fdfefe;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                 <h4 style="margin:0; color:var(--primary); font-size:11px;">⚡ Main Electrical Meter Log</h4>
@@ -271,12 +291,40 @@
     </div>
 
     <!-- PAGE 5: LOT TRACKER -->
-    <div id="page5" class="page"><h3>LOT TRACKER</h3></div>
+    <div id="page5" class="page">
+        <h3>LOT TRACKER & BATCH MANAGEMENT</h3>
+        <div class="section-card">
+            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Active Production Lots</h4>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lot #</th>
+                            <th>Material / Color</th>
+                            <th>Machine</th>
+                            <th>Batch Qty (Kg)</th>
+                            <th>Status</th>
+                            <th class="no-print">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lotTableBody"></tbody>
+                </table>
+            </div>
+            <button class="btn-success no-print" style="background:var(--secondary); font-size:10px; padding:4px 8px; width:auto;" onclick="addLotRow()">+ Add Lot Record</button>
+        </div>
+        <button class="btn-success" onclick="saveLots()">Save Lot Data</button>
+    </div>
 </div>
 
 <script>
     let inventoryData = JSON.parse(localStorage.getItem('moulding_inventory')) || [];
+    let jobSpecsData = JSON.parse(localStorage.getItem('moulding_jobSpecs')) || [
+        { name: "TOY CAR BODY", mach: "M/C 03", cavity: 1, cycle: 23, weight: 112 }
+    ];
     let dailySheets = JSON.parse(localStorage.getItem('moulding_dailySheets')) || {};
+    let lotsData = JSON.parse(localStorage.getItem('moulding_lots')) || [
+        { lotNo: "LOT-101", material: "BLACK PP", mach: "M/C 03", qty: 500, status: "IN PROGRESS" }
+    ];
 
     document.addEventListener("DOMContentLoaded", () => {
         let todayStr = new Date().toISOString().split('T')[0];
@@ -284,6 +332,8 @@
         document.getElementById('invDate').value = todayStr;
         
         renderInventoryTable();
+        renderJobSpecsTable();
+        renderLotsTable();
         loadDailyProductionForDate();
 
         let sampleColors = [
@@ -303,8 +353,9 @@
         document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
     }
 
-    /* Page 1 Inventory Functions */
-    function addInventoryEntry() {
+    /* Page 1 Inventory Functions with Edit & Delete */
+    function saveInventoryEntry() {
+        let editIndex = parseInt(document.getElementById('editInvIndex').value);
         let name = document.getElementById('invMaterialName').value.trim();
         let txType = document.getElementById('invTxType').value;
         let qty = parseFloat(document.getElementById('invQty').value) || 0;
@@ -315,63 +366,113 @@
             return;
         }
 
-        inventoryData.push({ name, txType, qty, date });
+        let entry = { name, txType, qty, date };
+        if (editIndex === -1) {
+            inventoryData.push(entry);
+        } else {
+            inventoryData[editIndex] = entry;
+            document.getElementById('editInvIndex').value = "-1";
+            document.getElementById('invSubmitBtn').textContent = "Add Inventory Entry";
+        }
+
         localStorage.setItem('moulding_inventory', JSON.stringify(inventoryData));
-        
         document.getElementById('invMaterialName').value = '';
         document.getElementById('invQty').value = '';
         renderInventoryTable();
-        alert("Inventory entry added successfully!");
+        alert("Inventory entry saved successfully!");
     }
 
     function renderInventoryTable() {
         let tbody = document.getElementById('inventoryTableBody');
         tbody.innerHTML = '';
 
-        let summary = {};
-        inventoryData.forEach((item, index) => {
-            let key = item.name.toUpperCase();
-            if (!summary[key]) {
-                summary[key] = { purch: 0, consumed: 0, indices: [] };
-            }
-            if (item.txType === 'PURCHASE') {
-                summary[key].purch += item.qty;
-            } else {
-                summary[key].consumed += item.qty;
-            }
-            summary[key].indices.push(index);
-        });
-
-        let keys = Object.keys(summary);
-        if (keys.length === 0) {
+        if (inventoryData.length === 0) {
             tbody.innerHTML = `<tr><td colspan="5" style="color:#777; padding:10px;">No inventory records found.</td></tr>`;
             return;
         }
 
-        keys.forEach(key => {
-            let data = summary[key];
-            let closing = data.purch - data.consumed;
+        inventoryData.forEach((item, index) => {
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td style="font-weight:bold;">${key}</td>
-                <td>${data.purch.toLocaleString()} KG</td>
-                <td>${data.consumed.toLocaleString()} KG</td>
-                <td style="font-weight:bold; color:${closing >= 0 ? 'var(--success)' : 'var(--danger)'};">${closing.toLocaleString()} KG</td>
-                <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 4px; font-size:8px; width:auto;" onclick="deleteMaterialGroup('${key}')">Clear</button></td>
+                <td>${item.date || '-'}</td>
+                <td style="font-weight:bold;">${item.name}</td>
+                <td style="color:${item.txType === 'PURCHASE' ? 'var(--success)' : 'var(--danger)'}; font-weight:bold;">${item.txType}</td>
+                <td>${item.qty.toLocaleString()} KG</td>
+                <td class="no-print">
+                    <button type="button" class="btn-warning" style="padding:1px 4px; font-size:8px; width:auto;" onclick="editInventoryEntry(${index})">Edit</button>
+                    <button type="button" class="btn-danger" style="padding:1px 4px; font-size:8px; width:auto;" onclick="deleteInventoryEntry(${index})">Del</button>
+                </td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    function deleteMaterialGroup(materialName) {
-        if(confirm("Remove all entries for " + materialName + "?")) {
-            inventoryData = inventoryData.filter(item => item.name.toUpperCase() !== materialName);
+    function editInventoryEntry(index) {
+        let item = inventoryData[index];
+        document.getElementById('invMaterialName').value = item.name;
+        document.getElementById('invTxType').value = item.txType;
+        document.getElementById('invQty').value = item.qty;
+        document.getElementById('invDate').value = item.date || '';
+        document.getElementById('editInvIndex').value = index;
+        document.getElementById('invSubmitBtn').textContent = "Update Inventory Entry";
+    }
+
+    function deleteInventoryEntry(index) {
+        if(confirm("Delete this inventory entry?")) {
+            inventoryData.splice(index, 1);
             localStorage.setItem('moulding_inventory', JSON.stringify(inventoryData));
             renderInventoryTable();
         }
     }
 
-    /* Page 3 Functions */
+    /* Page 2 Job Specs Functions with Add, Edit, Delete */
+    function renderJobSpecsTable() {
+        let tbody = document.getElementById('jobSpecsTableBody');
+        tbody.innerHTML = '';
+        jobSpecsData.forEach((job, index) => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="js-name" value="${job.name}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td><input type="text" class="js-mach" value="${job.mach}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td><input type="number" class="js-cavity" value="${job.cavity}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td><input type="number" class="js-cycle" value="${job.cycle}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td><input type="number" class="js-weight" value="${job.weight}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove();">Del</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function addJobSpecRow() {
+        let tbody = document.getElementById('jobSpecsTableBody');
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" class="js-name" placeholder="ITEM NAME" style="margin:0; padding:2px; text-align:center;"></td>
+            <td><input type="text" class="js-mach" placeholder="M/C NO" style="margin:0; padding:2px; text-align:center;"></td>
+            <td><input type="number" class="js-cavity" value="1" style="margin:0; padding:2px; text-align:center;"></td>
+            <td><input type="number" class="js-cycle" value="20" style="margin:0; padding:2px; text-align:center;"></td>
+            <td><input type="number" class="js-weight" value="100" style="margin:0; padding:2px; text-align:center;"></td>
+            <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove();">Del</button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function saveJobSpecs() {
+        jobSpecsData = [];
+        document.querySelectorAll('#jobSpecsTableBody tr').forEach(row => {
+            jobSpecsData.push({
+                name: row.querySelector('.js-name').value,
+                mach: row.querySelector('.js-mach').value,
+                cavity: parseFloat(row.querySelector('.js-cavity').value) || 1,
+                cycle: parseFloat(row.querySelector('.js-cycle').value) || 0,
+                weight: parseFloat(row.querySelector('.js-weight').value) || 0
+            });
+        });
+        localStorage.setItem('moulding_jobSpecs', JSON.stringify(jobSpecsData));
+        alert("Job specifications saved successfully!");
+    }
+
+    /* Page 3 Billing Functions */
     function addBillingColorRow(data = {}) {
         let tbody = document.getElementById('billingRowsContainer');
         let rowCount = tbody.rows.length + 1;
@@ -417,7 +518,7 @@
         document.getElementById('summaryTotalAmount').textContent = totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " PKR";
     }
 
-    /* Page 4 Functions (Daily Production & Power) */
+    /* Page 4 Daily Production Functions */
     function addMachineReportRow(data = {}) {
         let tbody = document.getElementById('machineReportTableBody');
         let tr = document.createElement('tr');
@@ -535,6 +636,53 @@
             calculateDailyUnits();
             addMachineReportRow();
         }
+    }
+
+    /* Page 5 Lot Tracker Functions with Add, Edit, Delete */
+    function renderLotsTable() {
+        let tbody = document.getElementById('lotTableBody');
+        tbody.innerHTML = '';
+        lotsData.forEach((lot, index) => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="lot-no" value="${lot.lotNo}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td><input type="text" class="lot-mat" value="${lot.material}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td><input type="text" class="lot-mach" value="${lot.mach}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td><input type="number" class="lot-qty" value="${lot.qty}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td><input type="text" class="lot-status" value="${lot.status}" style="margin:0; padding:2px; text-align:center;"></td>
+                <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove();">Del</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function addLotRow() {
+        let tbody = document.getElementById('lotTableBody');
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><input type="text" class="lot-no" placeholder="LOT #" style="margin:0; padding:2px; text-align:center;"></td>
+            <td><input type="text" class="lot-mat" placeholder="MATERIAL" style="margin:0; padding:2px; text-align:center;"></td>
+            <td><input type="text" class="lot-mach" placeholder="M/C" style="margin:0; padding:2px; text-align:center;"></td>
+            <td><input type="number" class="lot-qty" value="500" style="margin:0; padding:2px; text-align:center;"></td>
+            <td><input type="text" class="lot-status" value="ACTIVE" style="margin:0; padding:2px; text-align:center;"></td>
+            <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 3px; font-size:8px; width:auto;" onclick="this.closest('tr').remove();">Del</button></td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function saveLots() {
+        lotsData = [];
+        document.querySelectorAll('#lotTableBody tr').forEach(row => {
+            lotsData.push({
+                lotNo: row.querySelector('.lot-no').value,
+                material: row.querySelector('.lot-mat').value,
+                mach: row.querySelector('.lot-mach').value,
+                qty: parseFloat(row.querySelector('.lot-qty').value) || 0,
+                status: row.querySelector('.lot-status').value
+            });
+        });
+        localStorage.setItem('moulding_lots', JSON.stringify(lotsData));
+        alert("Lot tracker data saved successfully!");
     }
 </script>
 </body>
