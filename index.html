@@ -96,16 +96,16 @@
         </div>
 
         <div class="section-card">
-            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Inventory Entries & History</h4>
+            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Inventory Stock Summary</h4>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>Date</th>
                             <th>Material</th>
-                            <th>Type</th>
-                            <th>Qty (Kg)</th>
-                            <th class="no-print">Actions</th>
+                            <th>Opening/Purch</th>
+                            <th>Consumed</th>
+                            <th>Closing Balance</th>
+                            <th class="no-print">Action</th>
                         </tr>
                     </thead>
                     <tbody id="inventoryTableBody"></tbody>
@@ -353,7 +353,7 @@
         document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
     }
 
-    /* Page 1 Inventory Functions with Edit & Delete */
+    /* Page 1 Inventory Summary Table & Entries */
     function saveInventoryEntry() {
         let editIndex = parseInt(document.getElementById('editInvIndex').value);
         let name = document.getElementById('invMaterialName').value.trim();
@@ -391,35 +391,41 @@
             return;
         }
 
+        // Group inventory by material name for the summary grid view
+        let summaryMap = {};
         inventoryData.forEach((item, index) => {
+            let key = item.name.toUpperCase();
+            if (!summaryMap[key]) {
+                summaryMap[key] = { purchase: 0, consumed: 0, entries: [] };
+            }
+            if (item.txType === 'PURCHASE') {
+                summaryMap[key].purchase += item.qty;
+            } else {
+                summaryMap[key].consumed += item.qty;
+            }
+            summaryMap[key].entries.push(index);
+        });
+
+        Object.keys(summaryMap).forEach(matName => {
+            let data = summaryMap[matName];
+            let closing = data.purchase - data.consumed;
             let tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${item.date || '-'}</td>
-                <td style="font-weight:bold;">${item.name}</td>
-                <td style="color:${item.txType === 'PURCHASE' ? 'var(--success)' : 'var(--danger)'}; font-weight:bold;">${item.txType}</td>
-                <td>${item.qty.toLocaleString()} KG</td>
+                <td style="font-weight:bold;">${matName}</td>
+                <td style="color:var(--success); font-weight:bold;">+${data.purchase.toLocaleString()} KG</td>
+                <td style="color:var(--danger); font-weight:bold;">-${data.consumed.toLocaleString()} KG</td>
+                <td style="font-weight:bold; color:${closing < 0 ? 'var(--danger)' : 'var(--primary)'};">${closing.toLocaleString()} KG</td>
                 <td class="no-print">
-                    <button type="button" class="btn-warning" style="padding:1px 4px; font-size:8px; width:auto;" onclick="editInventoryEntry(${index})">Edit</button>
-                    <button type="button" class="btn-danger" style="padding:1px 4px; font-size:8px; width:auto;" onclick="deleteInventoryEntry(${index})">Del</button>
+                    <button type="button" class="btn-danger" style="padding:1px 4px; font-size:8px; width:auto;" onclick="deleteMaterialEntries('${matName}')">Clear All</button>
                 </td>
             `;
             tbody.appendChild(tr);
         });
     }
 
-    function editInventoryEntry(index) {
-        let item = inventoryData[index];
-        document.getElementById('invMaterialName').value = item.name;
-        document.getElementById('invTxType').value = item.txType;
-        document.getElementById('invQty').value = item.qty;
-        document.getElementById('invDate').value = item.date || '';
-        document.getElementById('editInvIndex').value = index;
-        document.getElementById('invSubmitBtn').textContent = "Update Inventory Entry";
-    }
-
-    function deleteInventoryEntry(index) {
-        if(confirm("Delete this inventory entry?")) {
-            inventoryData.splice(index, 1);
+    function deleteMaterialEntries(matName) {
+        if(confirm(`Delete all inventory logs for ${matName}?`)) {
+            inventoryData = inventoryData.filter(item => item.name.toUpperCase() !== matName);
             localStorage.setItem('moulding_inventory', JSON.stringify(inventoryData));
             renderInventoryTable();
         }
@@ -638,7 +644,7 @@
         }
     }
 
-    /* Page 5 Lot Tracker Functions with Add, Edit, Delete */
+    /* Page 5 Lot Tracker Functions */
     function renderLotsTable() {
         let tbody = document.getElementById('lotTableBody');
         tbody.innerHTML = '';
