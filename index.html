@@ -537,7 +537,22 @@
             return;
         }
 
-        let data = { id: editingProdKey || Date.now(), date, machineNo, operator, shotsA, goodPcsA, shotsB, goodPcsB };
+        // Store the electricity reading snapshot specific to this entry so rows don't overwrite each other
+        let prev = parseFloat(document.getElementById('elecPrevUnits').value) || 0;
+        let curr = parseFloat(document.getElementById('elecCurrUnits').value) || 0;
+
+        let data = { 
+            id: editingProdKey || Date.now(), 
+            date, 
+            machineNo, 
+            operator, 
+            shotsA, 
+            goodPcsA, 
+            shotsB, 
+            goodPcsB,
+            elecPrev: prev,
+            elecCurr: curr
+        };
 
         if (editingProdKey !== null) {
             let index = dailyProductions.findIndex(item => item.id === editingProdKey);
@@ -570,6 +585,9 @@
         document.getElementById('prodGoodPcsA').value = p.goodPcsA || '';
         document.getElementById('prodShotsB').value = p.shotsB || '';
         document.getElementById('prodGoodPcsB').value = p.goodPcsB || '';
+        if(p.elecPrev !== undefined) document.getElementById('elecPrevUnits').value = p.elecPrev;
+        if(p.elecCurr !== undefined) document.getElementById('elecCurrUnits').value = p.elecCurr;
+        
         editingProdKey = id;
         document.getElementById('prodBtn').textContent = "UPDATE MACHINE";
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -586,11 +604,6 @@
     function renderDailyProduction() {
         let tbody = document.getElementById('dailyProdTableBody');
         tbody.innerHTML = '';
-        
-        let prev = parseFloat(mainMeter.elecPrevUnits) || 0;
-        let curr = parseFloat(mainMeter.elecCurrUnits) || 0;
-        let diff = curr - prev;
-        let meterDisplay = `${prev} - ${curr}<br><b style="color:#d9534f;">(DIFF: ${diff})</b>`;
 
         if (dailyProductions.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" style="color:red; font-weight:bold;">NO DAILY PRODUCTION RECORDS FOUND</td></tr>`;
@@ -598,6 +611,11 @@
         }
 
         dailyProductions.forEach((p) => {
+            let prev = p.elecPrev !== undefined ? p.elecPrev : (parseFloat(mainMeter.elecPrevUnits) || 0);
+            let curr = p.elecCurr !== undefined ? p.elecCurr : (parseFloat(mainMeter.elecCurrUnits) || 0);
+            let diff = curr - prev;
+            let meterDisplay = `${prev} - ${curr}<br><b style="color:#d9534f;">(DIFF: ${diff})</b>`;
+
             let diffA = (p.shotsA || 0) - (p.goodPcsA || 0);
             let diffB = (p.shotsB || 0) - (p.goodPcsB || 0);
 
@@ -664,7 +682,7 @@
     function renderLotTracker() {
         let tbody = document.getElementById('lotTrackerTableBody');
         tbody.innerHTML = '';
-        if (lotTracker.length === 0) {
+        if (lotTrackers.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" style="color:red; font-weight:bold;">NO LOT RECORDS FOUND</td></tr>`;
             return;
         }
