@@ -41,6 +41,15 @@
         .table-responsive { overflow-x: auto; margin-bottom: 20px; }
         .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
         .header-elec-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+
+        /* Print styles: hide navigation tabs and buttons when printing, keep tables visible */
+        @media print {
+            .nav-tabs, button, .no-print { display: none !important; }
+            .page { display: none !important; }
+            .page.active { display: block !important; }
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 0; }
+        }
     </style>
 </head>
 <body>
@@ -82,12 +91,13 @@
                         <th>OPENING/PURCH</th>
                         <th>CONSUMED</th>
                         <th>CLOSING BALANCE</th>
-                        <th>ACTIONS</th>
+                        <th class="no-print">ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody id="inventorySummaryBody"></tbody>
             </table>
         </div>
+        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (INVENTORY)</button>
     </div>
 
     <!-- PAGE 2: JOB SPECS -->
@@ -120,6 +130,7 @@
         <div id="colorCardsContainer"></div>
         <button class="btn-warning" onclick="addColorCard()">+ ADD COLOR CARD</button>
         <button class="btn-success" style="margin-top:15px;" onclick="saveJobAndDeductInventory()">SAVE & DEDUCT INVENTORY</button>
+        <button class="btn-warning" style="margin-top:10px;" onclick="window.print()">PRINT / SAVE PDF (JOB SPECS)</button>
     </div>
 
     <!-- PAGE 3: BILLING -->
@@ -146,7 +157,7 @@
         <div style="background:#e8f4fd; padding:10px; margin-top:10px; border-radius:4px; font-weight:bold;">
             GRAND TOTAL PAYABLE: PKR <span id="grandTotalAmount">0.00</span>
         </div>
-        <button class="btn-success" onclick="window.print()">PRINT / SAVE PDF</button>
+        <button class="btn-success" onclick="window.print()">PRINT / SAVE PDF (BILLING)</button>
     </div>
 
     <!-- PAGE 4: DAILY PROD -->
@@ -205,12 +216,13 @@
                         <th>OPERATOR</th>
                         <th>SHIFTS (A / B)</th>
                         <th>GOOD PCS (A / B)</th>
-                        <th>ACTION</th>
+                        <th class="no-print">ACTION</th>
                     </tr>
                 </thead>
                 <tbody id="dailyProdTableBody"></tbody>
             </table>
         </div>
+        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (DAILY PROD)</button>
     </div>
 
     <!-- PAGE 5: LOT TRACKER -->
@@ -233,12 +245,13 @@
                         <th>ACTUAL</th>
                         <th>VARIANCE (+/-)</th>
                         <th>STATUS</th>
-                        <th>ACTION</th>
+                        <th class="no-print">ACTION</th>
                     </tr>
                 </thead>
                 <tbody id="lotTrackerTableBody"></tbody>
             </table>
         </div>
+        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (LOT TRACKER)</button>
     </div>
 </div>
 
@@ -291,7 +304,7 @@
             <input type="number" class="card-netwt" value="${netWt}" placeholder="0.00" oninput="calculateBillingOnly()">
             <label>SCRAP / WASTE WT (KG):</label>
             <input type="number" class="card-scrap" value="${scrap}" placeholder="0.00" oninput="calculateBillingOnly()">
-            <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove(); calculateBillingOnly();">REMOVE COLOR</button>
+            <button type="button" class="btn-danger no-print" style="margin-top:5px;" onclick="this.parentElement.remove(); calculateBillingOnly();">REMOVE COLOR</button>
         `;
         container.appendChild(cardDiv);
         calculateBillingOnly();
@@ -358,7 +371,6 @@
             return;
         }
 
-        // Push new inventory consumption transaction
         transactions.push({
             id: Date.now() + Math.random(),
             material: materialType,
@@ -421,7 +433,7 @@
                     <td style="color:green;">+${summary[mat].purchase.toFixed(2)}</td>
                     <td style="color:red;">-${summary[mat].consumption.toFixed(2)}</td>
                     <td><b>${closing.toFixed(2)}</b></td>
-                    <td>
+                    <td class="no-print">
                         <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteMaterialGroup('${mat}')">DEL</button>
                     </td>
                 </tr>`;
@@ -538,7 +550,7 @@
                     <td>${p.operator || '---'}</td>
                     <td>A: ${p.shotsA || 0}<br>B: ${p.shotsB || 0}</td>
                     <td>A: ${p.goodPcsA || 0}<br>B: ${p.goodPcsB || 0}</td>
-                    <td>
+                    <td class="no-print">
                         <button class="btn-edit" onclick="editProduction(${p.id})">EDIT</button>
                         <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteProduction(${p.id})">DEL</button>
                     </td>
@@ -605,7 +617,7 @@
                     <td>${l.actual}</td>
                     <td>${l.variance}</td>
                     <td style="color:${l.variance >= 0 ? 'green':'red'}; font-weight:bold;">${l.status}</td>
-                    <td>
+                    <td class="no-print">
                         <button class="btn-edit" onclick="editLot(${l.id})">EDIT</button>
                         <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteLot(${l.id})">DEL</button>
                     </td>
