@@ -274,16 +274,7 @@
       <label for="materialType">PP Granules</label> <select id="materialType" onchange="saveSpecFields(); calculateBilling()"></select>
      </div>
      <div class="input-group">
-      <label for="machineNo">Machine No</label> 
-      <select id="machineNo" onchange="saveSpecFields()">
-       <option value="M/C No-01">M/C No-01</option>
-       <option value="M/C No-02">M/C No-02</option>
-       <option value="M/C No-06" selected>M/C No-06</option>
-       <option value="90 Ton">90 Ton Machine</option>
-       <option value="120 Ton">120 Ton Machine</option>
-       <option value="160 Ton">160 Ton Machine</option>
-       <option value="200 Ton">200 Ton Machine</option>
-      </select>
+      <label for="machineNo">Machine Name / Number</label> <input type="text" id="machineNo" value="M/C No-06" placeholder="e.g. 200 Ton Machine" oninput="saveSpecFields()">
      </div>
      <div class="input-group">
       <label for="cycleTime">Cycle Time (Sec)</label> <input type="number" id="cycleTime" value="20" step="0.1" oninput="saveSpecFields(); calculateBilling()">
