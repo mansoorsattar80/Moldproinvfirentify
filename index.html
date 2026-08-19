@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Moulding Production &amp; Billing Software (3-Page Multi-View)</title>
-  <!-- Firebase SDK Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <style>
         :root {
             --primary-color: #2c3e50;
@@ -25,64 +21,6 @@
             color: #334155;
             margin: 0;
             padding: 10px;
-        }
-
-        /* Login Overlay Gate */
-        #loginOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.92);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-
-        .login-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 360px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-
-        .login-card h3 {
-            margin-top: 0;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-
-        .login-card input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-
-        .login-card button {
-            width: 100%;
-            padding: 10px;
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        #loginError {
-            color: var(--danger-color);
-            font-size: 12px;
-            margin-top: 8px;
-            display: none;
         }
 
         /* Custom Modal Overlay */
@@ -113,7 +51,7 @@
             font-size: 16px;
         }
 
-        /* App container hidden by default */
+        /* App container */
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -122,7 +60,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             position: relative;
-            display: none; 
+            display: block; 
         }
 
         /* Navigation Tab Bar */
@@ -180,7 +118,7 @@
         }
 
         .logout-btn {
-            background-color: var(--danger-color) !important;
+            background-color: var(--success-color) !important;
             padding: 5px 10px !important;
             font-size: 11px !important;
             border-radius: 4px !important;
@@ -195,7 +133,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: var(--primary-color);
+            background-color: var(--success-color);
             color: white;
             padding: 10px 18px;
             border-radius: 6px;
@@ -215,7 +153,7 @@
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
         .input-group { display: flex; flex-direction: column; }
         label { font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569; }
-        input, select { padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; }
+        input, select { padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; background: #fff; }
         .cards-container { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 15px; }
         @media (min-width: 600px) { .cards-container { grid-template-columns: repeat(2, 1fr); } }
         .item-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -244,15 +182,6 @@
     </style>
  </head>
  <body>
-  <!-- Login Modal Overlay -->
-  <div id="loginOverlay">
-   <div class="login-card">
-    <h3>🔒 System Login</h3>
-    <input type="email" id="loginEmail" placeholder="Email Address" value="admin@mouldingapp.com"> <input type="password" id="loginPassword" placeholder="Password">
-    <button onclick="handleLogin()">Login to Software</button>
-    <div id="loginError">Invalid email or password</div>
-   </div>
-  </div>
   <!-- Edit Material Custom Modal -->
   <div id="editMaterialModal" class="custom-modal">
    <div class="custom-modal-content">
@@ -269,22 +198,23 @@
     </div>
    </div>
   </div>
-  <div id="liveToast">🔄 Data updated by another user/device</div>
+  <div id="liveToast">✅ Connected &amp; Local Storage Synced Perfectly</div>
   <div class="container" id="appContainer">
    <!-- Logged in User Bar with Device Info -->
    <div class="user-bar">
-    <span id="loggedInUserDisplay" style="font-size: 13px;">👤 Logged in as: </span> <span id="deviceInfoDisplay" style="font-size: 11px; color: #64748b;">📱 Device: Detecting...</span>
-    <button type="button" class="logout-btn" onclick="handleLogout()">Logout</button>
+    <span id="loggedInUserDisplay" style="font-size: 13px;">👤 User Connected: Mansoor (Active Facility)</span> 
+    <span id="deviceInfoDisplay" style="font-size: 11px; color: var(--success-color); font-weight: bold;">🟢 Status: Local Storage Synchronized</span>
+    <button type="button" class="logout-btn" onclick="resetAppData()">Reset App Data</button>
    </div>
    <h2>Moulding Production &amp; Billing Software</h2>
-   <div id="syncStatus" class="sync-status">Connecting to Cloud Database...</div>
+   <div id="syncStatus" class="sync-status">🟢 System Operating Locally with Persistent Storage</div>
    <div id="visitCountDisplay" class="open-counter">📊 Total App Opens: Loading...</div>
    
    <!-- Navigation Tabs (3 Pages) -->
    <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchPage(1)">Page 1: Inventory</button>
-    <button class="nav-tab" onclick="switchPage(2)">Page 2: Job Specs &amp; Cards</button>
-    <button class="nav-tab" onclick="switchPage(3)">Page 3: Billing Summary</button>
+    <button class="nav-tab active" onclick="switchPage(1)">1. Inventory</button>
+    <button class="nav-tab" onclick="switchPage(2)">2. Job Specs &amp; Cards</button>
+    <button class="nav-tab" onclick="switchPage(3)">3. Billing Summary</button>
    </div>
 
    <!-- PAGE 1: INVENTORY LEDGER -->
@@ -344,7 +274,16 @@
       <label for="materialType">PP Granules</label> <select id="materialType" onchange="saveSpecFields(); calculateBilling()"></select>
      </div>
      <div class="input-group">
-      <label for="machineNo">Machine No</label> <input type="text" id="machineNo" value="M/C No-06" oninput="saveSpecFields()">
+      <label for="machineNo">Machine No</label> 
+      <select id="machineNo" onchange="saveSpecFields()">
+       <option value="M/C No-01">M/C No-01</option>
+       <option value="M/C No-02">M/C No-02</option>
+       <option value="M/C No-06" selected>M/C No-06</option>
+       <option value="90 Ton">90 Ton Machine</option>
+       <option value="120 Ton">120 Ton Machine</option>
+       <option value="160 Ton">160 Ton Machine</option>
+       <option value="200 Ton">200 Ton Machine</option>
+      </select>
      </div>
      <div class="input-group">
       <label for="cycleTime">Cycle Time (Sec)</label> <input type="number" id="cycleTime" value="20" step="0.1" oninput="saveSpecFields(); calculateBilling()">
@@ -408,25 +347,86 @@
 
   </div>
   <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyAdcwHrPb_Sdna7eTeIhjvHmYmD6X4woxg",
-        authDomain: "moldproinvfirentify.firebaseapp.com",
-        databaseURL: "https://moldproinvfirentify-default-rtdb.firebaseio.com",
-        projectId: "moldproinvfirentify",
-        storageBucket: "moldproinvfirentify.appspot.com",
-        messagingSenderId: "627192096664",
-        appId: "1:627192096664:android:af4d3bed7e2e4da204eded"
-    };
+    let inventoryData = { "Black PP": { opening: 500, purchased: 200 } };
+    let transactions = []; 
+    let itemsData = [
+        { color: "Stick Green", qty: 3000, bags: 2, gross: 16.30, scrap: 0.1, net: 16.20 },
+        { color: "Pink", qty: 3000, bags: 2, gross: 16.35, scrap: 0.1, net: 16.25 }
+    ];
 
-    let db, auth;
-    try {
-        firebase.initializeApp(firebaseConfig);
-        db = firebase.database();
-        auth = firebase.auth();
-        auth.signOut(); 
-        document.getElementById('syncStatus').innerText = "🟢 Connected to Real-Time Cloud Database";
-    } catch (e) {
-        document.getElementById('syncStatus').innerText = "⚠️ Running Offline";
+    let toastTimeout;
+
+    function showToast(message) {
+        const toast = document.getElementById('liveToast');
+        toast.innerText = message;
+        toast.style.display = 'flex';
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    // Load from LocalStorage on Startup
+    window.addEventListener('DOMContentLoaded', () => {
+        let savedState = localStorage.getItem('mouldingAppLocalState');
+        if (savedState) {
+            try {
+                let parsed = JSON.parse(savedState);
+                if (parsed.inventoryData) inventoryData = parsed.inventoryData;
+                if (parsed.transactions) transactions = parsed.transactions;
+                if (parsed.itemsData) itemsData = parsed.itemsData;
+                if (parsed.specs) {
+                    if (document.getElementById('slipNo')) document.getElementById('slipNo').value = parsed.specs.slipNo || '';
+                    if (document.getElementById('itemName')) document.getElementById('itemName').value = parsed.specs.itemName || '';
+                    if (document.getElementById('machineNo')) document.getElementById('machineNo').value = parsed.specs.machineNo || 'M/C No-06';
+                    if (document.getElementById('cycleTime')) document.getElementById('cycleTime').value = parsed.specs.cycleTime || 20;
+                    if (document.getElementById('mouldCavity')) document.getElementById('mouldCavity').value = parsed.specs.mouldCavity || 2;
+                    if (document.getElementById('rateType')) document.getElementById('rateType').value = parsed.specs.rateType || 'hourly';
+                    if (document.getElementById('rateValue')) document.getElementById('rateValue').value = parsed.specs.rateValue || 1000;
+                    if (document.getElementById('extraOverhead')) document.getElementById('extraOverhead').value = parsed.specs.extraOverhead || 0;
+                    if (document.getElementById('startDate')) document.getElementById('startDate').value = parsed.specs.startDate || '';
+                }
+            } catch(e) {}
+        }
+
+        let totalOpens = parseInt(localStorage.getItem('mouldingAppOpens') || '0') + 1;
+        localStorage.setItem('mouldingAppOpens', totalOpens);
+        document.getElementById('visitCountDisplay').innerText = "📊 Total App Opens: " + totalOpens;
+
+        recallDates();
+        updateMaterialDropdown();
+        if (savedState && JSON.parse(savedState).specs && JSON.parse(savedState).specs.materialType) {
+            document.getElementById('materialType').value = JSON.parse(savedState).specs.materialType;
+        }
+        renderCardsWithoutTrigger();
+    });
+
+    function saveToLocalStorage() {
+        const specs = {
+            slipNo: document.getElementById('slipNo').value,
+            itemName: document.getElementById('itemName').value,
+            materialType: document.getElementById('materialType').value,
+            machineNo: document.getElementById('machineNo').value,
+            cycleTime: document.getElementById('cycleTime').value,
+            mouldCavity: document.getElementById('mouldCavity').value,
+            rateType: document.getElementById('rateType').value,
+            rateValue: document.getElementById('rateValue').value,
+            extraOverhead: document.getElementById('extraOverhead').value,
+            startDate: document.getElementById('startDate').value
+        };
+        let state = {
+            inventoryData: inventoryData,
+            transactions: transactions,
+            itemsData: itemsData,
+            specs: specs
+        };
+        localStorage.setItem('mouldingAppLocalState', JSON.stringify(state));
+        showToast("💾 Changes saved locally!");
+    }
+
+    function resetAppData() {
+        if(confirm("Are you sure you want to reset all data to default?")) {
+            localStorage.removeItem('mouldingAppLocalState');
+            location.reload();
+        }
     }
 
     function switchPage(pageNum) {
@@ -438,110 +438,6 @@
         window.scrollTo(0, 0);
     }
 
-    function handleLogin() {
-        const email = document.getElementById('loginEmail').value;
-        const pass = document.getElementById('loginPassword').value;
-        const errDiv = document.getElementById('loginError');
-
-        auth.signInWithEmailAndPassword(email, pass)
-            .then((userCredential) => {
-                errDiv.style.display = 'none';
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'block';
-                
-                document.getElementById('loggedInUserDisplay').innerText = "👤 Logged in as: " + userCredential.user.email;
-                
-                const ua = navigator.userAgent;
-                let deviceName = "Unknown Device";
-                if (/android/i.test(ua)) {
-                    deviceName = "Android Mobile/Tablet";
-                } else if (/iphone|ipad|ipod/i.test(ua)) {
-                    deviceName = "Apple iOS Device";
-                } else if (/windows/i.test(ua)) {
-                    deviceName = "Windows PC";
-                } else if (/macintosh|mac os x/i.test(ua)) {
-                    deviceName = "Mac Computer";
-                }
-                document.getElementById('deviceInfoDisplay').innerText = "📱 Device: " + deviceName;
-                
-                initializeAppLogic();
-            })
-            .catch((error) => {
-                errDiv.innerText = error.message;
-                errDiv.style.display = 'block';
-            });
-    }
-
-    function handleLogout() {
-        auth.signOut().then(() => {
-            location.reload(); 
-        });
-    }
-
-    let inventoryData = { "Black PP": { opening: 500, purchased: 200 } };
-    let transactions = []; 
-    let itemsData = [
-        { color: "Stick Green", qty: 3000, bags: 2, gross: 16.30, scrap: 0.1, net: 16.20 },
-        { color: "Pink", qty: 3000, bags: 2, gross: 16.35, scrap: 0.1, net: 16.25 }
-    ];
-
-    let isRemoteUpdate = false;
-    let toastTimeout;
-    let syncTimer = null;
-
-    function showToast(message) {
-        const toast = document.getElementById('liveToast');
-        toast.innerText = message;
-        toast.style.display = 'flex';
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 3500);
-    }
-
-    function initializeAppLogic() {
-        if (db) {
-            const counterRef = db.ref('mouldingAppStats/totalOpens');
-            counterRef.transaction((currentValue) => {
-                return (currentValue || 0) + 1;
-            });
-
-            counterRef.on('value', (snapshot) => {
-                const count = snapshot.val() || 0;
-                document.getElementById('visitCountDisplay').innerText = "📊 Total App Opens: " + count;
-            });
-
-            db.ref('mouldingApp').on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (data && !window.isLocalSaving) {
-                    isRemoteUpdate = true;
-                    showToast("📥 Live Update: Data changed by another device");
-                    if (data.inventoryData) inventoryData = data.inventoryData;
-                    if (data.transactions) transactions = data.transactions;
-                    if (data.itemsData) itemsData = data.itemsData;
-                    if (data.specs) {
-                        if (document.getElementById('slipNo')) document.getElementById('slipNo').value = data.specs.slipNo || '';
-                        if (document.getElementById('itemName')) document.getElementById('itemName').value = data.specs.itemName || '';
-                        if (document.getElementById('machineNo')) document.getElementById('machineNo').value = data.specs.machineNo || '';
-                        if (document.getElementById('cycleTime')) document.getElementById('cycleTime').value = data.specs.cycleTime || 20;
-                        if (document.getElementById('mouldCavity')) document.getElementById('mouldCavity').value = data.specs.mouldCavity || 2;
-                        if (document.getElementById('rateType')) document.getElementById('rateType').value = data.specs.rateType || 'hourly';
-                        if (document.getElementById('rateValue')) document.getElementById('rateValue').value = data.specs.rateValue || 1000;
-                        if (document.getElementById('extraOverhead')) document.getElementById('extraOverhead').value = data.specs.extraOverhead || 0;
-                        if (document.getElementById('startDate')) document.getElementById('startDate').value = data.specs.startDate || '';
-                    }
-                    updateMaterialDropdown();
-                    if (data.specs && data.specs.materialType) {
-                        document.getElementById('materialType').value = data.specs.materialType;
-                    }
-                    renderCardsWithoutTrigger();
-                    isRemoteUpdate = false;
-                }
-            });
-        }
-        recallDates();
-        updateMaterialDropdown();
-        renderCardsWithoutTrigger();
-    }
-
     function recallDates() {
         let today = new Date();
         let firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
@@ -549,35 +445,6 @@
         document.getElementById('stockFromDate').value = firstDay;
         document.getElementById('stockToDate').value = lastDay;
         filterInventory();
-    }
-
-    function syncToFirebase() {
-        if (!db || isRemoteUpdate) return;
-        clearTimeout(syncTimer);
-        syncTimer = setTimeout(() => {
-            window.isLocalSaving = true;
-            showToast("💾 Saving to cloud...");
-            const specs = {
-                slipNo: document.getElementById('slipNo').value,
-                itemName: document.getElementById('itemName').value,
-                materialType: document.getElementById('materialType').value,
-                machineNo: document.getElementById('machineNo').value,
-                cycleTime: document.getElementById('cycleTime').value,
-                mouldCavity: document.getElementById('mouldCavity').value,
-                rateType: document.getElementById('rateType').value,
-                rateValue: document.getElementById('rateValue').value,
-                extraOverhead: document.getElementById('extraOverhead').value,
-                startDate: document.getElementById('startDate').value
-            };
-            db.ref('mouldingApp').set({
-                inventoryData: inventoryData,
-                transactions: transactions,
-                itemsData: itemsData,
-                specs: specs
-            }).then(() => {
-                setTimeout(() => { window.isLocalSaving = false; }, 500);
-            });
-        }, 600);
     }
 
     function updateMaterialDropdown() {
@@ -611,7 +478,6 @@
         updateMaterialDropdown();
         document.getElementById('materialType').value = newMat;
         calculateBilling();
-        syncToFirebase();
     }
 
     function renderCards() {
@@ -658,7 +524,6 @@
             container.appendChild(card);
         });
         calculateBilling();
-        syncToFirebase();
     }
 
     function renderCardsWithoutTrigger() {
@@ -720,7 +585,6 @@
             }
         });
         calculateBilling();
-        syncToFirebase();
     }
 
     function addRow() {
@@ -757,7 +621,6 @@
         if (!isNaN(qty) && qty > 0 && pDate) {
             transactions.push({ date: pDate, type: 'purchase', material: material, qty: qty });
             calculateBilling();
-            syncToFirebase();
         }
     }
 
@@ -798,7 +661,6 @@
         closeEditModal();
         updateMaterialDropdown();
         calculateBilling();
-        syncToFirebase();
     }
 
     function deleteMaterial(material) {
@@ -806,7 +668,6 @@
             delete inventoryData[material];
             updateMaterialDropdown();
             calculateBilling();
-            syncToFirebase();
         }
     }
 
@@ -816,7 +677,6 @@
             transactions = [];
             updateMaterialDropdown();
             calculateBilling();
-            syncToFirebase();
         }
     }
 
@@ -826,7 +686,7 @@
 
     function calculateBilling() {
         calculateBillingOnly();
-        syncToFirebase();
+        saveToLocalStorage();
     }
 
     function calculateBillingOnly() {
