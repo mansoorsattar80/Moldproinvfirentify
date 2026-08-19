@@ -1,280 +1,944 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moulding Management Software</title>
-    <!-- Bootstrap CSS for styling -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .machine-grid-item {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            padding: 10px;
-            margin-bottom: 8px;
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moulding Production &amp; Billing Software (3-Page Multi-View)</title>
+  <!-- Firebase SDK Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+            --border-color: #cbd5e1;
         }
-        .app-section {
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+            color: #334155;
+            margin: 0;
+            padding: 10px;
+        }
+
+        /* Login Overlay Gate */
+        #loginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.92);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .login-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .login-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #loginError {
+            color: var(--danger-color);
+            font-size: 12px;
+            margin-top: 8px;
             display: none;
         }
-        .app-section.active {
+
+        /* Custom Modal Overlay */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+        }
+        .custom-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .custom-modal-content h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        /* App container hidden by default */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            display: none; 
+        }
+
+        /* Navigation Tab Bar */
+        .nav-tabs {
+            display: flex;
+            background: #e2e8f0;
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 15px;
+            gap: 4px;
+        }
+        .nav-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: auto;
+        }
+        .nav-tab.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        /* Page Sections */
+        .app-page {
+            display: none;
+        }
+        .app-page.active-page {
             display: block;
         }
+
+        /* Top User Bar Header */
+        .user-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            position: relative;
+        }
+
+        .logout-btn {
+            background-color: var(--danger-color) !important;
+            padding: 5px 10px !important;
+            font-size: 11px !important;
+            border-radius: 4px !important;
+            min-width: auto !important;
+            flex: none !important;
+            position: absolute;
+            right: 10px;
+            top: 12px;
+        }
+
+        #liveToast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 { color: var(--primary-color); text-align: center; margin-bottom: 5px; font-size: 20px; }
+        .sync-status { text-align: center; font-size: 11px; color: var(--success-color); margin-bottom: 6px; font-weight: 600; }
+        .open-counter { text-align: center; font-size: 11px; color: #64748b; margin-bottom: 15px; font-weight: 600; }
+        .section-title { font-size: 15px; font-weight: 600; color: var(--primary-color); margin-top: 10px; margin-bottom: 10px; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569; }
+        input, select { padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; }
+        .cards-container { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 15px; }
+        @media (min-width: 600px) { .cards-container { grid-template-columns: repeat(2, 1fr); } }
+        .item-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .item-card-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 13px; color: var(--primary-color); margin-bottom: 8px; border-bottom: 1px solid #edf2f7; padding-bottom: 4px; }
+        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .table-container { overflow-x: auto; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 13px; }
+        th, td { border: 1px solid var(--border-color); padding: 8px; text-align: center; }
+        th { background-color: var(--primary-color); color: white; font-weight: 500; }
+        .btn-container { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 20px; flex-wrap: wrap; }
+        button { background-color: var(--secondary-color); color: white; border: none; padding: 10px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; flex: 1; min-width: 120px; }
+        button.btn-success { background-color: var(--success-color); }
+        button.btn-warning { background-color: var(--warning-color); }
+        button.btn-danger { background-color: var(--danger-color); }
+        button.btn-print { background-color: #8e44ad; }
+        button.btn-excel { background-color: #16a085; }
+        .summary-box { background-color: var(--light-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        @media (min-width: 600px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+        .summary-item { display: flex; flex-direction: column; }
+        .summary-label { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 600; }
+        .summary-value { font-size: 16px; font-weight: bold; color: var(--primary-color); margin-top: 2px; }
+        .inventory-panel { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 20px; }
+        .remove-card-btn { background: var(--danger-color) !important; padding: 2px 6px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; }
+        .action-btn { background-color: var(--secondary-color); padding: 4px 8px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; }
     </style>
-</head>
-<body class="bg-light">
-
-    <div class="container my-4">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Moulding Management Software</h5>
-                <button class="btn btn-light btn-sm text-primary fw-bold">Logout</button>
-            </div>
-            <div class="card-body">
-                
-                <!-- Navigation Tabs -->
-                <ul class="nav nav-pills mb-4" id="appTabs">
-                    <li class="nav-item">
-                        <button class="nav-link" onclick="switchSection('inventory', event)">1. Inventory</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link active" onclick="switchSection('billing', event)">2. Billing</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" onclick="switchSection('production', event)">3. Production</button>
-                    </li>
-                </ul>
-
-                <!-- SECTION 1: INVENTORY -->
-                <div id="inventory-section" class="app-section">
-                    <h4>Inventory Management</h4>
-                    <p class="text-muted">Manage your raw materials and granules stock here.</p>
-                    <div class="mb-3">
-                        <label class="form-label">Material Name</label>
-                        <input type="text" class="form-control" value="BLACK PP Granules">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Stock Quantity (Kg)</label>
-                        <input type="number" class="form-control" value="5000">
-                    </div>
-                    <button class="btn btn-primary">Update Inventory</button>
-                </div>
-
-                <!-- SECTION 2: BILLING (Includes Job Specs, Machine Grid, & Bags Breakdown) -->
-                <div id="billing-section" class="app-section active">
-                    <form id="job-billing-form">
-                        <h4 class="mb-3">Job Billing & Specs</h4>
-                        
-                        <!-- Slip / Job # -->
-                        <div class="mb-3">
-                            <label for="slipNo" class="form-label">Slip / Job #</label>
-                            <input type="text" class="form-control" id="slipNo" value="101">
-                        </div>
-
-                        <!-- Item Name -->
-                        <div class="mb-3">
-                            <label for="itemName" class="form-label">Item Name</label>
-                            <input type="text" class="form-control" id="itemName" value="CAP">
-                        </div>
-
-                        <!-- Grid Assigned Machines Section -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Assigned Machines</label>
-                            <div id="machine-grid-container">
-                                <!-- Dynamic grid rows will appear here -->
-                            </div>
-                            <button type="button" class="btn btn-success btn-sm mt-2" id="add-machine-btn">+ Add Machine</button>
-                        </div>
-
-                        <!-- PP Granules Material -->
-                        <div class="mb-3">
-                            <label for="material" class="form-label">PP Granules Material</label>
-                            <input type="text" class="form-control" id="material" value="BLACK PP">
-                        </div>
-
-                        <!-- Cycle Time & Cavity -->
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Cycle Time (Sec)</label>
-                                <input type="number" class="form-control" value="20">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Mould Cavity</label>
-                                <input type="number" class="form-control" value="2">
-                            </div>
-                        </div>
-
-                        <!-- Rate Per Hour -->
-                        <div class="mb-3">
-                            <label class="form-label">Rate Per Hour (PKR)</label>
-                            <input type="number" class="form-control" value="1200">
-                        </div>
-
-                        <!-- Production Breakdown (Colors & Weights) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Production Breakdown (Colors & Weights)</label>
-                            <table class="table table-bordered">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>Color</th>
-                                        <th>Bags</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="color-rows-container">
-                                    <tr>
-                                        <td><input type="text" class="form-control" placeholder="Enter color"></td>
-                                        <td><input type="number" class="form-control" value="1"></td>
-                                    </tr>
-                                    <tr>
-                                        <td><input type="text" class="form-control" placeholder="Enter color"></td>
-                                        <td><input type="number" class="form-control" value="1"></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <button type="button" class="btn btn-success btn-sm" id="add-color-btn">+ Add Color Row</button>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary w-100 mt-3">Save Job Specifications</button>
-                    </form>
-                </div>
-
-                <!-- SECTION 3: PRODUCTION -->
-                <div id="production-section" class="app-section">
-                    <h4>Daily Production Database</h4>
-                    <p class="text-muted">Track daily machine outputs and shifts.</p>
-                    <div class="mb-3">
-                        <label class="form-label">Shift</label>
-                        <select class="form-select">
-                            <option>MORNING</option>
-                            <option>EVENING</option>
-                            <option>NIGHT</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Parts Produced (Pcs)</label>
-                        <input type="number" class="form-control" value="1000">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Scrap / Waste (Kg)</label>
-                        <input type="number" class="form-control" value="1.5">
-                    </div>
-                    <button class="btn btn-primary">Save Entry to Production DB</button>
-                </div>
-
-            </div>
-        </div>
+ </head>
+ <body>
+  <!-- Login Modal Overlay -->
+  <div id="loginOverlay">
+   <div class="login-card">
+    <h3>🔒 System Login</h3>
+    <input type="email" id="loginEmail" placeholder="Email Address" value="admin@mouldingapp.com"> <input type="password" id="loginPassword" placeholder="Password">
+    <button onclick="handleLogin()">Login to Software</button>
+    <div id="loginError">Invalid email or password</div>
+   </div>
+  </div>
+  <!-- Edit Material Custom Modal -->
+  <div id="editMaterialModal" class="custom-modal">
+   <div class="custom-modal-content">
+    <h4>✏️ Edit Granule Material</h4>
+    <div class="input-group" style="margin-bottom: 10px;">
+     <label>Material Name</label> <input type="text" id="modalEditName">
     </div>
+    <div class="input-group" style="margin-bottom: 15px;">
+     <label>Opening Stock (Kg)</label> <input type="number" id="modalEditOpening" step="0.1">
+    </div>
+    <div style="display: flex; gap: 8px;">
+     <button type="button" class="btn-danger" onclick="closeEditModal()" style="padding: 8px;">Cancel</button>
+     <button type="button" class="btn-success" onclick="saveEditMaterial()" style="padding: 8px;">Save Changes</button>
+    </div>
+   </div>
+  </div>
+  <div id="liveToast">🔄 Data updated by another user/device</div>
+  <div class="container" id="appContainer">
+   <!-- Logged in User Bar with Device Info -->
+   <div class="user-bar">
+    <span id="loggedInUserDisplay" style="font-size: 13px;">👤 Logged in as: </span> <span id="deviceInfoDisplay" style="font-size: 11px; color: #64748b;">📱 Device: Detecting...</span>
+    <button type="button" class="logout-btn" onclick="handleLogout()">Logout</button>
+   </div>
+   <h2>Moulding Production &amp; Billing Software</h2>
+   <div id="syncStatus" class="sync-status">Connecting to Cloud Database...</div>
+   <div id="visitCountDisplay" class="open-counter">📊 Total App Opens: Loading...</div>
+   
+   <!-- Navigation Tabs (3 Pages) -->
+   <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchPage(1)">Page 1: Inventory</button>
+    <button class="nav-tab" onclick="switchPage(2)">Page 2: Job Specs &amp; Cards</button>
+    <button class="nav-tab" onclick="switchPage(3)">Page 3: Billing Summary</button>
+   </div>
 
-    <!-- JavaScript Logic -->
-    <script>
-        // Tab switching function
-        function switchSection(sectionName, eventObj) {
-            document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
-            
-            if(sectionName === 'inventory') {
-                document.getElementById('inventory-section').classList.add('active');
-            } else if(sectionName === 'billing') {
-                document.getElementById('billing-section').classList.add('active');
-            } else if(sectionName === 'production') {
-                document.getElementById('production-section').classList.add('active');
-            }
-            if(eventObj) eventObj.target.classList.add('active');
-        }
+   <!-- PAGE 1: INVENTORY LEDGER -->
+   <div id="page1" class="app-page active-page">
+    <div class="section-title">
+     <span>Raw Material Inventory Ledger</span>
+     <div style="display: flex; gap: 6px;">
+      <button type="button" class="btn-success" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="addNewMaterialType()">+ Add New Material</button>
+      <button type="button" class="btn-warning" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="openPurchaseModal()">+ Purchase</button>
+      <button type="button" class="btn-danger" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="confirmResetInventory()">Reset Inventory</button>
+     </div>
+    </div>
+    <div class="inventory-panel">
+     <div class="form-grid" style="margin-bottom: 10px; align-items: flex-end;">
+      <div class="input-group">
+       <label for="stockFromDate">From Date</label> <input type="date" id="stockFromDate" onchange="filterInventory()">
+      </div>
+      <div class="input-group">
+       <label for="stockToDate">To Date</label> <input type="date" id="stockToDate" onchange="filterInventory()">
+      </div>
+      <div class="input-group">
+       <button type="button" class="action-btn" style="height: 35px; width: 100%; font-size: 12px;" onclick="recallDates()">🔄 Recall Dates</button>
+      </div>
+     </div>
+     <div class="table-container">
+      <table>
+       <thead>
+        <tr>
+         <th>Material</th>
+         <th>Opening</th>
+         <th>Purch.</th>
+         <th>Cons.</th>
+         <th>Closing</th>
+         <th>Action</th>
+        </tr>
+       </thead>
+       <tbody id="inventoryTableBody"></tbody>
+      </table>
+     </div>
+    </div>
+    <div class="btn-container">
+     <button onclick="switchPage(2)">Next: Job Specs &amp; Cards &rarr;</button>
+    </div>
+   </div>
 
-        // List of available machines
-        const availableMachines = [
-            "M/C NO-01",
-            "M/C NO-02",
-            "M/C NO-06",
-            "MACHINE NO 06"
-        ];
+   <!-- PAGE 2: JOB SPECS & COLOR VARIATIONS -->
+   <div id="page2" class="app-page">
+    <div class="section-title">Job &amp; Machine Specs</div>
+    <div class="form-grid">
+     <div class="input-group">
+      <label for="slipNo">Slip / Item #</label> <input type="text" id="slipNo" value="963" oninput="saveSpecFields()">
+     </div>
+     <div class="input-group">
+      <label for="itemName">Item Name</label> <input type="text" id="itemName" value="Stick" oninput="saveSpecFields()">
+     </div>
+     <div class="input-group">
+      <label for="materialType">PP Granules</label> <select id="materialType" onchange="saveSpecFields(); calculateBilling()"></select>
+     </div>
+     <div class="input-group">
+      <label for="machineNo">Machine No</label> <input type="text" id="machineNo" value="M/C No-06" oninput="saveSpecFields()">
+     </div>
+     <div class="input-group">
+      <label for="cycleTime">Cycle Time (Sec)</label> <input type="number" id="cycleTime" value="20" step="0.1" oninput="saveSpecFields(); calculateBilling()">
+     </div>
+     <div class="input-group">
+      <label for="mouldCavity">Mould Cavity</label> <input type="number" id="mouldCavity" value="2" step="1" oninput="saveSpecFields(); calculateBilling()">
+     </div>
+     <div class="input-group">
+      <label for="rateType">Rate Type</label> <select id="rateType" onchange="saveSpecFields(); calculateBilling()"> <option value="hourly" selected>Per Hour Rate</option> <option value="fixed">Fixed Rate</option> </select>
+     </div>
+     <div class="input-group">
+      <label for="rateValue">Rate (PKR)</label> <input type="number" id="rateValue" value="1000" step="0.01" oninput="saveSpecFields(); calculateBilling()">
+     </div>
+     <div class="input-group">
+      <label for="extraOverhead">Overhead / Labor (PKR)</label> <input type="number" id="extraOverhead" value="0" step="0.01" oninput="saveSpecFields(); calculateBilling()">
+     </div>
+     <div class="input-group">
+      <label for="startDate">Start Date</label> <input type="date" id="startDate" value="2026-08-15" onchange="saveSpecFields()">
+     </div>
+    </div>
+    <div class="section-title">Color Variations, Production &amp; Scrap Grid</div>
+    <div id="cardsContainer" class="cards-container"></div>
+    <div class="btn-container">
+     <button onclick="switchPage(1)">&larr; Back</button>
+     <button onclick="addRow()">Add Color Card</button>
+     <button class="btn-success" onclick="calculateBilling(); switchPage(3)">Calculate &amp; View Summary &rarr;</button>
+    </div>
+   </div>
 
-        // Function to add a machine row into the grid layout
-        function addMachineGridRow(selectedValue = "") {
-            const container = document.getElementById('machine-grid-container');
-            
-            const gridItem = document.createElement('div');
-            gridItem.className = 'machine-grid-item row align-items-center g-2';
-            
-            const colSelect = document.createElement('div');
-            colSelect.className = 'col-8';
-            
-            const select = document.createElement('select');
-            select.className = 'form-select machine-select';
-            
-            const defaultOpt = document.createElement('option');
-            defaultOpt.value = "";
-            defaultOpt.textContent = "-- Select Machine --";
-            defaultOpt.disabled = true;
-            if (!selectedValue) defaultOpt.selected = true;
-            select.appendChild(defaultOpt);
+   <!-- PAGE 3: BILLING SUMMARY -->
+   <div id="page3" class="app-page">
+    <div class="section-title">Billing Summary &amp; Reports</div>
+    <div class="summary-box">
+     <div class="summary-grid">
+      <div class="summary-item">
+       <span class="summary-label">Total Quantity</span> <span class="summary-value" id="totalQty">6000 Pcs</span>
+      </div>
+      <div class="summary-item">
+       <span class="summary-label">Total Gross Wt</span> <span class="summary-value" id="totalGrossDisp">32.65 Kg</span>
+      </div>
+      <div class="summary-item">
+       <span class="summary-label">Total Scrap / Waste</span> <span class="summary-value" id="totalScrapDisp" style="color: var(--warning-color);">0.00 Kg</span>
+      </div>
+      <div class="summary-item">
+       <span class="summary-label">Total Net Wt (Cons.)</span> <span class="summary-value" id="totalNetDisp">32.45 Kg</span>
+      </div>
+      <div class="summary-item">
+       <span class="summary-label">Total Hours</span> <span class="summary-value" id="totalHours">16.67 Hrs</span>
+      </div>
+      <div class="summary-item">
+       <span class="summary-label">Total Amount Payable</span> <span class="summary-value" id="totalAmount" style="color: var(--success-color);">38,280.00 PKR</span>
+      </div>
+     </div>
+    </div>
+    <div class="btn-container" style="margin-top: 20px;">
+     <button onclick="switchPage(2)">&larr; Back to Cards</button>
+     <button class="btn-print" onclick="window.print()">Print / PDF</button>
+     <button class="btn-excel" onclick="exportToCSV()">Export Excel (CSV)</button>
+    </div>
+   </div>
 
-            availableMachines.forEach(machine => {
-                const option = document.createElement('option');
-                option.value = machine;
-                option.textContent = machine;
-                if (machine === selectedValue) {
-                    option.selected = true;
+  </div>
+  <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAdcwHrPb_Sdna7eTeIhjvHmYmD6X4woxg",
+        authDomain: "moldproinvfirentify.firebaseapp.com",
+        databaseURL: "https://moldproinvfirentify-default-rtdb.firebaseio.com",
+        projectId: "moldproinvfirentify",
+        storageBucket: "moldproinvfirentify.appspot.com",
+        messagingSenderId: "627192096664",
+        appId: "1:627192096664:android:af4d3bed7e2e4da204eded"
+    };
+
+    let db, auth;
+    try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+        auth = firebase.auth();
+        auth.signOut(); 
+        document.getElementById('syncStatus').innerText = "🟢 Connected to Real-Time Cloud Database";
+    } catch (e) {
+        document.getElementById('syncStatus').innerText = "⚠️ Running Offline";
+    }
+
+    function switchPage(pageNum) {
+        document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active-page'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        
+        document.getElementById('page' + pageNum).classList.add('active-page');
+        document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value;
+        const pass = document.getElementById('loginPassword').value;
+        const errDiv = document.getElementById('loginError');
+
+        auth.signInWithEmailAndPassword(email, pass)
+            .then((userCredential) => {
+                errDiv.style.display = 'none';
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                
+                document.getElementById('loggedInUserDisplay').innerText = "👤 Logged in as: " + userCredential.user.email;
+                
+                const ua = navigator.userAgent;
+                let deviceName = "Unknown Device";
+                if (/android/i.test(ua)) {
+                    deviceName = "Android Mobile/Tablet";
+                } else if (/iphone|ipad|ipod/i.test(ua)) {
+                    deviceName = "Apple iOS Device";
+                } else if (/windows/i.test(ua)) {
+                    deviceName = "Windows PC";
+                } else if (/macintosh|mac os x/i.test(ua)) {
+                    deviceName = "Mac Computer";
                 }
-                select.appendChild(option);
+                document.getElementById('deviceInfoDisplay').innerText = "📱 Device: " + deviceName;
+                
+                initializeAppLogic();
+            })
+            .catch((error) => {
+                errDiv.innerText = error.message;
+                errDiv.style.display = 'block';
             });
-            colSelect.appendChild(select);
+    }
 
-            const colBtn = document.createElement('div');
-            colBtn.className = 'col-4 text-end';
-            
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'btn btn-outline-danger btn-sm w-100';
-            removeBtn.textContent = 'Remove';
-            removeBtn.onclick = function() {
-                gridItem.remove();
+    function handleLogout() {
+        auth.signOut().then(() => {
+            location.reload(); 
+        });
+    }
+
+    let inventoryData = { "Black PP": { opening: 500, purchased: 200 } };
+    let transactions = []; 
+    let itemsData = [
+        { color: "Stick Green", qty: 3000, bags: 2, gross: 16.30, scrap: 0.1, net: 16.20 },
+        { color: "Pink", qty: 3000, bags: 2, gross: 16.35, scrap: 0.1, net: 16.25 }
+    ];
+
+    let isRemoteUpdate = false;
+    let toastTimeout;
+    let syncTimer = null;
+
+    function showToast(message) {
+        const toast = document.getElementById('liveToast');
+        toast.innerText = message;
+        toast.style.display = 'flex';
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 3500);
+    }
+
+    function initializeAppLogic() {
+        if (db) {
+            const counterRef = db.ref('mouldingAppStats/totalOpens');
+            counterRef.transaction((currentValue) => {
+                return (currentValue || 0) + 1;
+            });
+
+            counterRef.on('value', (snapshot) => {
+                const count = snapshot.val() || 0;
+                document.getElementById('visitCountDisplay').innerText = "📊 Total App Opens: " + count;
+            });
+
+            db.ref('mouldingApp').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && !window.isLocalSaving) {
+                    isRemoteUpdate = true;
+                    showToast("📥 Live Update: Data changed by another device");
+                    if (data.inventoryData) inventoryData = data.inventoryData;
+                    if (data.transactions) transactions = data.transactions;
+                    if (data.itemsData) itemsData = data.itemsData;
+                    if (data.specs) {
+                        if (document.getElementById('slipNo')) document.getElementById('slipNo').value = data.specs.slipNo || '';
+                        if (document.getElementById('itemName')) document.getElementById('itemName').value = data.specs.itemName || '';
+                        if (document.getElementById('machineNo')) document.getElementById('machineNo').value = data.specs.machineNo || '';
+                        if (document.getElementById('cycleTime')) document.getElementById('cycleTime').value = data.specs.cycleTime || 20;
+                        if (document.getElementById('mouldCavity')) document.getElementById('mouldCavity').value = data.specs.mouldCavity || 2;
+                        if (document.getElementById('rateType')) document.getElementById('rateType').value = data.specs.rateType || 'hourly';
+                        if (document.getElementById('rateValue')) document.getElementById('rateValue').value = data.specs.rateValue || 1000;
+                        if (document.getElementById('extraOverhead')) document.getElementById('extraOverhead').value = data.specs.extraOverhead || 0;
+                        if (document.getElementById('startDate')) document.getElementById('startDate').value = data.specs.startDate || '';
+                    }
+                    updateMaterialDropdown();
+                    if (data.specs && data.specs.materialType) {
+                        document.getElementById('materialType').value = data.specs.materialType;
+                    }
+                    renderCardsWithoutTrigger();
+                    isRemoteUpdate = false;
+                }
+            });
+        }
+        recallDates();
+        updateMaterialDropdown();
+        renderCardsWithoutTrigger();
+    }
+
+    function recallDates() {
+        let today = new Date();
+        let firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+        let lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+        document.getElementById('stockFromDate').value = firstDay;
+        document.getElementById('stockToDate').value = lastDay;
+        filterInventory();
+    }
+
+    function syncToFirebase() {
+        if (!db || isRemoteUpdate) return;
+        clearTimeout(syncTimer);
+        syncTimer = setTimeout(() => {
+            window.isLocalSaving = true;
+            showToast("💾 Saving to cloud...");
+            const specs = {
+                slipNo: document.getElementById('slipNo').value,
+                itemName: document.getElementById('itemName').value,
+                materialType: document.getElementById('materialType').value,
+                machineNo: document.getElementById('machineNo').value,
+                cycleTime: document.getElementById('cycleTime').value,
+                mouldCavity: document.getElementById('mouldCavity').value,
+                rateType: document.getElementById('rateType').value,
+                rateValue: document.getElementById('rateValue').value,
+                extraOverhead: document.getElementById('extraOverhead').value,
+                startDate: document.getElementById('startDate').value
             };
-            colBtn.appendChild(removeBtn);
+            db.ref('mouldingApp').set({
+                inventoryData: inventoryData,
+                transactions: transactions,
+                itemsData: itemsData,
+                specs: specs
+            }).then(() => {
+                setTimeout(() => { window.isLocalSaving = false; }, 500);
+            });
+        }, 600);
+    }
 
-            gridItem.appendChild(colSelect);
-            gridItem.appendChild(colBtn);
-            container.appendChild(gridItem);
+    function updateMaterialDropdown() {
+        const select = document.getElementById('materialType');
+        let currentSelected = select.value;
+        select.innerHTML = '';
+        let keys = Object.keys(inventoryData);
+        if (keys.length === 0) {
+            let opt = document.createElement('option');
+            opt.value = "";
+            opt.textContent = "-- No Material Added --";
+            select.appendChild(opt);
+            return;
+        }
+        keys.forEach(material => {
+            let opt = document.createElement('option');
+            opt.value = material;
+            opt.textContent = material;
+            if (material === currentSelected) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
+    function addNewMaterialType() {
+        let newMat = prompt("Enter new Raw Material / Granule type name:", "");
+        if (!newMat) return;
+        newMat = newMat.trim();
+        if (!newMat || inventoryData[newMat]) return;
+        let opening = parseFloat(prompt(`Enter Opening Stock (Kg):`, "0")) || 0;
+        inventoryData[newMat] = { opening: opening, purchased: 0 };
+        updateMaterialDropdown();
+        document.getElementById('materialType').value = newMat;
+        calculateBilling();
+        syncToFirebase();
+    }
+
+    function renderCards() {
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = '';
+        itemsData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div class="item-card-header">
+                    <span>#${index + 1} - Color Details</span>
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" class="action-btn" onclick="editCard(${index})">Edit</button>
+                        <button type="button" class="remove-card-btn" onclick="removeCard(${index})">X</button>
+                    </div>
+                </div>
+                <div class="card-grid">
+                    <div class="input-group" style="grid-column: span 2;">
+                        <label>Color / Description</label>
+                        <input type="text" class="card-color" value="${item.color}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Quantity (Pcs)</label>
+                        <input type="number" class="card-qty" value="${item.qty}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Boray / Bags</label>
+                        <input type="number" class="card-bag" value="${item.bags}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Gross Wt (Kg)</label>
+                        <input type="number" class="card-gross" value="${item.gross}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Scrap / Waste (Kg)</label>
+                        <input type="number" class="card-scrap" value="${item.scrap || 0}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group" style="grid-column: span 2;">
+                        <label>Net Finished Wt (Kg)</label>
+                        <input type="number" class="card-net" value="${item.net}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        calculateBilling();
+        syncToFirebase();
+    }
+
+    function renderCardsWithoutTrigger() {
+        const container = document.getElementById('cardsContainer');
+        container.innerHTML = '';
+        itemsData.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.innerHTML = `
+                <div class="item-card-header">
+                    <span>#${index + 1} - Color Details</span>
+                    <div style="display: flex; gap: 4px;">
+                        <button type="button" class="action-btn" onclick="editCard(${index})">Edit</button>
+                        <button type="button" class="remove-card-btn" onclick="removeCard(${index})">X</button>
+                    </div>
+                </div>
+                <div class="card-grid">
+                    <div class="input-group" style="grid-column: span 2;">
+                        <label>Color / Description</label>
+                        <input type="text" class="card-color" value="${item.color}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Quantity (Pcs)</label>
+                        <input type="number" class="card-qty" value="${item.qty}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Boray / Bags</label>
+                        <input type="number" class="card-bag" value="${item.bags}" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Gross Wt (Kg)</label>
+                        <input type="number" class="card-gross" value="${item.gross}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group">
+                        <label>Scrap / Waste (Kg)</label>
+                        <input type="number" class="card-scrap" value="${item.scrap || 0}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                    <div class="input-group" style="grid-column: span 2;">
+                        <label>Net Finished Wt (Kg)</label>
+                        <input type="number" class="card-net" value="${item.net}" step="0.01" oninput="updateDataFromCards()">
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+        calculateBillingOnly();
+    }
+
+    function updateDataFromCards() {
+        const cards = document.querySelectorAll('.item-card');
+        cards.forEach((card, index) => {
+            if (itemsData[index]) {
+                itemsData[index].color = card.querySelector('.card-color').value;
+                itemsData[index].qty = parseFloat(card.querySelector('.card-qty').value) || 0;
+                itemsData[index].bags = parseFloat(card.querySelector('.card-bag').value) || 0;
+                itemsData[index].gross = parseFloat(card.querySelector('.card-gross').value) || 0;
+                itemsData[index].scrap = parseFloat(card.querySelector('.card-scrap').value) || 0;
+                itemsData[index].net = parseFloat(card.querySelector('.card-net').value) || 0;
+            }
+        });
+        calculateBilling();
+        syncToFirebase();
+    }
+
+    function addRow() {
+        itemsData.push({ color: "New Color", qty: 0, bags: 0, gross: 0.00, scrap: 0.00, net: 0.00 });
+        renderCards();
+    }
+
+    function removeCard(index) {
+        itemsData.splice(index, 1);
+        renderCards();
+    }
+
+    function editCard(index) {
+        let item = itemsData[index];
+        let newColor = prompt("Edit Color:", item.color);
+        if (newColor !== null) {
+            item.color = newColor;
+            item.qty = parseFloat(prompt("Edit Quantity:", item.qty)) || item.qty;
+            item.bags = parseFloat(prompt("Edit Bags:", item.bags)) || item.bags;
+            item.gross = parseFloat(prompt("Edit Gross Wt:", item.gross)) || item.gross;
+            item.scrap = parseFloat(prompt("Edit Scrap Wt:", item.scrap || 0)) || 0;
+            item.net = parseFloat(prompt("Edit Net Wt:", item.net)) || item.net;
+            renderCards();
+        }
+    }
+
+    function openPurchaseModal() {
+        let keys = Object.keys(inventoryData);
+        if (keys.length === 0) return;
+        let material = prompt(`Enter Granule Type (${keys.join(", ")}):`, keys[0]);
+        if (!material || !inventoryData[material]) return;
+        let qty = parseFloat(prompt(`Enter purchase quantity in Kg:`, "100"));
+        let pDate = prompt(`Enter Purchase Date (YYYY-MM-DD):`, new Date().toISOString().split('T')[0]);
+        if (!isNaN(qty) && qty > 0 && pDate) {
+            transactions.push({ date: pDate, type: 'purchase', material: material, qty: qty });
+            calculateBilling();
+            syncToFirebase();
+        }
+    }
+
+    let editingOriginalMaterial = "";
+    function editInventory(material) {
+        editingOriginalMaterial = material;
+        document.getElementById('modalEditName').value = material;
+        document.getElementById('modalEditOpening').value = inventoryData[material].opening || 0;
+        document.getElementById('editMaterialModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editMaterialModal').style.display = 'none';
+    }
+
+    function saveEditMaterial() {
+        let newName = document.getElementById('modalEditName').value.trim();
+        let newOpening = parseFloat(document.getElementById('modalEditOpening').value) || 0;
+        let material = editingOriginalMaterial;
+
+        if (!newName) {
+            alert("Material name cannot be empty.");
+            return;
         }
 
-        // Event listener for the Add Machine button
-        document.getElementById('add-machine-btn').addEventListener('click', function() {
-            addMachineGridRow();
-        });
-
-        // Add dynamic color row functionality with blank inputs
-        document.getElementById('add-color-btn').addEventListener('click', function() {
-            const tbody = document.getElementById('color-rows-container');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="text" class="form-control" placeholder="Enter color"></td>
-                <td><input type="number" class="form-control" placeholder="Bags"></td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        // Initialize with one default machine row on load
-        window.addEventListener('DOMContentLoaded', () => {
-            addMachineGridRow("M/C NO-01");
-        });
-
-        // Form submission collector
-        document.getElementById('job-billing-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const selects = document.querySelectorAll('.machine-select');
-            let selectedMachines = [];
-            selects.forEach(select => {
-                if(select.value) {
-                    selectedMachines.push(select.value);
-                }
+        if (newName !== material) {
+            inventoryData[newName] = { opening: newOpening, purchased: 0 };
+            delete inventoryData[material];
+            transactions.forEach(t => {
+                if (t.material === material) t.material = newName;
             });
+            let matSelect = document.getElementById('materialType');
+            if (matSelect.value === material) matSelect.value = newName;
+        } else {
+            inventoryData[material].opening = newOpening;
+        }
 
-            console.log("Grid Assigned Machines:", selectedMachines);
-            alert("Saved successfully with machines: " + selectedMachines.join(', '));
+        closeEditModal();
+        updateMaterialDropdown();
+        calculateBilling();
+        syncToFirebase();
+    }
+
+    function deleteMaterial(material) {
+        if (confirm(`Delete ${material}?`)) {
+            delete inventoryData[material];
+            updateMaterialDropdown();
+            calculateBilling();
+            syncToFirebase();
+        }
+    }
+
+    function confirmResetInventory() {
+        if (confirm("Clear all inventory and logs?")) {
+            inventoryData = {};
+            transactions = [];
+            updateMaterialDropdown();
+            calculateBilling();
+            syncToFirebase();
+        }
+    }
+
+    function filterInventory() {
+        calculateBillingOnly();
+    }
+
+    function calculateBilling() {
+        calculateBillingOnly();
+        syncToFirebase();
+    }
+
+    function calculateBillingOnly() {
+        let totalQty = 0, totalGross = 0, totalScrap = 0, totalNet = 0;
+        itemsData.forEach(item => {
+            totalQty += item.qty;
+            totalGross += item.gross;
+            totalScrap += (item.scrap || 0);
+            totalNet += item.net;
         });
-    </script>
-</body>
+
+        let totalConsumption = totalNet + totalScrap;
+
+        let selectedMaterial = document.getElementById('materialType').value;
+        let jobStartDate = document.getElementById('startDate').value;
+        
+        if (selectedMaterial && totalConsumption > 0 && jobStartDate) {
+            transactions = transactions.filter(t => !(t.type === 'consumption' && t.jobDate === jobStartDate && t.material === selectedMaterial));
+            transactions.push({ date: jobStartDate, jobDate: jobStartDate, type: 'consumption', material: selectedMaterial, qty: totalConsumption });
+        }
+
+        let fromDate = document.getElementById('stockFromDate').value;
+        let toDate = document.getElementById('stockToDate').value;
+
+        const tbody = document.getElementById('inventoryTableBody');
+        tbody.innerHTML = "";
+        let keys = Object.keys(inventoryData);
+        
+        if (keys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="color: #64748b; padding: 15px;">No inventory items added.</td></tr>`;
+        } else {
+            keys.forEach(material => {
+                let baseOpening = inventoryData[material].opening || 0;
+                let priorPurchases = 0;
+                let priorConsumption = 0;
+                let periodPurchases = 0;
+                let periodConsumption = 0;
+
+                transactions.forEach(t => {
+                    if (t.material === material) {
+                        if (fromDate && t.date < fromDate) {
+                            if (t.type === 'purchase') priorPurchases += t.qty;
+                            if (t.type === 'consumption') priorConsumption += t.qty;
+                        } else if ((!fromDate || t.date >= fromDate) && (!toDate || t.date <= toDate)) {
+                            if (t.type === 'purchase') periodPurchases += t.qty;
+                            if (t.type === 'consumption') periodConsumption += t.qty;
+                        }
+                    }
+                });
+
+                let openingStock = baseOpening + priorPurchases - priorConsumption;
+                let closingStock = (openingStock + periodPurchases) - periodConsumption;
+
+                let row = tbody.insertRow();
+                row.innerHTML = `
+                    <td style="font-weight: 600; text-align: left; padding-left: 8px;">${material}</td>
+                    <td>${openingStock.toFixed(1)}</td>
+                    <td style="color: var(--success-color);">+${periodPurchases.toFixed(1)}</td>
+                    <td style="color: var(--danger-color);">-${periodConsumption.toFixed(1)}</td>
+                    <td style="font-weight: bold; color: ${closingStock < 0 ? 'var(--danger-color)' : 'var(--primary-color)'};">${closingStock.toFixed(1)}</td>
+                    <td>
+                        <button type="button" class="action-btn" onclick="editInventory('${material}')">Edit</button>
+                        <button type="button" class="remove-card-btn" onclick="deleteMaterial('${material}')">X</button>
+                    </td>
+                `;
+            });
+        }
+
+        let mouldPcs = parseFloat(document.getElementById('mouldCavity').value) || 1;
+        let cycleTimeSec = parseFloat(document.getElementById('cycleTime').value) || 0;
+        let rateType = document.getElementById('rateType').value;
+        let rateVal = parseFloat(document.getElementById('rateValue').value) || 0;
+        let extraOverhead = parseFloat(document.getElementById('extraOverhead').value) || 0;
+
+        let totalHours = mouldPcs > 0 ? (totalQty * cycleTimeSec) / (mouldPcs * 3600) : 0;
+        let effectiveRate = rateType === 'hourly' ? (rateVal / 3600) * cycleTimeSec : rateVal;
+        let totalAmount = (totalQty * effectiveRate) + extraOverhead;
+
+        document.getElementById('totalQty').innerText = totalQty.toLocaleString() + ' Pcs';
+        document.getElementById('totalGrossDisp').innerText = totalGross.toFixed(2) + ' Kg';
+        document.getElementById('totalScrapDisp').innerText = totalScrap.toFixed(2) + ' Kg';
+        document.getElementById('totalNetDisp').innerText = totalNet.toFixed(2) + ' Kg';
+        document.getElementById('totalHours').innerText = totalHours.toFixed(2) + ' Hrs';
+        document.getElementById('totalAmount').innerText = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' PKR';
+    }
+
+    function exportToCSV() {
+        let slipNo = document.getElementById('slipNo').value;
+        let itemName = document.getElementById('itemName').value;
+        let machineNo = document.getElementById('machineNo').value;
+        
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Moulding Production & Billing Report\n";
+        csvContent += `Slip No,${slipNo}\n`;
+        csvContent += `Item Name,${itemName}\n`;
+        csvContent += `Machine No,${machineNo}\n\n`;
+        csvContent += "Color,Quantity (Pcs),Bags,Gross Wt (Kg),Scrap Wt (Kg),Net Wt (Kg)\n";
+
+        itemsData.forEach(item => {
+            csvContent += `"${item.id || item.color}",${item.qty},${item.bags},${item.gross},${item.scrap || 0},${item.net}\n`;
+        });
+
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Production_Slip_${slipNo}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function saveSpecFields() { calculateBilling(); }
+</script>
+ </body>
 </html>
