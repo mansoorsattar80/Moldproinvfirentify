@@ -29,6 +29,10 @@
             padding: 10px;
         }
 
+        input, select {
+            text-transform: uppercase;
+        }
+
         /* Login Overlay Gate */
         #loginOverlay {
             position: fixed;
@@ -227,7 +231,7 @@
         <h4>✏️ Edit Granule Material</h4>
         <div class="input-group" style="margin-bottom: 10px;">
             <label>Material Name</label>
-            <input type="text" id="modalEditName">
+            <input type="text" id="modalEditName" style="text-transform: uppercase;">
         </div>
         <div class="input-group" style="margin-bottom: 15px;">
             <label>Opening Stock (Kg)</label>
@@ -302,7 +306,7 @@
         </div>
         <div class="input-group">
             <label for="itemName">Item Name</label>
-            <input type="text" id="itemName" value="Stick" oninput="saveSpecFields()">
+            <input type="text" id="itemName" value="STICK" oninput="saveSpecFields()">
         </div>
         <div class="input-group">
             <label for="materialType">PP Granules</label>
@@ -310,7 +314,7 @@
         </div>
         <div class="input-group">
             <label for="machineNo">Machine No</label>
-            <input type="text" id="machineNo" value="M/C No-06" oninput="saveSpecFields()">
+            <input type="text" id="machineNo" value="M/C NO-06" oninput="saveSpecFields()">
         </div>
         <div class="input-group">
             <label for="cycleTime">Cycle Time (Sec)</label>
@@ -418,15 +422,15 @@
                 document.getElementById('loggedInUserDisplay').innerText = "👤 Logged in as: " + userCredential.user.email;
                 
                 const ua = navigator.userAgent;
-                let deviceName = "Unknown Device";
+                let deviceName = "UNKNOWN DEVICE";
                 if (/android/i.test(ua)) {
-                    deviceName = "Android Mobile/Tablet";
+                    deviceName = "ANDROID MOBILE/TABLET";
                 } else if (/iphone|ipad|ipod/i.test(ua)) {
-                    deviceName = "Apple iOS Device";
+                    deviceName = "APPLE IOS DEVICE";
                 } else if (/windows/i.test(ua)) {
-                    deviceName = "Windows PC";
+                    deviceName = "WINDOWS PC";
                 } else if (/macintosh|mac os x/i.test(ua)) {
-                    deviceName = "Mac Computer";
+                    deviceName = "MAC COMPUTER";
                 }
                 document.getElementById('deviceInfoDisplay').innerText = "📱 Device: " + deviceName;
                 
@@ -444,11 +448,11 @@
         });
     }
 
-    let inventoryData = { "Black PP": { opening: 500, purchased: 200 } };
+    let inventoryData = { "BLACK PP": { opening: 500, purchased: 200 } };
     let transactions = []; 
     let itemsData = [
-        { color: "Stick Green", qty: 3000, bags: 2, gross: 16.30, scrap: 0.1, net: 16.20 },
-        { color: "Pink", qty: 3000, bags: 2, gross: 16.35, scrap: 0.1, net: 16.25 }
+        { color: "STICK GREEN", qty: 3000, bags: 2, gross: 16.30, scrap: 0.1, net: 16.20 },
+        { color: "PINK", qty: 3000, bags: 2, gross: 16.35, scrap: 0.1, net: 16.25 }
     ];
 
     let isRemoteUpdate = false;
@@ -485,8 +489,8 @@
                     if (data.itemsData) itemsData = data.itemsData;
                     if (data.specs) {
                         if (document.getElementById('slipNo')) document.getElementById('slipNo').value = data.specs.slipNo || '';
-                        if (document.getElementById('itemName')) document.getElementById('itemName').value = data.specs.itemName || '';
-                        if (document.getElementById('machineNo')) document.getElementById('machineNo').value = data.specs.machineNo || '';
+                        if (document.getElementById('itemName')) document.getElementById('itemName').value = (data.specs.itemName || '').toUpperCase();
+                        if (document.getElementById('machineNo')) document.getElementById('machineNo').value = (data.specs.machineNo || '').toUpperCase();
                         if (document.getElementById('cycleTime')) document.getElementById('cycleTime').value = data.specs.cycleTime || 20;
                         if (document.getElementById('mouldCavity')) document.getElementById('mouldCavity').value = data.specs.mouldCavity || 2;
                         if (document.getElementById('rateType')) document.getElementById('rateType').value = data.specs.rateType || 'hourly';
@@ -525,9 +529,9 @@
             showToast("💾 Saving to cloud...");
             const specs = {
                 slipNo: document.getElementById('slipNo').value,
-                itemName: document.getElementById('itemName').value,
+                itemName: document.getElementById('itemName').value.toUpperCase(),
                 materialType: document.getElementById('materialType').value,
-                machineNo: document.getElementById('machineNo').value,
+                machineNo: document.getElementById('machineNo').value.toUpperCase(),
                 cycleTime: document.getElementById('cycleTime').value,
                 mouldCavity: document.getElementById('mouldCavity').value,
                 rateType: document.getElementById('rateType').value,
@@ -554,14 +558,14 @@
         if (keys.length === 0) {
             let opt = document.createElement('option');
             opt.value = "";
-            opt.textContent = "-- No Material Added --";
+            opt.textContent = "-- NO MATERIAL ADDED --";
             select.appendChild(opt);
             return;
         }
         keys.forEach(material => {
             let opt = document.createElement('option');
             opt.value = material;
-            opt.textContent = material;
+            opt.textContent = material.toUpperCase();
             if (material === currentSelected) opt.selected = true;
             select.appendChild(opt);
         });
@@ -570,7 +574,7 @@
     function addNewMaterialType() {
         let newMat = prompt("Enter new Raw Material / Granule type name:", "");
         if (!newMat) return;
-        newMat = newMat.trim();
+        newMat = newMat.trim().toUpperCase();
         if (!newMat || inventoryData[newMat]) return;
         let opening = parseFloat(prompt(`Enter Opening Stock (Kg):`, "0")) || 0;
         inventoryData[newMat] = { opening: opening, purchased: 0 };
@@ -597,7 +601,7 @@
                 <div class="card-grid">
                     <div class="input-group" style="grid-column: span 2;">
                         <label>Color / Description</label>
-                        <input type="text" class="card-color" value="${item.color}" oninput="updateDataFromCards()">
+                        <input type="text" class="card-color" value="${(item.color || '').toUpperCase()}" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase(); updateDataFromCards()">
                     </div>
                     <div class="input-group">
                         <label>Quantity (Pcs)</label>
@@ -644,7 +648,7 @@
                 <div class="card-grid">
                     <div class="input-group" style="grid-column: span 2;">
                         <label>Color / Description</label>
-                        <input type="text" class="card-color" value="${item.color}" oninput="updateDataFromCards()">
+                        <input type="text" class="card-color" value="${(item.color || '').toUpperCase()}" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase(); updateDataFromCards()">
                     </div>
                     <div class="input-group">
                         <label>Quantity (Pcs)</label>
@@ -677,7 +681,7 @@
         const cards = document.querySelectorAll('.item-card');
         cards.forEach((card, index) => {
             if (itemsData[index]) {
-                itemsData[index].color = card.querySelector('.card-color').value;
+                itemsData[index].color = card.querySelector('.card-color').value.toUpperCase();
                 itemsData[index].qty = parseFloat(card.querySelector('.card-qty').value) || 0;
                 itemsData[index].bags = parseFloat(card.querySelector('.card-bag').value) || 0;
                 itemsData[index].gross = parseFloat(card.querySelector('.card-gross').value) || 0;
@@ -690,7 +694,7 @@
     }
 
     function addRow() {
-        itemsData.push({ color: "New Color", qty: 0, bags: 0, gross: 0.00, scrap: 0.00, net: 0.00 });
+        itemsData.push({ color: "NEW COLOR", qty: 0, bags: 0, gross: 0.00, scrap: 0.00, net: 0.00 });
         renderCards();
     }
 
@@ -703,7 +707,7 @@
         let item = itemsData[index];
         let newColor = prompt("Edit Color:", item.color);
         if (newColor !== null) {
-            item.color = newColor;
+            item.color = newColor.toUpperCase();
             item.qty = parseFloat(prompt("Edit Quantity:", item.qty)) || item.qty;
             item.bags = parseFloat(prompt("Edit Bags:", item.bags)) || item.bags;
             item.gross = parseFloat(prompt("Edit Gross Wt:", item.gross)) || item.gross;
@@ -717,7 +721,9 @@
         let keys = Object.keys(inventoryData);
         if (keys.length === 0) return;
         let material = prompt(`Enter Granule Type (${keys.join(", ")}):`, keys[0]);
-        if (!material || !inventoryData[material]) return;
+        if (!material) return;
+        material = material.trim().toUpperCase();
+        if (!inventoryData[material]) return;
         let qty = parseFloat(prompt(`Enter purchase quantity in Kg:`, "100"));
         let pDate = prompt(`Enter Purchase Date (YYYY-MM-DD):`, new Date().toISOString().split('T')[0]);
         if (!isNaN(qty) && qty > 0 && pDate) {
@@ -740,7 +746,7 @@
     }
 
     function saveEditMaterial() {
-        let newName = document.getElementById('modalEditName').value.trim();
+        let newName = document.getElementById('modalEditName').value.trim().toUpperCase();
         let newOpening = parseFloat(document.getElementById('modalEditOpening').value) || 0;
         let material = editingOriginalMaterial;
 
@@ -794,8 +800,8 @@
             totalNet += item.net;
         });
 
-        // Consumption is deducted exclusively from Gross Weight
-        let totalConsumption = totalGross;
+        // Consumption is deducted exclusively from Net Weight as requested
+        let totalConsumption = totalNet;
 
         let selectedMaterial = document.getElementById('materialType').value;
         let jobStartDate = document.getElementById('startDate').value;
@@ -813,7 +819,7 @@
         let keys = Object.keys(inventoryData);
         
         if (keys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="color: #64748b; padding: 15px;">No inventory items added.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="color: #64748b; padding: 15px;">NO INVENTORY ITEMS ADDED.</td></tr>`;
         } else {
             keys.forEach(material => {
                 let baseOpening = inventoryData[material].opening || 0;
@@ -839,7 +845,7 @@
 
                 let row = tbody.insertRow();
                 row.innerHTML = `
-                    <td style="font-weight: 600; text-align: left; padding-left: 8px;">${material}</td>
+                    <td style="font-weight: 600; text-align: left; padding-left: 8px; text-transform: uppercase;">${material}</td>
                     <td>${openingStock.toFixed(1)}</td>
                     <td style="color: var(--success-color);">+${periodPurchases.toFixed(1)}</td>
                     <td style="color: var(--danger-color);">-${periodConsumption.toFixed(1)}</td>
@@ -862,11 +868,11 @@
         let effectiveRate = rateType === 'hourly' ? (rateVal / 3600) * cycleTimeSec : rateVal;
         let totalAmount = (totalQty * effectiveRate) + extraOverhead;
 
-        document.getElementById('totalQty').innerText = totalQty.toLocaleString() + ' Pcs';
-        document.getElementById('totalGrossDisp').innerText = totalGross.toFixed(2) + ' Kg';
-        document.getElementById('totalScrapDisp').innerText = totalScrap.toFixed(2) + ' Kg';
-        document.getElementById('totalNetDisp').innerText = totalNet.toFixed(2) + ' Kg';
-        document.getElementById('totalHours').innerText = totalHours.toFixed(2) + ' Hrs';
+        document.getElementById('totalQty').innerText = totalQty.toLocaleString() + ' PCS';
+        document.getElementById('totalGrossDisp').innerText = totalGross.toFixed(2) + ' KG';
+        document.getElementById('totalScrapDisp').innerText = totalScrap.toFixed(2) + ' KG';
+        document.getElementById('totalNetDisp').innerText = totalNet.toFixed(2) + ' KG';
+        document.getElementById('totalHours').innerText = totalHours.toFixed(2) + ' HRS';
         document.getElementById('totalAmount').innerText = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' PKR';
     }
 
@@ -876,14 +882,14 @@
         let machineNo = document.getElementById('machineNo').value;
         
         let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Moulding Production & Billing Report\n";
-        csvContent += `Slip No,${slipNo}\n`;
-        csvContent += `Item Name,${itemName}\n`;
-        csvContent += `Machine No,${machineNo}\n\n`;
-        csvContent += "Color,Quantity (Pcs),Bags,Gross Wt (Kg),Scrap Wt (Kg),Net Wt (Kg)\n";
+        csvContent += "MOULDING PRODUCTION & BILLING REPORT\n";
+        csvContent += `SLIP NO,${slipNo}\n`;
+        csvContent += `ITEM NAME,${itemName}\n`;
+        csvContent += `MACHINE NO,${machineNo}\n\n`;
+        csvContent += "COLOR,QUANTITY (PCS),BAGS,GROSS WT (KG),SCRAP WT (KG),NET WT (KG)\n";
 
         itemsData.forEach(item => {
-            csvContent += `"${item.id || item.color}",${item.qty},${item.bags},${item.gross},${item.scrap || 0},${item.net}\n`;
+            csvContent += `"${(item.id || item.color || '').toUpperCase()}",${item.qty},${item.bags},${item.gross},${item.scrap || 0},${item.net}\n`;
         });
 
         let encodedUri = encodeURI(csvContent);
@@ -895,7 +901,13 @@
         document.body.removeChild(link);
     }
 
-    function saveSpecFields() { calculateBilling(); }
+    function saveSpecFields() {
+        let itemNameInput = document.getElementById('itemName');
+        itemNameInput.value = itemNameInput.value.toUpperCase();
+        let machineNoInput = document.getElementById('machineNo');
+        machineNoInput.value = machineNoInput.value.toUpperCase();
+        calculateBilling();
+    }
 </script>
 
 </body>
