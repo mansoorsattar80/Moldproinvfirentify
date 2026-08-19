@@ -38,10 +38,11 @@
         .btn-warning { background: var(--warning); color: #fff; }
         .btn-edit { background: #e67e22; color: white; padding: 4px 8px; font-size: 11px; width: auto; margin-right: 3px; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
-        th, td { border: 1px solid #ddd; padding: 6px; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+        th, td { border: 1px solid #ddd; padding: 5px; text-align: center; }
         th { background: var(--primary); color: white; }
         .table-responsive { overflow-x: auto; }
+        .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -154,26 +155,51 @@
 
     <!-- PAGE 4: DAILY PROD -->
     <div id="page4" class="page">
-        <h3>DAILY PRODUCTION LOG</h3>
-        <label>SELECT SHIFT:</label>
-        <select id="prodShift">
-            <option value="SHIFT A">SHIFT A</option>
-            <option value="SHIFT B">SHIFT B</option>
-        </select>
-        <label>ACTUAL SHOTS PRODUCED:</label>
-        <input type="number" id="prodShots" placeholder="0">
-        <label>GOOD PRODUCTION PIECES:</label>
-        <input type="number" id="prodGoodPcs" placeholder="0">
-        <button class="btn-success" id="prodBtn" onclick="addDailyProduction()">LOG PRODUCTION</button>
+        <h3>DAILY PRODUCTION & ELECTRICITY LOG</h3>
+        <label>MACHINE NO:</label>
+        <input type="text" id="prodMachineNo" placeholder="E.G. 160 TON">
+        <label>OPERATOR:</label>
+        <input type="text" id="prodOperator" placeholder="OPERATOR NAME">
+
+        <!-- ELECTRICITY METER UNITS -->
+        <div class="shift-box" style="background:#fff3cd; border-color:#ffeeba;">
+            <h4 style="margin:0 0 5px 0; color:#856404;">ELECTRICITY METER UNITS</h4>
+            <label>PREVIOUS UNITS:</label>
+            <input type="number" id="elecPrevUnits" placeholder="0.00">
+            <label>CURRENT UNITS:</label>
+            <input type="number" id="elecCurrUnits" placeholder="0.00">
+        </div>
+
+        <!-- SHIFT A -->
+        <div class="shift-box">
+            <h4 style="margin:0 0 5px 0; color:var(--secondary);">SHIFT A</h4>
+            <label>SCREEN SHOT (A):</label>
+            <input type="number" id="prodShotsA" placeholder="0">
+            <label>GOOD SHOT (A):</label>
+            <input type="number" id="prodGoodPcsA" placeholder="0">
+        </div>
+
+        <!-- SHIFT B -->
+        <div class="shift-box">
+            <h4 style="margin:0 0 5px 0; color:var(--secondary);">SHIFT B</h4>
+            <label>SCREEN SHOT (B):</label>
+            <input type="number" id="prodShotsB" placeholder="0">
+            <label>GOOD SHOT (B):</label>
+            <input type="number" id="prodGoodPcsB" placeholder="0">
+        </div>
+
+        <button class="btn-success" id="prodBtn" style="margin-top:15px;" onclick="addDailyProduction()">ADD MACHINE PRODUCTION</button>
 
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
                         <th>DATE</th>
-                        <th>SHIFT</th>
-                        <th>SHOTS</th>
-                        <th>GOOD PCS</th>
+                        <th>MACHINE</th>
+                        <th>OPERATOR</th>
+                        <th>UNITS (PREV - CURR)</th>
+                        <th>SHIFTS (A / B)</th>
+                        <th>GOOD PCS (A / B)</th>
                         <th>ACTION</th>
                     </tr>
                 </thead>
@@ -280,7 +306,6 @@
             let netWt = parseFloat(card.querySelector('.card-netwt').value) || 0;
             let scrap = parseFloat(card.querySelector('.card-scrap').value) || 0;
 
-            // Formula: (Rate Per Hour / 3600) * Cycle Time * Pieces / Cavities
             let totalSeconds = (pcs * cycleTime) / cavities;
             let amount = (ratePerHour / 3600) * totalSeconds;
             grandTotal += amount;
@@ -375,44 +400,65 @@
     }
 
     function addDailyProduction() {
-        let shift = document.getElementById('prodShift').value;
-        let shots = parseFloat(document.getElementById('prodShots').value) || 0;
-        let goodPcs = parseFloat(document.getElementById('prodGoodPcs').value) || 0;
+        let machineNo = document.getElementById('prodMachineNo').value.toUpperCase();
+        let operator = document.getElementById('prodOperator').value.toUpperCase();
+        let elecPrevUnits = parseFloat(document.getElementById('elecPrevUnits').value) || 0;
+        let elecCurrUnits = parseFloat(document.getElementById('elecCurrUnits').value) || 0;
+        let shotsA = parseFloat(document.getElementById('prodShotsA').value) || 0;
+        let goodPcsA = parseFloat(document.getElementById('prodGoodPcsA').value) || 0;
+        let shotsB = parseFloat(document.getElementById('prodShotsB').value) || 0;
+        let goodPcsB = parseFloat(document.getElementById('prodGoodPcsB').value) || 0;
         let date = new Date().toISOString().split('T')[0];
 
+        let consumedUnits = elecCurrUnits - elecPrevUnits;
+
         if (editingProdIndex !== null) {
-            dailyProductions[editingProdIndex] = { date: dailyProductions[editingProdIndex].date, shift, shots, goodPcs };
+            dailyProductions[editingProdIndex] = { date: dailyProductions[editingProdIndex].date, machineNo, operator, elecPrevUnits, elecCurrUnits, consumedUnits, shotsA, goodPcsA, shotsB, goodPcsB };
             editingProdIndex = null;
-            document.getElementById('prodBtn').textContent = "LOG PRODUCTION";
+            document.getElementById('prodBtn').textContent = "ADD MACHINE PRODUCTION";
         } else {
-            dailyProductions.push({ date, shift, shots, goodPcs });
+            dailyProductions.push({ date, machineNo, operator, elecPrevUnits, elecCurrUnits, consumedUnits, shotsA, goodPcsA, shotsB, goodPcsB });
         }
 
         saveData();
         renderDailyProduction();
-        document.getElementById('prodShots').value = '';
-        document.getElementById('prodGoodPcs').value = '';
+        document.getElementById('prodMachineNo').value = '';
+        document.getElementById('prodOperator').value = '';
+        document.getElementById('elecPrevUnits').value = '';
+        document.getElementById('elecCurrUnits').value = '';
+        document.getElementById('prodShotsA').value = '';
+        document.getElementById('prodGoodPcsA').value = '';
+        document.getElementById('prodShotsB').value = '';
+        document.getElementById('prodGoodPcsB').value = '';
     }
 
     function editProduction(index) {
         let p = dailyProductions[index];
-        document.getElementById('prodShift').value = p.shift;
-        document.getElementById('prodShots').value = p.shots;
-        document.getElementById('prodGoodPcs').value = p.goodPcs;
+        document.getElementById('prodMachineNo').value = p.machineNo || '';
+        document.getElementById('prodOperator').value = p.operator || '';
+        document.getElementById('elecPrevUnits').value = p.elecPrevUnits || '';
+        document.getElementById('elecCurrUnits').value = p.elecCurrUnits || '';
+        document.getElementById('prodShotsA').value = p.shotsA || '';
+        document.getElementById('prodGoodPcsA').value = p.goodPcsA || '';
+        document.getElementById('prodShotsB').value = p.shotsB || '';
+        document.getElementById('prodGoodPcsB').value = p.goodPcsB || '';
         editingProdIndex = index;
-        document.getElementById('prodBtn').textContent = "UPDATE PRODUCTION";
+        document.getElementById('prodBtn').textContent = "UPDATE MACHINE PRODUCTION";
     }
 
     function renderDailyProduction() {
         let tbody = document.getElementById('dailyProdTableBody');
         tbody.innerHTML = '';
         dailyProductions.forEach((p, index) => {
+            let unitsText = (p.elecCurrUnits !== undefined && p.elecPrevUnits !== undefined) ? `${p.elecPrevUnits} - ${p.elecCurrUnits}<br><b style="color:#d9534f;">(Diff: ${p.consumedUnits || (p.elecCurrUnits - p.elecPrevUnits)})</b>` : '---';
             tbody.innerHTML += `
                 <tr>
                     <td>${p.date}</td>
-                    <td>${p.shift}</td>
-                    <td>${p.shots}</td>
-                    <td>${p.goodPcs}</td>
+                    <td>${p.machineNo || '---'}</td>
+                    <td>${p.operator || '---'}</td>
+                    <td>${unitsText}</td>
+                    <td>A: ${p.shotsA || 0}<br>B: ${p.shotsB || 0}</td>
+                    <td>A: ${p.goodPcsA || 0}<br>B: ${p.goodPcsB || 0}</td>
                     <td>
                         <button class="btn-edit" onclick="editProduction(${index})">EDIT</button>
                         <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="dailyProductions.splice(${index},1); saveData(); renderDailyProduction();">DEL</button>
