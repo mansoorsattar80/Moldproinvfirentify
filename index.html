@@ -1,1210 +1,483 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
- <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MOULDING PRODUCTION &amp; BILLING SOFTWARE (FIREBASE CLOUD)</title>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moulding Production & Billing Software</title>
+    <!-- Firebase App (Core SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #e67e22;
-            --danger-color: #e74c3c;
-            --light-bg: #f8f9fa;
-            --border-color: #cbd5e1;
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f1f5f9;
-            color: #334155;
-            margin: 0;
-            padding: 10px;
-            text-transform: uppercase;
-        }
-
-        /* Login Screen Overlay */
-        #loginScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0f172a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 20000;
-        }
-        .login-card {
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 380px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-        .login-card h3 {
-            color: var(--primary-color);
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-        .login-card .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        /* Custom Modal Overlay */
-        .custom-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.75);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10001;
-        }
-        .custom-modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 340px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-        .custom-modal-content h4 {
-            margin-top: 0;
-            color: var(--primary-color);
-            margin-bottom: 12px;
-            font-size: 16px;
-        }
-
-        /* App container */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            position: relative;
-            display: none; 
-        }
-
-        /* Navigation Tab Bar */
-        .nav-tabs {
-            display: flex;
-            background: #e2e8f0;
-            border-radius: 8px;
-            padding: 4px;
-            margin-bottom: 15px;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-        .nav-tab {
-            flex: 1;
-            padding: 8px 6px;
-            text-align: center;
-            background: transparent;
-            border: none;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 11px;
-            color: #475569;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-width: auto;
-            text-transform: uppercase;
-        }
-        .nav-tab.active {
-            background: white;
-            color: var(--primary-color);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        /* Page Sections */
-        .app-page {
-            display: none;
-        }
-        .app-page.active-page {
-            display: block;
-        }
-
-        /* Top User Bar Header */
-        .user-bar {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 4px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 10px 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #475569;
-            position: relative;
-        }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 10px; background: #f4f6f7; color: #333; }
+        .container { max-width: 100%; margin: auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: var(--primary); font-size: 20px; margin-bottom: 5px; }
+        .status-bar { text-align: center; font-size: 12px; font-weight: bold; padding: 5px; margin-bottom: 10px; border-radius: 4px; }
+        .status-online { background: #d4edda; color: #155724; }
+        .status-offline { background: #f8d7da; color: #721c24; }
         
-        .logout-btn {
-            background-color: var(--warning-color) !important;
-            padding: 5px 10px !important;
-            font-size: 11px !important;
-            border-radius: 4px !important;
-            min-width: auto !important;
-            flex: none !important;
-            position: absolute;
-            right: 12px;
-            top: 12px;
-            text-transform: uppercase;
-        }
+        /* Navigation Tabs */
+        .nav-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; background: #e9ecef; padding: 5px; border-radius: 6px; }
+        .nav-tab { flex: 1; min-width: 90px; padding: 8px 5px; text-align: center; background: #fff; border: 1px solid #ced4da; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; color: #495057; }
+        .nav-tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
 
-        #liveToast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--success-color);
-            color: white;
-            padding: 10px 18px;
-            border-radius: 6px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            font-size: 13px;
-            font-weight: 600;
-            z-index: 9999;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            text-transform: uppercase;
-        }
+        .page { display: none; }
+        .page.active { display: block; }
 
-        h2 { color: var(--primary-color); text-align: center; margin-bottom: 5px; font-size: 20px; }
-        .sync-status { text-align: center; font-size: 11px; color: var(--success-color); margin-bottom: 6px; font-weight: 600; }
-        .open-counter { text-align: center; font-size: 11px; color: #64748b; margin-bottom: 15px; font-weight: 600; }
-        .section-title { font-size: 15px; font-weight: 600; color: var(--primary-color); margin-top: 10px; margin-bottom: 10px; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        .input-group { display: flex; flex-direction: column; }
-        label { font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #475569; }
-        input, select { padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box; background: #fff; text-transform: uppercase; }
-        .cards-container { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 15px; }
-        @media (min-width: 600px) { .cards-container { grid-template-columns: repeat(2, 1fr); } }
-        .item-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .item-card-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 13px; color: var(--primary-color); margin-bottom: 8px; border-bottom: 1px solid #edf2f7; padding-bottom: 4px; }
-        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-        .table-container { overflow-x: auto; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 13px; }
-        th, td { border: 1px solid var(--border-color); padding: 8px; text-align: center; }
-        th { background-color: var(--primary-color); color: white; font-weight: 500; }
-        .btn-container { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 20px; flex-wrap: wrap; }
-        button { background-color: var(--secondary-color); color: white; border: none; padding: 10px 14px; font-size: 13px; font-weight: 600; border-radius: 6px; cursor: pointer; flex: 1; min-width: 120px; text-transform: uppercase; }
-        button.btn-success { background-color: var(--success-color); }
-        button.btn-warning { background-color: var(--warning-color); }
-        button.btn-danger { background-color: var(--danger-color); }
-        button.btn-print { background-color: #8e44ad; }
-        button.btn-excel { background-color: #16a085; }
-        .summary-box { background-color: var(--light-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; }
-        .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        @media (min-width: 600px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
-        .summary-item { display: flex; flex-direction: column; }
-        .summary-label { font-size: 11px; color: #64748b; text-transform: uppercase; font-weight: 600; }
-        .summary-value { font-size: 16px; font-weight: bold; color: var(--primary-color); margin-top: 2px; }
-        .inventory-panel { background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 8px; margin-bottom: 20px; }
-        .remove-card-btn { background: var(--danger-color) !important; padding: 3px 7px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; }
-        .action-btn { background-color: var(--secondary-color); padding: 3px 7px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; }
-        .edit-action-btn { background-color: var(--warning-color); padding: 3px 7px; font-size: 11px; border-radius: 4px; min-width: auto !important; flex: none !important; color: white; }
+        label { font-weight: bold; font-size: 13px; display: block; margin-top: 8px; color: #555; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        button { background: var(--secondary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; margin-top: 5px; }
+        button:hover { opacity: 0.9; }
+        .btn-danger { background: var(--danger); }
+        .btn-success { background: var(--success); }
+        .btn-warning { background: var(--warning); color: #fff; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 6px; text-align: center; }
+        th { background: var(--primary); color: white; }
+        .table-responsive { overflow-x: auto; }
+        
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 15% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 8px; }
     </style>
- </head>
- <body>
-  <!-- Login Screen -->
-  <div id="loginScreen">
-   <div class="login-card">
-    <h3>🔒 System Login</h3>
-    <div class="input-group">
-     <label>Username</label> 
-     <input type="text" id="loginUser" value="MANSOOR">
-    </div>
-    <div class="input-group">
-     <label>Password / Pin</label> 
-     <input type="password" id="loginPass" value="1234">
-    </div>
-    <button type="button" class="btn-success" style="width: 100%; margin-top: 10px;" onclick="handleLogin()">Login to Cloud DB</button>
-   </div>
-  </div>
+</head>
+<body>
 
-  <!-- Edit Material Custom Modal -->
-  <div id="editMaterialModal" class="custom-modal">
-   <div class="custom-modal-content">
-    <h4>✏️ Edit Granule Material</h4>
-    <div class="input-group" style="margin-bottom: 10px;">
-     <label>Material Name</label> <input type="text" id="modalEditName">
+<div class="container">
+    <div id="connectionStatus" class="status-bar status-offline">CONNECTING TO FIREBASE...</div>
+    <h2>MOULDING PRODUCTION & BILLING</h2>
+    <div style="text-align:center; font-size:11px; color:#666; margin-bottom:10px;">
+        📊 TOTAL APP OPENS: <span id="appOpenCount">1</span> | <a href="#" onclick="logoutUser()">Logout</a>
     </div>
-    <div class="input-group" style="margin-bottom: 15px;">
-     <label>Opening Stock (Kg)</label> <input type="number" id="modalEditOpening" step="0.1">
-    </div>
-    <div style="display: flex; gap: 8px;">
-     <button type="button" class="btn-danger" onclick="closeEditModal()" style="padding: 8px;">Cancel</button>
-     <button type="button" class="btn-success" onclick="saveEditMaterial()" style="padding: 8px;">Save Changes</button>
-    </div>
-   </div>
-  </div>
 
-  <!-- Edit Daily Production Modal -->
-  <div id="editDailyProdModal" class="custom-modal">
-   <div class="custom-modal-content">
-    <h4>✏️ Edit Daily Production</h4>
-    <input type="hidden" id="editDpIndex">
-    <div class="input-group" style="margin-bottom: 8px;">
-     <label>Machine No.</label> <input type="text" id="modalDpMachine">
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="switchPage(1)">1. INVENTORY</div>
+        <div class="nav-tab" onclick="switchPage(2)">2. JOB SPECS</div>
+        <div class="nav-tab" onclick="switchPage(3)">3. BILLING</div>
+        <div class="nav-tab" onclick="switchPage(4)">4. DAILY PROD</div>
+        <div class="nav-tab" onclick="switchPage(5)">5. LOT TRACKER</div>
     </div>
-    <div class="input-group" style="margin-bottom: 8px;">
-     <label>Operator</label> <input type="text" id="modalDpOperator">
-    </div>
-    <div class="input-group" style="margin-bottom: 8px;">
-     <label>Shift A Actual</label> <input type="number" id="modalDpAActual">
-    </div>
-    <div class="input-group" style="margin-bottom: 8px;">
-     <label>Shift A Good</label> <input type="number" id="modalDpAGood">
-    </div>
-    <div class="input-group" style="margin-bottom: 8px;">
-     <label>Shift B Actual</label> <input type="number" id="modalDpBActual">
-    </div>
-    <div class="input-group" style="margin-bottom: 12px;">
-     <label>Shift B Good</label> <input type="number" id="modalDpBGood">
-    </div>
-    <div style="display: flex; gap: 8px;">
-     <button type="button" class="btn-danger" onclick="closeEditDailyProdModal()" style="padding: 8px;">Cancel</button>
-     <button type="button" class="btn-success" onclick="saveEditDailyProd()" style="padding: 8px;">Save Changes</button>
-    </div>
-   </div>
-  </div>
 
-  <!-- Edit Lot Tracker Modal -->
-  <div id="editLotModal" class="custom-modal">
-   <div class="custom-modal-content">
-    <h4>✏️ Edit Lot / Order Tracker</h4>
-    <input type="hidden" id="editLotIndex">
-    <div class="input-group" style="margin-bottom: 8px;">
-     <label>Lot / Slip #</label> <input type="text" id="modalLotNo">
-    </div>
-    <div class="input-group" style="margin-bottom: 8px;">
-     <label>Item / Description</label> <input type="text" id="modalLotItem">
-    </div>
-    <div class="input-group" style="margin-bottom: 8px;">
-     <label>Target Qty (Pcs)</label> <input type="number" id="modalLotTarget">
-    </div>
-    <div class="input-group" style="margin-bottom: 12px;">
-     <label>Actual Produced (Pcs)</label> <input type="number" id="modalLotActual">
-    </div>
-    <div style="display: flex; gap: 8px;">
-     <button type="button" class="btn-danger" onclick="closeEditLotModal()" style="padding: 8px;">Cancel</button>
-     <button type="button" class="btn-success" onclick="saveEditLot()" style="padding: 8px;">Save Changes</button>
-    </div>
-   </div>
-  </div>
+    <!-- PAGE 1: INVENTORY LEDGER -->
+    <div id="page1" class="page active">
+        <h3>Raw Material Inventory</h3>
+        <label>Material Name / Granule Type:</label>
+        <input type="text" id="invMaterialName" placeholder="e.g. BLACK PP, PURE PP">
+        <label>Transaction Type:</label>
+        <select id="invType">
+            <option value="purchase">Purchase / Opening Stock (+)</option>
+            <option value="consumption">Manual Consumption (-)</option>
+        </select>
+        <label>Quantity (Kg):</label>
+        <input type="number" id="invQty" placeholder="0.00">
+        <label>Date:</label>
+        <input type="date" id="invDate">
+        <button class="btn-success" onclick="addInventoryTransaction()">Add Inventory Entry</button>
 
-  <div id="liveToast">✅ Synced to Cloud</div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Opening/Purch</th>
+                        <th>Consumed</th>
+                        <th>Closing Balance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="inventorySummaryBody"></tbody>
+            </table>
+        </div>
+    </div>
 
-  <div class="container" id="appContainer">
-   <!-- User Status Bar -->
-   <div class="user-bar">
-    <span id="loggedInUserDisplay" style="font-size: 13px;">👤 User Connected: MANSOOR</span> 
-    <span id="deviceInfoDisplay" style="font-size: 11px; color: var(--success-color); font-weight: bold;">🟢 Status: Firebase Real-time Cloud Synchronized</span>
-    <button type="button" class="logout-btn" onclick="handleLogout()">Logout</button>
-   </div>
+    <!-- PAGE 2: JOB SPECS & COLOR VARIATIONS -->
+    <div id="page2" class="page">
+        <h3>Job Specifications & Color Cards</h3>
+        <label>Slip / Item #:</label>
+        <input type="text" id="slipNo" placeholder="e.g. 963">
+        <label>Item Name:</label>
+        <input type="text" id="itemName" placeholder="e.g. STICK">
+        <label>Select PP Granules:</label>
+        <select id="materialType">
+            <option value="BLACK PP">BLACK PP</option>
+            <option value="PURE PP">PURE PP</option>
+        </select>
+        <label>Machine Number:</label>
+        <input type="text" id="machineNo" placeholder="e.g. 160 Ton">
+        <label>Cycle Time (Sec):</label>
+        <input type="number" id="cycleTime" value="20">
+        <label>Mould Cavities:</label>
+        <input type="number" id="cavities" value="1">
+        <label>Job Start Date:</label>
+        <input type="date" id="startDate">
 
-   <h2>Moulding Production &amp; Billing Software</h2>
-   <div id="syncStatus" class="sync-status">🟢 Multi-User Cloud Database Connected via Firebase</div>
-   <div id="visitCountDisplay" class="open-counter">📊 Total App Opens: Loading...</div>
-   
-   <!-- Navigation Tabs (5 Pages including Lot Tracker) -->
-   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchPage(1)">1. Inventory</button>
-    <button class="nav-tab" onclick="switchPage(2)">2. Job Specs</button>
-    <button class="nav-tab" onclick="switchPage(3)">3. Billing</button>
-    <button class="nav-tab" onclick="switchPage(4)">4. Daily Prod</button>
-    <button class="nav-tab" onclick="switchPage(5)">5. Lot Tracker</button>
-   </div>
+        <h4 style="margin-top:15px; border-bottom:2px solid var(--secondary); padding-bottom:3px;">Color Variations</h4>
+        <div id="colorCardsContainer"></div>
+        <button class="btn-warning" onclick="addColorCard()">+ Add Color Card</button>
+        <button class="btn-success" style="margin-top:15px;" onclick="saveJobSpecs()">Save Job Specs & Calculate</button>
+    </div>
 
-   <!-- PAGE 1: INVENTORY LEDGER -->
-   <div id="page1" class="app-page active-page">
-    <div class="section-title">
-     <span>Raw Material Inventory Ledger</span>
-     <div style="display: flex; gap: 6px;">
-      <button type="button" class="btn-success" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="addNewMaterialType()">+ Add New Material</button>
-      <button type="button" class="btn-warning" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="openPurchaseModal()">+ Purchase</button>
-     </div>
+    <!-- PAGE 3: BILLING SUMMARY -->
+    <div id="page3" class="page">
+        <h3>Billing Summary & Reports</h3>
+        <label>Party / Customer Name:</label>
+        <input type="text" id="partyName" placeholder="Customer Name">
+        <label>Moulding Rate Per Kg (PKR):</label>
+        <input type="number" id="mouldingRate" value="150" oninput="calculateBillingOnly()">
+        
+        <div class="table-responsive" style="margin-top:10px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Color</th>
+                        <th>Pcs</th>
+                        <th>Bags</th>
+                        <th>Net Wt</th>
+                        <th>Scrap</th>
+                        <th>Total Amt</th>
+                    </tr>
+                </thead>
+                <tbody id="billingTableBody"></tbody>
+            </table>
+        </div>
+        <div style="background:#e8f4fd; padding:10px; margin-top:10px; border-radius:4px; font-weight:bold;">
+            Grand Total Payable: PKR <span id="grandTotalAmount">0.00</span>
+        </div>
+        <button class="btn-success" onclick="window.print()">Print / Save PDF</button>
     </div>
-    <div class="inventory-panel">
-     <div class="form-grid" style="margin-bottom: 10px; align-items: flex-end;">
-      <div class="input-group">
-       <label for="stockFromDate">From Date</label> <input type="date" id="stockFromDate" onchange="filterInventory()">
-      </div>
-      <div class="input-group">
-       <label for="stockToDate">To Date</label> <input type="date" id="stockToDate" onchange="filterInventory()">
-      </div>
-      <div class="input-group">
-       <button type="button" class="action-btn" style="height: 35px; width: 100%; font-size: 12px;" onclick="recallDates()">🔄 Recall Dates</button>
-      </div>
-     </div>
-     <div class="table-container">
-      <table>
-       <thead>
-        <tr>
-         <th>Material</th>
-         <th>Stock (Opening)</th>
-         <th>Purchase</th>
-         <th>Consume</th>
-         <th>Balance (Closing)</th>
-         <th>Action</th>
-        </tr>
-       </thead>
-       <tbody id="inventoryTableBody"></tbody>
-      </table>
-     </div>
-    </div>
-    <div class="btn-container">
-     <button onclick="switchPage(2)">Next: Job Specs &amp; Cards &rarr;</button>
-    </div>
-   </div>
 
-   <!-- PAGE 2: JOB SPECS & COLOR VARIATIONS -->
-   <div id="page2" class="app-page">
-    <div class="section-title">Job &amp; Machine Specs (Fully Editable)</div>
-    <div class="form-grid">
-     <div class="input-group">
-      <label for="slipNo">Slip / Item #</label> <input type="text" id="slipNo" value="963" oninput="saveSpecFields()">
-     </div>
-     <div class="input-group">
-      <label for="itemName">Item Name</label> <input type="text" id="itemName" value="STICK" oninput="saveSpecFields()">
-     </div>
-     <div class="input-group">
-      <label for="materialType">PP Granules</label> <select id="materialType" onchange="saveSpecFields(); calculateBilling()"></select>
-     </div>
-     <div class="input-group">
-      <label for="machineNo">Machine Number</label> <input type="text" id="machineNo" value="M-06" placeholder="Type machine # here" oninput="saveSpecFields()">
-     </div>
-     <div class="input-group">
-      <label for="cycleTime">Cycle Time (Sec)</label> <input type="number" id="cycleTime" value="20" step="0.1" oninput="saveSpecFields(); calculateBilling()">
-     </div>
-     <div class="input-group">
-      <label for="mouldCavity">Mould Cavity</label> <input type="number" id="mouldCavity" value="2" step="1" oninput="saveSpecFields(); calculateBilling()">
-     </div>
-     <div class="input-group">
-      <label for="rateType">Rate Type</label> <select id="rateType" onchange="saveSpecFields(); calculateBilling()"> <option value="hourly" selected>Per Hour Rate</option> <option value="fixed">Fixed Rate</option> </select>
-     </div>
-     <div class="input-group">
-      <label for="rateValue">Rate (PKR)</label> <input type="number" id="rateValue" value="1000" step="0.01" oninput="saveSpecFields(); calculateBilling()">
-     </div>
-     <div class="input-group">
-      <label for="extraOverhead">Overhead / Labor (PKR)</label> <input type="number" id="extraOverhead" value="0" step="0.01" oninput="saveSpecFields(); calculateBilling()">
-     </div>
-     <div class="input-group">
-      <label for="startDate">Start Date</label> <input type="date" id="startDate" value="2026-08-15" onchange="saveSpecFields()">
-     </div>
-     <div class="input-group">
-      <label for="endDate">End Date</label> <input type="date" id="endDate" value="2026-08-15" onchange="saveSpecFields()">
-     </div>
-    </div>
-    <div class="section-title">Color Variations, Production &amp; Scrap Grid</div>
-    <div id="cardsContainer" class="cards-container"></div>
-    <div class="btn-container">
-     <button onclick="switchPage(1)">&larr; Back</button>
-     <button onclick="addRow()">Add Color Card</button>
-     <button class="btn-success" onclick="calculateBilling(); switchPage(3)">Calculate &amp; View Summary &rarr;</button>
-    </div>
-   </div>
+    <!-- PAGE 4: DAILY PRODUCTION LOG -->
+    <div id="page4" class="page">
+        <h3>Daily Production Log</h3>
+        <label>Select Shift:</label>
+        <select id="prodShift">
+            <option value="Shift A">Shift A</option>
+            <option value="Shift B">Shift B</option>
+        </select>
+        <label>Actual Shots Produced:</label>
+        <input type="number" id="prodShots" placeholder="0">
+        <label>Good Production Pieces:</label>
+        <input type="number" id="prodGoodPcs" placeholder="0">
+        <button class="btn-success" onclick="addDailyProduction()">Log Production</button>
 
-   <!-- PAGE 3: BILLING SUMMARY -->
-   <div id="page3" class="app-page">
-    <div class="section-title">Billing Summary &amp; Reports</div>
-    <div class="summary-box">
-     <div class="summary-grid">
-      <div class="summary-item">
-       <span class="summary-label">Total Quantity</span> <span class="summary-value" id="totalQty">6000 Pcs</span>
-      </div>
-      <div class="summary-item">
-       <span class="summary-label">Total Gross Wt</span> <span class="summary-value" id="totalGrossDisp">32.65 Kg</span>
-      </div>
-      <div class="summary-item">
-       <span class="summary-label">Total Scrap / Waste</span> <span class="summary-value" id="totalScrapDisp" style="color: var(--warning-color);">0.00 Kg</span>
-      </div>
-      <div class="summary-item">
-       <span class="summary-label">Total Net Wt (Cons.)</span> <span class="summary-value" id="totalNetDisp">32.45 Kg</span>
-      </div>
-      <div class="summary-item">
-       <span class="summary-label">Total Hours</span> <span class="summary-value" id="totalHours">16.67 Hrs</span>
-      </div>
-      <div class="summary-item">
-       <span class="summary-label">Total Amount Payable</span> <span class="summary-value" id="totalAmount" style="color: var(--success-color);">38,280.00 PKR</span>
-      </div>
-     </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Shift</th>
+                        <th>Shots</th>
+                        <th>Good Pcs</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="dailyProdTableBody"></tbody>
+            </table>
+        </div>
     </div>
-    <div class="btn-container" style="margin-top: 20px;">
-     <button onclick="switchPage(2)">&larr; Back to Cards</button>
-     <button class="btn-print" onclick="window.print()">Print / PDF</button>
-     <button class="btn-excel" onclick="exportToCSV()">Export Excel (CSV)</button>
-    </div>
-   </div>
 
-   <!-- PAGE 4: DAILY PRODUCTION -->
-   <div id="page4" class="app-page">
-    <div class="section-title">
-     <span>Daily Production Log</span>
-     <button type="button" class="btn-success" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="addDailyProdRow()">+ Add Machine Production</button>
-    </div>
-    <div id="dailyProdContainer" class="cards-container"></div>
-    <div class="btn-container" style="margin-top: 20px;">
-     <button onclick="switchPage(3)">&larr; Back to Billing</button>
-     <button class="btn-success" onclick="saveToCloud(); showToast('Daily production saved')">Save Daily Production</button>
-    </div>
-   </div>
+    <!-- PAGE 5: LOT MANAGEMENT & SHORT MOLDING TRACKER -->
+    <div id="page5" class="page">
+        <h3>Lot Tracker & Short Molding</h3>
+        <label>Lot / Order Reference:</label>
+        <input type="text" id="lotRef" placeholder="e.g. Lot #1204">
+        <label>Target Order Qty (Pcs):</label>
+        <input type="number" id="lotTargetQty" placeholder="0">
+        <label>Actual Produced Qty (Pcs):</label>
+        <input type="number" id="lotActualQty" placeholder="0">
+        <button class="btn-success" onclick="saveLotTrackerEntry()">Save Lot Record</button>
 
-   <!-- PAGE 5: LOT MANAGEMENT & SHORT MOULDING TRACKER -->
-   <div id="page5" class="app-page">
-    <div class="section-title">
-     <span>Lot Management &amp; Short Molding Tracker</span>
-     <button type="button" class="btn-success" style="padding: 6px 10px; font-size: 12px; min-width: auto; flex: none;" onclick="addLotTrackerRow()">+ Add New Lot / Order</button>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Lot Ref</th>
+                        <th>Target</th>
+                        <th>Actual</th>
+                        <th>Variance (+/-)</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="lotTrackerTableBody"></tbody>
+            </table>
+        </div>
     </div>
-    <div class="inventory-panel" style="margin-bottom: 10px;">
-     <p style="font-size: 11px; color: #64748b; margin-top: 0; margin-bottom: 10px;">Compare target order quantity against actual produced pieces to automatically calculate short molding / surplus variance and percentages.</p>
-     <div class="table-container">
-      <table>
-       <thead>
-        <tr>
-         <th>Lot / Slip #</th>
-         <th>Item / Description</th>
-         <th>Target Qty (Pcs)</th>
-         <th>Actual Produced (Pcs)</th>
-         <th>Variance (+ / - Pcs)</th>
-         <th>Short / Surplus (%)</th>
-         <th>Action</th>
-        </tr>
-       </thead>
-       <tbody id="lotTrackerTableBody"></tbody>
-      </table>
-     </div>
-    </div>
-    <div class="btn-container" style="margin-top: 20px;">
-     <button onclick="switchPage(4)">&larr; Back to Daily Production</button>
-     <button class="btn-success" onclick="saveToCloud(); showToast('Lot Tracker Saved')">Save Lot Tracker</button>
-    </div>
-   </div>
+</div>
 
-  </div>
-  <script>
-    // Firebase Initialization Configuration
+<!-- Generic Edit Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3>Edit Record</h3>
+        <div id="modalBody"></div>
+        <button class="btn-success" onclick="saveModalChanges()">Save Changes</button>
+        <button class="btn-danger" onclick="closeModal()" style="margin-top:5px;">Cancel</button>
+    </div>
+</div>
+
+<script>
+    // Initialize Firebase (Placeholder config - active on user firebase hosting)
     const firebaseConfig = {
-        apiKey: "AIzaSyDummyKeyForTemplateInstantiation12345",
-        authDomain: "moulding-production-app.firebaseapp.com",
-        projectId: "moulding-production-app",
-        storageBucket: "moulding-production-app.appspot.com",
-        messagingSenderId: "123456789012",
-        appId: "1:123456789012:web:abcdef123456"
+        apiKey: "AIzaSyDummyKeyForAppStructure99",
+        authDomain: "moldpro-app.firebaseapp.com",
+        projectId: "moldpro-app",
+        storageBucket: "moldpro-app.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:12345:web:abcde"
     };
-
     if (!firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
-    const cloudDb = firebase.firestore();
+    const db = firebase.firestore();
 
-    let inventoryData = { "PURE PP": { opening: 500, purchased: 200 } };
-    let transactions = []; 
-    let itemsData = [
-        { color: "STICK GREEN", qty: 3000, bags: 2, gross: 16.30, scrap: 0.1, net: 16.20 },
-        { color: "PINK", qty: 3000, bags: 2, gross: 16.35, scrap: 0.1, net: 16.25 }
-    ];
-    let dailyProductionData = [
-        { machineNo: "M-06", operator: "ALI", shiftAActual: 1200, shiftAGood: 1150, shiftBActual: 1300, shiftBGood: 1250 }
-    ];
-    let lotTrackerData = [
-        { lotNo: "963", itemName: "STICK", targetQty: 6000, actualQty: 6000 }
-    ];
-    let toastTimeout;
-    let isRemoteUpdate = false;
+    let transactions = [];
+    let jobCards = [];
+    let dailyProductions = [];
+    let lotTrackers = [];
+    let currentEditingId = null;
 
-    function showToast(message) {
-        const toast = document.getElementById('liveToast');
-        toast.innerText = message.toUpperCase();
-        toast.style.display = 'flex';
-        clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => { toast.style.display = 'none'; }, 3500);
-    }
-
-    // Initialize Real-time Cloud Synchronization Listener
-    function initCloudSync() {
-        cloudDb.collection("mouldingApp").doc("mainData")
-            .onSnapshot((doc) => {
-                if (doc.exists) {
-                    isRemoteUpdate = true;
-                    const data = doc.data();
-                    if (data.inventoryData) inventoryData = data.inventoryData;
-                    if (data.transactions) transactions = data.transactions;
-                    if (data.itemsData) itemsData = data.itemsData;
-                    if (data.dailyProductionData) dailyProductionData = data.dailyProductionData;
-                    if (data.lotTrackerData) lotTrackerData = data.lotTrackerData;
-                    
-                    if (data.specs) {
-                        if (document.getElementById('slipNo')) document.getElementById('slipNo').value = data.specs.slipNo || '';
-                        if (document.getElementById('itemName')) document.getElementById('itemName').value = data.specs.itemName || '';
-                        if (document.getElementById('machineNo')) document.getElementById('machineNo').value = data.specs.machineNo || '';
-                        if (document.getElementById('cycleTime')) document.getElementById('cycleTime').value = data.specs.cycleTime || 20;
-                        if (document.getElementById('mouldCavity')) document.getElementById('mouldCavity').value = data.specs.mouldCavity || 2;
-                        if (document.getElementById('rateType')) document.getElementById('rateType').value = data.specs.rateType || 'hourly';
-                        if (document.getElementById('rateValue')) document.getElementById('rateValue').value = data.specs.rateValue || 1000;
-                        if (document.getElementById('extraOverhead')) document.getElementById('extraOverhead').value = data.specs.extraOverhead || 0;
-                        if (document.getElementById('startDate')) document.getElementById('startDate').value = data.specs.startDate || '';
-                        if (document.getElementById('endDate')) document.getElementById('endDate').value = data.specs.endDate || '';
-                        if (data.specs.materialType) document.getElementById('materialType').value = data.specs.materialType;
-                    }
-
-                    updateMaterialDropdown();
-                    renderCardsWithoutTrigger();
-                    renderDailyProductionWithoutTrigger();
-                    renderLotTrackerWithoutTrigger();
-                    isRemoteUpdate = false;
-                }
-            }, (error) => {
-                console.error("Firestore sync error:", error);
-            });
-    }
-
-    function saveToCloud() {
-        if (isRemoteUpdate) return;
-        
-        const specs = {
-            slipNo: document.getElementById('slipNo').value.toUpperCase(),
-            itemName: document.getElementById('itemName').value.toUpperCase(),
-            materialType: document.getElementById('materialType').value.toUpperCase(),
-            machineNo: document.getElementById('machineNo').value.toUpperCase(),
-            cycleTime: document.getElementById('cycleTime').value,
-            mouldCavity: document.getElementById('mouldCavity').value,
-            rateType: document.getElementById('rateType').value,
-            rateValue: document.getElementById('rateValue').value,
-            extraOverhead: document.getElementById('extraOverhead').value,
-            startDate: document.getElementById('startDate').value,
-            endDate: document.getElementById('endDate').value
-        };
-
-        cloudDb.collection("mouldingApp").doc("mainData").set({
-            inventoryData: inventoryData,
-            transactions: transactions,
-            itemsData: itemsData,
-            dailyProductionData: dailyProductionData,
-            lotTrackerData: lotTrackerData,
-            specs: specs,
-            lastUpdatedBy: document.getElementById('loginUser').value.toUpperCase(),
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then(() => {
-            showToast("Synced to Cloud DB");
-        })
-        .catch((error) => {
-            console.error("Error writing document: ", error);
-        });
-    }
-
-    function handleLogin() {
-        let user = document.getElementById('loginUser').value.trim();
-        if(!user) {
-            alert("PLEASE ENTER USERNAME");
-            return;
-        }
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'block';
-        document.getElementById('loggedInUserDisplay').innerText = "👤 USER CONNECTED: " + user.toUpperCase();
-        
-        initCloudSync();
-
-        let totalOpens = parseInt(localStorage.getItem('mouldingAppOpens') || '0') + 1;
-        localStorage.setItem('mouldingAppOpens', totalOpens);
-        document.getElementById('visitCountDisplay').innerText = "📊 TOTAL APP OPENS: " + totalOpens;
-
-        recallDates();
-        updateMaterialDropdown();
-        renderCardsWithoutTrigger();
-        renderDailyProductionWithoutTrigger();
-        renderLotTrackerWithoutTrigger();
-    }
-
-    function handleLogout() {
-        document.getElementById('appContainer').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'flex';
-    }
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('invDate').valueAsDate = new Date();
+        document.getElementById('startDate').valueAsDate = new Date();
+        loadDataFromFirebase();
+        incrementAppOpen();
+    });
 
     function switchPage(pageNum) {
-        document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active-page'));
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        
-        document.getElementById('page' + pageNum).classList.add('active-page');
+        document.getElementById('page' + pageNum).classList.add('active');
         document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
-        window.scrollTo(0, 0);
     }
 
-    function recallDates() {
-        let today = new Date();
-        let firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-        let lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
-        document.getElementById('stockFromDate').value = firstDay;
-        document.getElementById('stockToDate').value = lastDay;
-        filterInventory();
-    }
-
-    function updateMaterialDropdown() {
-        const select = document.getElementById('materialType');
-        let currentSelected = select.value;
-        select.innerHTML = '';
-        let keys = Object.keys(inventoryData);
-        if (keys.length === 0) {
-            let opt = document.createElement('option');
-            opt.value = "";
-            opt.textContent = "-- NO MATERIAL ADDED --";
-            select.appendChild(opt);
-            return;
-        }
-        keys.forEach(material => {
-            let opt = document.createElement('option');
-            opt.value = material;
-            opt.textContent = material;
-            if (material === currentSelected) opt.selected = true;
-            select.appendChild(opt);
-        });
-    }
-
-    function addNewMaterialType() {
-        let newMat = prompt("ENTER NEW RAW MATERIAL / GRANULE TYPE NAME:", "");
-        if (!newMat) return;
-        newMat = newMat.trim().toUpperCase();
-        if (!newMat || inventoryData[newMat]) return;
-        let opening = parseFloat(prompt(`ENTER INITIAL STOCK (KG):`, "0")) || 0;
-        inventoryData[newMat] = { opening: opening, purchased: 0 };
-        updateMaterialDropdown();
-        document.getElementById('materialType').value = newMat;
-        calculateBilling();
-    }
-
-    function renderCards() {
-        const container = document.getElementById('cardsContainer');
-        container.innerHTML = '';
-        itemsData.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = 'item-card';
-            card.innerHTML = `
-                <div class="item-card-header">
-                    <span>#${index + 1} - COLOR DETAILS</span>
-                    <div style="display: flex; gap: 4px;">
-                        <button type="button" class="edit-action-btn" onclick="editCard(${index})">EDIT</button>
-                        <button type="button" class="remove-card-btn" onclick="removeCard(${index})">X</button>
-                    </div>
-                </div>
-                <div class="card-grid">
-                    <div class="input-group" style="grid-column: span 2;">
-                        <label>Color / Description</label>
-                        <input type="text" class="card-color" value="${item.color}" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group">
-                        <label>Quantity (Pcs)</label>
-                        <input type="number" class="card-qty" value="${item.qty}" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group">
-                        <label>Boray / Bags</label>
-                        <input type="number" class="card-bag" value="${item.bags}" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group">
-                        <label>Gross Wt (Kg)</label>
-                        <input type="number" class="card-gross" value="${item.gross}" step="0.01" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group">
-                        <label>Scrap / Waste (Kg)</label>
-                        <input type="number" class="card-scrap" value="${item.scrap || 0}" step="0.01" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group" style="grid-column: span 2;">
-                        <label>Net Finished Wt (Kg) - Deducted from Inventory</label>
-                        <input type="number" class="card-net" value="${item.net}" step="0.01" oninput="updateDataFromCards()">
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-        calculateBilling();
-    }
-
-    function renderCardsWithoutTrigger() {
-        const container = document.getElementById('cardsContainer');
-        container.innerHTML = '';
-        itemsData.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = 'item-card';
-            card.innerHTML = `
-                <div class="item-card-header">
-                    <span>#${index + 1} - COLOR DETAILS</span>
-                    <div style="display: flex; gap: 4px;">
-                        <button type="button" class="edit-action-btn" onclick="editCard(${index})">EDIT</button>
-                        <button type="button" class="remove-card-btn" onclick="removeCard(${index})">X</button>
-                    </div>
-                </div>
-                <div class="card-grid">
-                    <div class="input-group" style="grid-column: span 2;">
-                        <label>Color / Description</label>
-                        <input type="text" class="card-color" value="${item.color}" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group">
-                        <label>Quantity (Pcs)</label>
-                        <input type="number" class="card-qty" value="${item.qty}" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group">
-                        <label>Boray / Bags</label>
-                        <input type="number" class="card-bag" value="${item.bags}" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group">
-                        <label>Gross Wt (Kg)</label>
-                        <input type="number" class="card-gross" value="${item.gross}" step="0.01" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group">
-                        <label>Scrap / Waste (Kg)</label>
-                        <input type="number" class="card-scrap" value="${item.scrap || 0}" step="0.01" oninput="updateDataFromCards()">
-                    </div>
-                    <div class="input-group" style="grid-column: span 2;">
-                        <label>Net Finished Wt (Kg) - Deducted from Inventory</label>
-                        <input type="number" class="card-net" value="${item.net}" step="0.01" oninput="updateDataFromCards()">
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-        calculateBillingOnly();
-    }
-
-    // Daily Production Rendering and Updates
-    function renderDailyProduction() {
-        renderDailyProductionCards();
-        saveToCloud();
-    }
-
-    function renderDailyProductionWithoutTrigger() {
-        renderDailyProductionCards();
-    }
-
-    function renderDailyProductionCards() {
-        const container = document.getElementById('dailyProdContainer');
-        container.innerHTML = '';
-        dailyProductionData.forEach((row, index) => {
-            const card = document.createElement('div');
-            card.className = 'item-card';
-            card.innerHTML = `
-                <div class="item-card-header">
-                    <span>MACHINE DAILY PRODUCTION #${index + 1} (${row.machineNo})</span>
-                    <div style="display: flex; gap: 4px;">
-                        <button type="button" class="edit-action-btn" onclick="openEditDailyProdModal(${index})">EDIT</button>
-                        <button type="button" class="remove-card-btn" onclick="removeDailyProdRow(${index})">X</button>
-                    </div>
-                </div>
-                <div class="card-grid">
-                    <div class="input-group">
-                        <label>Machine No.</label>
-                        <input type="text" class="dp-machine" value="${row.machineNo}" oninput="updateDataFromDailyProd()">
-                    </div>
-                    <div class="input-group">
-                        <label>Operator</label>
-                        <input type="text" class="dp-operator" value="${row.operator}" oninput="updateDataFromDailyProd()">
-                    </div>
-                    <div class="input-group">
-                        <label>Shift A - Actual Shot</label>
-                        <input type="number" class="dp-a-actual" value="${row.shiftAActual}" oninput="updateDataFromDailyProd()">
-                    </div>
-                    <div class="input-group">
-                        <label>Shift A - Good Shot</label>
-                        <input type="number" class="dp-a-good" value="${row.shiftAGood}" oninput="updateDataFromDailyProd()">
-                    </div>
-                    <div class="input-group">
-                        <label>Shift B - Actual Shot</label>
-                        <input type="number" class="dp-b-actual" value="${row.shiftBActual}" oninput="updateDataFromDailyProd()">
-                    </div>
-                    <div class="input-group">
-                        <label>Shift B - Good Shot</label>
-                        <input type="number" class="dp-b-good" value="${row.shiftBGood}" oninput="updateDataFromDailyProd()">
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
-
-    function openEditDailyProdModal(index) {
-        let row = dailyProductionData[index];
-        document.getElementById('editDpIndex').value = index;
-        document.getElementById('modalDpMachine').value = row.machineNo;
-        document.getElementById('modalDpOperator').value = row.operator;
-        document.getElementById('modalDpAActual').value = row.shiftAActual;
-        document.getElementById('modalDpAGood').value = row.shiftAGood;
-        document.getElementById('modalDpBActual').value = row.shiftBActual;
-        document.getElementById('modalDpBGood').value = row.shiftBGood;
-        document.getElementById('editDailyProdModal').style.display = 'flex';
-    }
-
-    function closeEditDailyProdModal() {
-        document.getElementById('editDailyProdModal').style.display = 'none';
-    }
-
-    function saveEditDailyProd() {
-        let index = parseInt(document.getElementById('editDpIndex').value);
-        if (!isNaN(index) && dailyProductionData[index]) {
-            dailyProductionData[index].machineNo = document.getElementById('modalDpMachine').value.toUpperCase();
-            dailyProductionData[index].operator = document.getElementById('modalDpOperator').value.toUpperCase();
-            dailyProductionData[index].shiftAActual = parseFloat(document.getElementById('modalDpAActual').value) || 0;
-            dailyProductionData[index].shiftAGood = parseFloat(document.getElementById('modalDpAGood').value) || 0;
-            dailyProductionData[index].shiftBActual = parseFloat(document.getElementById('modalDpBActual').value) || 0;
-            dailyProductionData[index].shiftBGood = parseFloat(document.getElementById('modalDpBGood').value) || 0;
-        }
-        closeEditDailyProdModal();
-        renderDailyProduction();
-    }
-
-    function updateDataFromDailyProd() {
-        const cards = document.querySelectorAll('#dailyProdContainer .item-card');
-        cards.forEach((card, index) => {
-            if (dailyProductionData[index]) {
-                dailyProductionData[index].machineNo = card.querySelector('.dp-machine').value.toUpperCase();
-                dailyProductionData[index].operator = card.querySelector('.dp-operator').value.toUpperCase();
-                dailyProductionData[index].shiftAActual = parseFloat(card.querySelector('.dp-a-actual').value) || 0;
-                dailyProductionData[index].shiftAGood = parseFloat(card.querySelector('.dp-a-good').value) || 0;
-                dailyProductionData[index].shiftBActual = parseFloat(card.querySelector('.dp-b-actual').value) || 0;
-                dailyProductionData[index].shiftBGood = parseFloat(card.querySelector('.dp-b-good').value) || 0;
-            }
-        });
-        saveToCloud();
-    }
-
-    function addDailyProdRow() {
-        dailyProductionData.push({ machineNo: "M-06", operator: "", shiftAActual: 0, shiftAGood: 0, shiftBActual: 0, shiftBGood: 0 });
-        renderDailyProduction();
-    }
-
-    function removeDailyProdRow(index) {
-        dailyProductionData.splice(index, 1);
-        renderDailyProduction();
-    }
-
-    // Lot Tracker Rendering and Updates
-    function renderLotTracker() {
-        renderLotTrackerTable();
-        saveToCloud();
-    }
-
-    function renderLotTrackerWithoutTrigger() {
-        renderLotTrackerTable();
-    }
-
-    function renderLotTrackerTable() {
-        const tbody = document.getElementById('lotTrackerTableBody');
-        tbody.innerHTML = '';
-        if (lotTrackerData.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="color: #64748b; padding: 15px;">NO LOTS ADDED YET.</td></tr>`;
-            return;
-        }
-        lotTrackerData.forEach((lot, index) => {
-            let diff = lot.actualQty - lot.targetQty;
-            let percentage = lot.targetQty > 0 ? ((diff / lot.targetQty) * 100).toFixed(1) : 0;
-            let diffColor = diff < 0 ? 'var(--danger-color)' : (diff > 0 ? 'var(--success-color)' : 'var(--primary-color)');
-            let diffText = diff > 0 ? `+${diff.toLocaleString()} (${percentage}%)` : `${diff.toLocaleString()} (${percentage}%)`;
-
-            let row = tbody.insertRow();
-            row.innerHTML = `
-                <td><input type="text" class="lt-lot" value="${lot.lotNo}" oninput="updateDataFromLotTracker()" style="text-align: center;"></td>
-                <td><input type="text" class="lt-item" value="${lot.itemName}" oninput="updateDataFromLotTracker()" style="text-align: center;"></td>
-                <td><input type="number" class="lt-target" value="${lot.targetQty}" oninput="updateDataFromLotTracker()" style="text-align: center;"></td>
-                <td><input type="number" class="lt-actual" value="${lot.actualQty}" oninput="updateDataFromLotTracker()" style="text-align: center;"></td>
-                <td style="font-weight: bold; color: ${diffColor};">${diffText}</td>
-                <td style="font-weight: bold; color: ${diff < 0 ? 'var(--danger-color)' : 'var(--success-color)'};">${diff < 0 ? 'SHORT MOULDING' : (diff > 0 ? 'SURPLUS' : 'EXACT')}</td>
-                <td>
-                    <div style="display: flex; gap: 4px; justify-content: center;">
-                        <button type="button" class="edit-action-btn" onclick="openEditLotModal(${index})">EDIT</button>
-                        <button type="button" class="remove-card-btn" onclick="removeLotTrackerRow(${index})">X</button>
-                    </div>
-                </td>
-            `;
-        });
-    }
-
-    function openEditLotModal(index) {
-        let lot = lotTrackerData[index];
-        document.getElementById('editLotIndex').value = index;
-        document.getElementById('modalLotNo').value = lot.lotNo;
-        document.getElementById('modalLotItem').value = lot.itemName;
-        document.getElementById('modalLotTarget').value = lot.targetQty;
-        document.getElementById('modalLotActual').value = lot.actualQty;
-        document.getElementById('editLotModal').style.display = 'flex';
-    }
-
-    function closeEditLotModal() {
-        document.getElementById('editLotModal').style.display = 'none';
-    }
-
-    function saveEditLot() {
-        let index = parseInt(document.getElementById('editLotIndex').value);
-        if (!isNaN(index) && lotTrackerData[index]) {
-            lotTrackerData[index].lotNo = document.getElementById('modalLotNo').value.toUpperCase();
-            lotTrackerData[index].itemName = document.getElementById('modalLotItem').value.toUpperCase();
-            lotTrackerData[index].targetQty = parseFloat(document.getElementById('modalLotTarget').value) || 0;
-            lotTrackerData[index].actualQty = parseFloat(document.getElementById('modalLotActual').value) || 0;
-        }
-        closeEditLotModal();
-        renderLotTracker();
-    }
-
-    function updateDataFromLotTracker() {
-        const rows = document.querySelectorAll('#lotTrackerTableBody tr');
-        rows.forEach((row, index) => {
-            if (lotTrackerData[index]) {
-                lotTrackerData[index].lotNo = row.querySelector('.lt-lot').value.toUpperCase();
-                lotTrackerData[index].itemName = row.querySelector('.lt-item').value.toUpperCase();
-                lotTrackerData[index].targetQty = parseFloat(row.querySelector('.lt-target').value) || 0;
-                lotTrackerData[index].actualQty = parseFloat(row.querySelector('.lt-actual').value) || 0;
-            }
-        });
-        saveToCloud();
-    }
-
-    function addLotTrackerRow() {
-        lotTrackerData.push({ lotNo: "964", itemName: "NEW ITEM", targetQty: 5000, actualQty: 5000 });
-        renderLotTracker();
-    }
-
-    function removeLotTrackerRow(index) {
-        lotTrackerData.splice(index, 1);
-        renderLotTracker();
-    }
-
-    function updateDataFromCards() {
-        const cards = document.querySelectorAll('#cardsContainer .item-card');
-        cards.forEach((card, index) => {
-            if (itemsData[index]) {
-                itemsData[index].color = card.querySelector('.card-color').value.toUpperCase();
-                itemsData[index].qty = parseFloat(card.querySelector('.card-qty').value) || 0;
-                itemsData[index].bags = parseFloat(card.querySelector('.card-bag').value) || 0;
-                itemsData[index].gross = parseFloat(card.querySelector('.card-gross').value) || 0;
-                itemsData[index].scrap = parseFloat(card.querySelector('.card-scrap').value) || 0;
-                itemsData[index].net = parseFloat(card.querySelector('.card-net').value) || 0;
-            }
-        });
-        calculateBilling();
-    }
-
-    function addRow() {
-        itemsData.push({ color: "NEW COLOR", qty: 0, bags: 0, gross: 0.00, scrap: 0.00, net: 0.00 });
-        renderCards();
-    }
-
-    function removeCard(index) {
-        itemsData.splice(index, 1);
-        renderCards();
-    }
-
-    function editCard(index) {
-        let item = itemsData[index];
-        let newColor = prompt("EDIT COLOR:", item.color);
-        if (newColor !== null) {
-            item.color = newColor.toUpperCase();
-            item.qty = parseFloat(prompt("EDIT QUANTITY:", item.qty)) || item.qty;
-            item.bags = parseFloat(prompt("EDIT BAGS:", item.bags)) || item.bags;
-            item.gross = parseFloat(prompt("EDIT GROSS WT:", item.gross)) || item.gross;
-            item.scrap = parseFloat(prompt("EDIT SCRAP WT:", item.scrap || 0)) || 0;
-            item.net = parseFloat(prompt("EDIT NET WT:", item.net)) || item.net;
-            renderCards();
-        }
-    }
-
-    function openPurchaseModal() {
-        let keys = Object.keys(inventoryData);
-        if (keys.length === 0) return;
-        let material = prompt(`ENTER GRANULE TYPE (${keys.join(", ")}):`, keys[0]);
-        if (!material) return;
-        material = material.toUpperCase();
-        if (!inventoryData[material]) return;
-        let qty = parseFloat(prompt(`ENTER PURCHASE QUANTITY IN KG:`, "100"));
-        let pDate = prompt(`ENTER PURCHASE DATE (YYYY-MM-DD):`, new Date().toISOString().split('T')[0]);
-        if (!isNaN(qty) && qty > 0 && pDate) {
-            transactions.push({ date: pDate, type: 'purchase', material: material, qty: qty });
-            calculateBilling();
-        }
-    }
-
-    let editingOriginalMaterial = "";
-    function editInventory(material) {
-        editingOriginalMaterial = material;
-        document.getElementById('modalEditName').value = material;
-        document.getElementById('modalEditOpening').value = inventoryData[material].opening || 0;
-        document.getElementById('editMaterialModal').style.display = 'flex';
-    }
-
-    function closeEditModal() {
-        document.getElementById('editMaterialModal').style.display = 'none';
-    }
-
-    function saveEditMaterial() {
-        let newName = document.getElementById('modalEditName').value.trim().toUpperCase();
-        let newOpening = parseFloat(document.getElementById('modalEditOpening').value) || 0;
-        let material = editingOriginalMaterial;
-
-        if (!newName) {
-            alert("MATERIAL NAME CANNOT BE EMPTY.");
-            return;
-        }
-
-        if (newName !== material) {
-            inventoryData[newName] = { opening: newOpening, purchased: 0 };
-            delete inventoryData[material];
-            transactions.forEach(t => {
-                if (t.material === material) t.material = newName;
-            });
-            let matSelect = document.getElementById('materialType');
-            if (matSelect.value === material) matSelect.value = newName;
-        } else {
-            inventoryData[material].opening = newOpening;
-        }
-
-        closeEditModal();
-        updateMaterialDropdown();
-        calculateBilling();
-    }
-
-    function deleteMaterial(material) {
-        if (confirm(`DELETE ${material}?`)) {
-            delete inventoryData[material];
-            updateMaterialDropdown();
-            calculateBilling();
-        }
-    }
-
-    function filterInventory() {
-        calculateBillingOnly();
-    }
-
-    function calculateBilling() {
-        calculateBillingOnly();
-        saveToCloud();
+    function addColorCard() {
+        let container = document.getElementById('colorCardsContainer');
+        let cardDiv = document.createElement('div');
+        cardDiv.style.cssText = "background:#f8f9fa; padding:8px; margin-bottom:8px; border:1px solid #ddd; border-radius:4px;";
+        cardDiv.innerHTML = `
+            <label>Color Name:</label>
+            <input type="text" class="card-color" placeholder="e.g. RED, GREEN">
+            <label>Pieces Produced:</label>
+            <input type="number" class="card-pcs" placeholder="0" oninput="calculateBillingOnly()">
+            <label>Bags Packed:</label>
+            <input type="number" class="card-bags" placeholder="0">
+            <label>Net Finished Wt (Kg):</label>
+            <input type="number" class="card-netwt" placeholder="0.00" oninput="calculateBillingOnly()">
+            <label>Scrap / Waste Wt (Kg):</label>
+            <input type="number" class="card-scrap" placeholder="0.00" oninput="calculateBillingOnly()">
+            <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove(); calculateBillingOnly();">Remove Color</button>
+        `;
+        container.appendChild(cardDiv);
     }
 
     function calculateBillingOnly() {
-        let totalQty = 0, totalGross = 0, totalScrap = 0, totalNet = 0;
-        itemsData.forEach(item => {
-            totalQty += item.qty;
-            totalGross += item.gross;
-            totalScrap += (item.scrap || 0);
-            totalNet += item.net;
+        let rate = parseFloat(document.getElementById('mouldingRate').value) || 0;
+        let colorCards = document.querySelectorAll('#colorCardsContainer > div');
+        let billingBody = document.getElementById('billingTableBody');
+        billingBody.innerHTML = '';
+        let grandTotal = 0;
+        let totalNet = 0;
+        let totalScrap = 0;
+
+        colorCards.forEach(card => {
+            let color = card.querySelector('.card-color').value || 'Unspecified';
+            let pcs = parseFloat(card.querySelector('.card-pcs').value) || 0;
+            let bags = parseFloat(card.querySelector('.card-bags').value) || 0;
+            let netWt = parseFloat(card.querySelector('.card-netwt').value) || 0;
+            let scrap = parseFloat(card.querySelector('.card-scrap').value) || 0;
+
+            let amount = netWt * rate;
+            grandTotal += amount;
+            totalNet += netWt;
+            totalScrap += scrap;
+
+            billingBody.innerHTML += `
+                <tr>
+                    <td>${color}</td>
+                    <td>${pcs}</td>
+                    <td>${bags}</td>
+                    <td>${netWt.toFixed(2)}</td>
+                    <td>${scrap.toFixed(2)}</td>
+                    <td>${amount.toFixed(2)}</td>
+                </tr>`;
         });
 
-        let totalConsumption = totalNet + totalScrap;
+        document.getElementById('grandTotalAmount').textContent = grandTotal.toFixed(2);
 
+        // Targeted Consumption Deduction Isolation Fix
+        let totalConsumption = totalNet + totalScrap;
         let selectedMaterial = document.getElementById('materialType').value;
         let jobStartDate = document.getElementById('startDate').value;
-        
+
+        transactions = transactions.filter(t => !(t.type === 'consumption' && t.jobDate === jobStartDate));
         if (selectedMaterial && totalConsumption > 0 && jobStartDate) {
-            transactions = transactions.filter(t => !(t.type === 'consumption' && t.jobDate === jobStartDate && t.material === selectedMaterial));
-            transactions.push({ date: jobStartDate, jobDate: jobStartDate, type: 'consumption', material: selectedMaterial, qty: totalConsumption });
-        }
-
-        let fromDate = document.getElementById('stockFromDate').value;
-        let toDate = document.getElementById('stockToDate').value;
-
-        const tbody = document.getElementById('inventoryTableBody');
-        tbody.innerHTML = "";
-        let keys = Object.keys(inventoryData);
-        
-        if (keys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="color: #64748b; padding: 15px;">NO INVENTORY ITEMS ADDED.</td></tr>`;
-        } else {
-            keys.forEach(material => {
-                let baseOpening = inventoryData[material].opening || 0;
-                let priorPurchases = 0;
-                let priorConsumption = 0;
-                let periodPurchases = 0;
-                let periodConsumption = 0;
-
-                transactions.forEach(t => {
-                    if (t.material === material) {
-                        if (fromDate && t.date < fromDate) {
-                            if (t.type === 'purchase') priorPurchases += t.qty;
-                            if (t.type === 'consumption') priorConsumption += t.qty;
-                        } else if ((!fromDate || t.date >= fromDate) && (!toDate || t.date <= toDate)) {
-                            if (t.type === 'purchase') periodPurchases += t.qty;
-                            if (t.type === 'consumption') periodConsumption += t.qty;
-                        }
-                    }
-                });
-
-                let openingStock = baseOpening + priorPurchases - priorConsumption;
-                let closingStock = (openingStock + periodPurchases) - periodConsumption;
-
-                let row = tbody.insertRow();
-                row.innerHTML = `
-                    <td style="font-weight: 600; text-align: left; padding-left: 8px;">${material}</td>
-                    <td>${openingStock.toFixed(1)}</td>
-                    <td style="color: var(--success-color);">+${periodPurchases.toFixed(1)}</td>
-                    <td style="color: var(--danger-color);">-${periodConsumption.toFixed(1)}</td>
-                    <td style="font-weight: bold; color: ${closingStock < 0 ? 'var(--danger-color)' : 'var(--primary-color)'};">${closingStock.toFixed(1)}</td>
-                    <td>
-                        <div style="display: flex; gap: 4px; justify-content: center;">
-                            <button type="button" class="edit-action-btn" onclick="editInventory('${material}')">EDIT</button>
-                            <button type="button" class="remove-card-btn" onclick="deleteMaterial('${material}')">X</button>
-                        </div>
-                    </td>
-                `;
+            transactions.push({
+                date: jobStartDate,
+                jobDate: jobStartDate,
+                type: 'consumption',
+                material: selectedMaterial, // Strictly linked ONLY to the selected granule type
+                qty: totalConsumption
             });
         }
-
-        let mouldPcs = parseFloat(document.getElementById('mouldCavity').value) || 1;
-        let cycleTimeSec = parseFloat(document.getElementById('cycleTime').value) || 0;
-        let rateType = document.getElementById('rateType').value;
-        let rateVal = parseFloat(document.getElementById('rateValue').value) || 0;
-        let extraOverhead = parseFloat(document.getElementById('extraOverhead').value) || 0;
-
-        let totalHours = mouldPcs > 0 ? (totalQty * cycleTimeSec) / (mouldPcs * 3600) : 0;
-        let effectiveRate = rateType === 'hourly' ? (rateVal / 3600) * cycleTimeSec : rateVal;
-        let totalAmount = (totalQty * effectiveRate) + extraOverhead;
-
-        document.getElementById('totalQty').innerText = totalQty.toLocaleString() + ' PCS';
-        document.getElementById('totalGrossDisp').innerText = totalGross.toFixed(2) + ' KG';
-        document.getElementById('totalScrapDisp').innerText = totalScrap.toFixed(2) + ' KG';
-        document.getElementById('totalNetDisp').innerText = totalNet.toFixed(2) + ' KG';
-        document.getElementById('totalHours').innerText = totalHours.toFixed(2) + ' HRS';
-        document.getElementById('totalAmount').innerText = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' PKR';
+        renderInventory();
     }
 
-    function exportToCSV() {
-        let slipNo = document.getElementById('slipNo').value;
-        let itemName = document.getElementById('itemName').value;
-        let machineNo = document.getElementById('machineNo').value;
-        
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "MOULDING PRODUCTION & BILLING REPORT\n";
-        csvContent += `SLIP NO,${slipNo}\n`;
-        csvContent += `ITEM NAME,${itemName}\n`;
-        csvContent += `MACHINE NO,${machineNo}\n\n`;
-        csvContent += "COLOR,QUANTITY (PCS),BAGS,GROSS WT (KG),SCRAP WT (KG),NET WT (KG)\n";
+    function addInventoryTransaction() {
+        let material = document.getElementById('invMaterialName').value.trim().toUpperCase();
+        let type = document.getElementById('invType').value;
+        let qty = parseFloat(document.getElementById('invQty').value) || 0;
+        let date = document.getElementById('invDate').value;
 
-        itemsData.forEach(item => {
-            csvContent += `"${item.color}",${item.qty},${item.bags},${item.gross},${item.scrap || 0},${item.net}\n`;
+        if (!material || qty <= 0) {
+            alert('Please enter a valid material name and quantity.');
+            return;
+        }
+
+        transactions.push({ material, type, qty, date });
+        saveDataToFirebase();
+        document.getElementById('invMaterialName').value = '';
+        document.getElementById('invQty').value = '';
+    }
+
+    function renderInventory() {
+        let summary = {};
+        transactions.forEach(t => {
+            if (!summary[t.material]) summary[t.material] = { purchase: 0, consumption: 0 };
+            if (t.type === 'purchase') summary[t.material].purchase += t.qty;
+            if (t.type === 'consumption') summary[t.material].consumption += t.qty;
         });
 
-        let encodedUri = encodeURI(csvContent);
-        let link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `PRODUCTION_SLIP_${slipNo}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        let tbody = document.getElementById('inventorySummaryBody');
+        tbody.innerHTML = '';
+        for (let mat in summary) {
+            let closing = summary[mat].purchase - summary[mat].consumption;
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${mat}</b></td>
+                    <td style="color:green;">+${summary[mat].purchase.toFixed(2)}</td>
+                    <td style="color:red;">-${summary[mat].consumption.toFixed(2)}</td>
+                    <td><b>${closing.toFixed(2)}</b></td>
+                    <td><button class="btn-danger" style="padding:2px 5px; font-size:10px;" onclick="deleteMaterial('${mat}')">Del</button></td>
+                </tr>`;
+        }
     }
 
-    function saveSpecFields() { calculateBilling(); }
+    function deleteMaterial(mat) {
+        transactions = transactions.filter(t => t.material !== mat);
+        saveDataToFirebase();
+    }
+
+    function saveJobSpecs() {
+        calculateBillingOnly();
+        alert('Job specifications and billing successfully updated and synchronized.');
+        switchPage(3);
+    }
+
+    function addDailyProduction() {
+        let shift = document.getElementById('prodShift').value;
+        let shots = parseFloat(document.getElementById('prodShots').value) || 0;
+        let goodPcs = parseFloat(document.getElementById('prodGoodPcs').value) || 0;
+        let date = new Date().toISOString().split('T')[0];
+
+        dailyProductions.push({ date, shift, shots, goodPcs });
+        saveDataToFirebase();
+        renderDailyProduction();
+    }
+
+    function renderDailyProduction() {
+        let tbody = document.getElementById('dailyProdTableBody');
+        tbody.innerHTML = '';
+        dailyProductions.forEach((p, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${p.date}</td>
+                    <td>${p.shift}</td>
+                    <td>${p.shots}</td>
+                    <td>${p.goodPcs}</td>
+                    <td><button class="btn-danger" style="padding:2px 5px; font-size:10px;" onclick="dailyProductions.splice(${index},1); saveDataToFirebase(); renderDailyProduction();">Del</button></td>
+                </tr>`;
+        });
+    }
+
+    function saveLotTrackerEntry() {
+        let lotRef = document.getElementById('lotRef').value;
+        let target = parseFloat(document.getElementById('lotTargetQty').value) || 0;
+        let actual = parseFloat(document.getElementById('lotActualQty').value) || 0;
+        let variance = actual - target;
+        let status = variance === 0 ? "EXACT" : (variance > 0 ? `SURPLUS (+${variance})` : `SHORT (${variance})`);
+
+        lotTrackers.push({ lotRef, target, actual, variance, status });
+        saveDataToFirebase();
+        renderLotTracker();
+    }
+
+    function renderLotTracker() {
+        let tbody = document.getElementById('lotTrackerTableBody');
+        tbody.innerHTML = '';
+        lotTrackers.forEach((l, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${l.lotRef}</b></td>
+                    <td>${l.target}</td>
+                    <td>${l.actual}</td>
+                    <td>${l.variance}</td>
+                    <td style="color:${l.variance >= 0 ? 'green':'red'}; font-weight:bold;">${l.status}</td>
+                    <td><button class="btn-danger" style="padding:2px 5px; font-size:10px;" onclick="lotTrackers.splice(${index},1); saveDataToFirebase(); renderLotTracker();">Del</button></td>
+                </tr>`;
+        });
+    }
+
+    function saveDataToFirebase() {
+        db.collection("mouldingApp").doc("masterData").set({
+            transactions, jobCards, dailyProductions, lotTrackers
+        }).then(() => {
+            document.getElementById('connectionStatus').className = "status-bar status-online";
+            document.getElementById('connectionStatus').textContent = "STATUS: FIREBASE REAL-TIME CLOUD SYNCHRONIZED";
+            renderInventory();
+            renderDailyProduction();
+            renderLotTracker();
+        }).catch(err => {
+            document.getElementById('connectionStatus').className = "status-bar status-offline";
+            document.getElementById('connectionStatus').textContent = "STATUS: OFFLINE / SYNC ERROR";
+        });
+    }
+
+    function loadDataFromFirebase() {
+        db.collection("mouldingApp").doc("masterData").get().then((doc) => {
+            if (doc.exists) {
+                let data = doc.data();
+                transactions = data.transactions || [];
+                jobCards = data.jobCards || [];
+                dailyProductions = data.dailyProductions || [];
+                lotTrackers = data.lotTrackers || [];
+                renderInventory();
+                renderDailyProduction();
+                renderLotTracker();
+            }
+        });
+    }
+
+    function incrementAppOpen() {
+        let count = localStorage.getItem('appOpens') || 0;
+        count++;
+        localStorage.setItem('appOpens', count);
+        document.getElementById('appOpenCount').textContent = count;
+    }
+
+    function logoutUser() {
+        alert('Session closed securely.');
+        location.reload();
+    }
 </script>
- </body>
+</body>
 </html>
