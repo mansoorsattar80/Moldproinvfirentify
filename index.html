@@ -36,24 +36,29 @@
         .btn-edit { background: #e67e22; color: white; padding: 4px 8px; font-size: 11px; width: auto; margin-right: 3px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
-        th, td { border: 1px solid #ddd; padding: 5px; text-align: center; }
+        th, td { border: 1px solid #ddd; padding: 6px; text-align: center; vertical-align: middle; }
         th { background: var(--primary); color: white; }
         .table-responsive { overflow-x: auto; margin-bottom: 20px; }
         .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
         .header-elec-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
 
-        /* Print styles: Hide tabs, buttons, form inputs, and entry sections when printing */
+        /* Report-only Mode: Hide inputs, labels, buttons, and setup sections entirely */
         @media print {
             .nav-tabs, button, .no-print, 
             .header-elec-box, .shift-box, 
-            label, input, select, hr,
+            label, input, select, textarea, hr,
+            #page1 > h3:first-of-type,
+            #page2 > h3:first-of-type,
+            #page2 > h4,
             #page4 > h4:not(#gridSectionTitle),
-            #page4 > label, #page4 > input { display: none !important; }
+            #page5 > h3:first-of-type { display: none !important; }
             
             .page { display: none !important; }
             .page.active { display: block !important; }
             body { background: white; padding: 0; }
             .container { box-shadow: none; padding: 0; }
+            table { font-size: 10px; }
+            th, td { padding: 4px; }
         }
     </style>
 </head>
@@ -102,7 +107,7 @@
                 <tbody id="inventorySummaryBody"></tbody>
             </table>
         </div>
-        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (INVENTORY)</button>
+        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (INVENTORY REPORT)</button>
     </div>
 
     <!-- PAGE 2: JOB SPECS -->
@@ -162,7 +167,7 @@
         <div style="background:#e8f4fd; padding:10px; margin-top:10px; border-radius:4px; font-weight:bold;">
             GRAND TOTAL PAYABLE: PKR <span id="grandTotalAmount">0.00</span>
         </div>
-        <button class="btn-success" onclick="window.print()">PRINT / SAVE PDF (BILLING)</button>
+        <button class="btn-success" onclick="window.print()">PRINT / SAVE PDF (BILLING REPORT)</button>
     </div>
 
     <!-- PAGE 4: DAILY PROD -->
@@ -219,15 +224,15 @@
                         <th>MAIN ELEC (PREV-CURR)</th>
                         <th>MACHINE</th>
                         <th>OPERATOR</th>
-                        <th>SHIFTS (A / B)</th>
-                        <th>GOOD PCS (A / B)</th>
+                        <th>SHIFT A (SCREEN / GOOD)</th>
+                        <th>SHIFT B (SCREEN / GOOD)</th>
                         <th class="no-print">ACTION</th>
                     </tr>
                 </thead>
                 <tbody id="dailyProdTableBody"></tbody>
             </table>
         </div>
-        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (DAILY PROD)</button>
+        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (DAILY PROD REPORT)</button>
     </div>
 
     <!-- PAGE 5: LOT TRACKER -->
@@ -256,7 +261,7 @@
                 <tbody id="lotTrackerTableBody"></tbody>
             </table>
         </div>
-        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (LOT TRACKER)</button>
+        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (LOT TRACKER REPORT)</button>
     </div>
 </div>
 
@@ -284,18 +289,15 @@
         renderLotTracker();
     });
 
-    // Automatically clear Page 2 (Job Specs) inputs after printing
     window.addEventListener('afterprint', () => {
         document.getElementById('slipNo').value = '';
         document.getElementById('itemName').value = '';
         document.getElementById('partyName').value = '';
         document.getElementById('machineNo').value = '';
         
-        // Clear color cards container and add a fresh blank card
         document.getElementById('colorCardsContainer').innerHTML = '';
         addColorCard();
         
-        // Reset billing display
         document.getElementById('displayPartyName').textContent = '---';
         document.getElementById('billingTableBody').innerHTML = '';
         document.getElementById('grandTotalAmount').textContent = '0.00';
@@ -556,7 +558,7 @@
         let prev = parseFloat(mainMeter.elecPrevUnits) || 0;
         let curr = parseFloat(mainMeter.elecCurrUnits) || 0;
         let diff = curr - prev;
-        let meterDisplay = `${prev} - ${curr}<br><b style="color:#d9534f;">(Diff: ${diff})</b>`;
+        let meterDisplay = `${prev} - ${curr}<br><b style="color:#d9534f;">(DIFF: ${diff})</b>`;
 
         if (dailyProductions.length === 0) {
             tbody.innerHTML = `<tr><td colspan="7" style="color:red; font-weight:bold;">NO DAILY PRODUCTION RECORDS FOUND</td></tr>`;
@@ -564,14 +566,17 @@
         }
 
         dailyProductions.forEach((p) => {
+            let diffA = (p.shotsA || 0) - (p.goodPcsA || 0);
+            let diffB = (p.shotsB || 0) - (p.goodPcsB || 0);
+
             tbody.innerHTML += `
                 <tr>
                     <td>${p.date}</td>
                     <td>${meterDisplay}</td>
-                    <td>${p.machineNo || '---'}</td>
+                    <td><b>${p.machineNo || '---'}</b></td>
                     <td>${p.operator || '---'}</td>
-                    <td>A: ${p.shotsA || 0}<br>B: ${p.shotsB || 0}</td>
-                    <td>A: ${p.goodPcsA || 0}<br>B: ${p.goodPcsB || 0}</td>
+                    <td style="text-align:left; padding-left:12px;">SCREEN: ${p.shotsA || 0}<br>GOOD: ${p.goodPcsA || 0} <b style="color:#c0392b;">(${diffA})</b></td>
+                    <td style="text-align:left; padding-left:12px;">SCREEN: ${p.shotsB || 0}<br>GOOD: ${p.goodPcsB || 0} <b style="color:#c0392b;">(${diffB})</b></td>
                     <td class="no-print">
                         <button class="btn-edit" onclick="editProduction(${p.id})">EDIT</button>
                         <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteProduction(${p.id})">DEL</button>
@@ -590,7 +595,7 @@
         let data = { id: editingLotKey || Date.now(), lotRef, target, actual, variance, status };
 
         if (editingLotKey !== null) {
-            let index = lotTrackers.Item.findIndex(item => item.id === editingLotKey);
+            let index = lotTrackers.findIndex(item => item.id === editingLotKey);
             if (index !== -1) lotTrackers[index] = data;
             editingLotKey = null;
             document.getElementById('lotBtn').textContent = "SAVE LOT RECORD";
