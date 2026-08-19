@@ -62,7 +62,7 @@
     <div id="page1" class="page active">
         <h3>RAW MATERIAL INVENTORY</h3>
         <label>MATERIAL NAME / GRANULE TYPE:</label>
-        <input type="text" id="invMaterialName" placeholder="E.G. BLACK PP, PURE PP">
+        <input type="text" id="invMaterialName" placeholder="E.G. BLACK, PURE PP">
         <label>TRANSACTION TYPE:</label>
         <select id="invType">
             <option value="PURCHASE">PURCHASE / OPENING STOCK (+)</option>
@@ -101,11 +101,12 @@
         <input type="text" id="partyName" placeholder="CUSTOMER NAME">
         <label>MACHINE RATE PER HOUR (PKR):</label>
         <input type="number" id="ratePerHour" value="1250" oninput="calculateBillingOnly()">
+        
         <label>SELECT PP GRANULES (DEDUCTS FROM INVENTORY):</label>
         <select id="materialType">
-            <option value="BLACK PP">BLACK PP</option>
-            <option value="PURE PP">PURE PP</option>
+            <!-- Dynamically populated from inventory -->
         </select>
+
         <label>MACHINE NUMBER:</label>
         <input type="text" id="machineNo" placeholder="E.G. 160 TON">
         <label>CYCLE TIME (SEC):</label>
@@ -152,7 +153,6 @@
     <div id="page4" class="page">
         <h3>DAILY PRODUCTION & ELECTRICITY LOG</h3>
 
-        <!-- HEADER: MAIN ELECTRICITY METER UNITS AT THE VERY TOP -->
         <div class="header-elec-box">
             <h4 style="margin:0 0 5px 0; color:#856404; font-size:14px;">⚡ MAIN ELECTRICAL METER (ALL MACHINES)</h4>
             <div style="display: flex; gap: 10px;">
@@ -170,14 +170,12 @@
 
         <hr style="border:0; border-top:1px solid #ccc; margin:15px 0;">
 
-        <!-- MACHINE PRODUCTION FORM -->
         <h4 style="color:var(--primary); margin-bottom:5px;">ADD MACHINE PRODUCTION</h4>
         <label>MACHINE NO:</label>
         <input type="text" id="prodMachineNo" placeholder="E.G. 160 TON">
         <label>OPERATOR:</label>
         <input type="text" id="prodOperator" placeholder="OPERATOR NAME">
 
-        <!-- SHIFT A -->
         <div class="shift-box">
             <h4 style="margin:0 0 5px 0; color:var(--secondary);">SHIFT A</h4>
             <label>SCREEN SHOT:</label>
@@ -186,7 +184,6 @@
             <input type="number" id="prodGoodPcsA" placeholder="0">
         </div>
 
-        <!-- SHIFT B -->
         <div class="shift-box">
             <h4 style="margin:0 0 5px 0; color:var(--secondary);">SHIFT B</h4>
             <label>SCREEN SHOT:</label>
@@ -195,10 +192,9 @@
             <input type="number" id="prodGoodPcsB" placeholder="0">
         </div>
 
-        <!-- FIXED BUTTON CLICK EVENT -->
         <button class="btn-success" id="prodBtn" style="margin-top:15px;" onclick="saveDailyProduction()">ADD MACHINE</button>
 
-        <h4 style="margin-top:20px; color:var(--primary);">PRODUCTION RECORDS GRID</h4>
+        <h4 id="gridSectionTitle" style="margin-top:20px; color:var(--primary);">PRODUCTION RECORDS GRID</h4>
         <div class="table-responsive">
             <table>
                 <thead>
@@ -292,9 +288,9 @@
             <label>GROSS WEIGHT (KG):</label>
             <input type="number" class="card-grosswt" value="${grossWt}" placeholder="0.00" oninput="calculateBillingOnly()">
             <label>NET FINISHED WT (KG):</label>
-            <input type="number" class="card-netwt" value="${netWt}" placeholder="0.00">
+            <input type="number" class="card-netwt" value="${netWt}" placeholder="0.00" oninput="calculateBillingOnly()">
             <label>SCRAP / WASTE WT (KG):</label>
-            <input type="number" class="card-scrap" value="${scrap}" placeholder="0.00">
+            <input type="number" class="card-scrap" value="${scrap}" placeholder="0.00" oninput="calculateBillingOnly()">
             <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove(); calculateBillingOnly();">REMOVE COLOR</button>
         `;
         container.appendChild(cardDiv);
@@ -343,28 +339,36 @@
 
     function saveJobAndDeductInventory() {
         let materialType = document.getElementById('materialType').value;
-        let colorCards = document.querySelectorAll('#colorCardsContainer > div');
-        let totalNetWt = 0;
-        let totalScrap = 0;
-
-        colorCards.forEach(card => {
-            totalNetWt += parseFloat(card.querySelector('.card-netwt').value) || 0;
-            totalScrap += parseFloat(card.querySelector('.card-scrap').value) || 0;
-        });
-
-        let totalConsumption = totalNetWt + totalScrap;
-
-        if (totalConsumption > 0) {
-            transactions.push({
-                id: Date.now() + Math.random(),
-                material: materialType,
-                type: 'CONSUMPTION',
-                qty: totalConsumption,
-                date: document.getElementById('startDate').value || new Date().toISOString().split('T')[0]
-            });
-            localStorage.setItem('moulding_inventory', JSON.stringify(transactions));
+        if (!materialType) {
+            alert("PLEASE SELECT A VALID MATERIAL FROM INVENTORY FIRST.");
+            return;
         }
 
+        let colorCards = document.querySelectorAll('#colorCardsContainer > div');
+        let totalConsumption = 0;
+
+        colorCards.forEach(card => {
+            let netWt = parseFloat(card.querySelector('.card-netwt').value) || 0;
+            let scrap = parseFloat(card.querySelector('.card-scrap').value) || 0;
+            totalConsumption += (netWt + scrap);
+        });
+
+        if (totalConsumption <= 0) {
+            alert("PLEASE ENTER NET WEIGHT OR SCRAP WEIGHT IN COLOR CARDS TO DEDUCT INVENTORY.");
+            return;
+        }
+
+        // Push new inventory consumption transaction
+        transactions.push({
+            id: Date.now() + Math.random(),
+            material: materialType,
+            type: 'CONSUMPTION',
+            qty: totalConsumption,
+            date: document.getElementById('startDate').value || new Date().toISOString().split('T')[0]
+        });
+        
+        localStorage.setItem('moulding_inventory', JSON.stringify(transactions));
+        renderInventory();
         switchPage(3);
     }
 
@@ -397,9 +401,15 @@
 
         let tbody = document.getElementById('inventorySummaryBody');
         tbody.innerHTML = '';
+        
+        let materialSelect = document.getElementById('materialType');
+        let currentSelectedMaterial = materialSelect.value;
+        materialSelect.innerHTML = '';
+
         let keys = Object.keys(summary);
         if (keys.length === 0) {
             tbody.innerHTML = `<tr><td colspan="5" style="color:red; font-weight:bold;">NO INVENTORY RECORDS FOUND</td></tr>`;
+            materialSelect.innerHTML = `<option value="">-- ADD MATERIALS IN INVENTORY FIRST --</option>`;
             return;
         }
 
@@ -415,7 +425,16 @@
                         <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteMaterialGroup('${mat}')">DEL</button>
                     </td>
                 </tr>`;
+            
+            let opt = document.createElement('option');
+            opt.value = mat;
+            opt.textContent = mat;
+            materialSelect.appendChild(opt);
         });
+
+        if(currentSelectedMaterial) {
+            materialSelect.value = currentSelectedMaterial;
+        }
     }
 
     function deleteMaterialGroup(mat) {
@@ -436,8 +455,8 @@
     }
 
     function saveDailyProduction() {
-        let machineNo = document.getElementById('prodMachineNo').value.toUpperCase();
-        let operator = document.getElementById('prodOperator').value.toUpperCase();
+        let machineNo = document.getElementById('prodMachineNo').value.trim().toUpperCase();
+        let operator = document.getElementById('prodOperator').value.trim().toUpperCase();
         let shotsA = parseFloat(document.getElementById('prodShotsA').value) || 0;
         let goodPcsA = parseFloat(document.getElementById('prodGoodPcsA').value) || 0;
         let shotsB = parseFloat(document.getElementById('prodShotsB').value) || 0;
@@ -446,6 +465,7 @@
 
         if (!machineNo) {
             alert('PLEASE ENTER MACHINE NUMBER.');
+            document.getElementById('prodMachineNo').focus();
             return;
         }
 
@@ -468,7 +488,9 @@
         document.getElementById('prodGoodPcsA').value = '';
         document.getElementById('prodShotsB').value = '';
         document.getElementById('prodGoodPcsB').value = '';
+        
         renderDailyProduction();
+        document.getElementById('gridSectionTitle').scrollIntoView({ behavior: 'smooth' });
     }
 
     function editProduction(id) {
@@ -482,6 +504,7 @@
         document.getElementById('prodGoodPcsB').value = p.goodPcsB || '';
         editingProdKey = id;
         document.getElementById('prodBtn').textContent = "UPDATE MACHINE";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function deleteProduction(id) {
