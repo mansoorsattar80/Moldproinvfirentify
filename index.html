@@ -21,7 +21,6 @@
         h2 { text-align: center; color: var(--primary); font-size: 20px; margin-bottom: 5px; }
         .status-bar { text-align: center; font-size: 12px; font-weight: bold; padding: 5px; margin-bottom: 10px; border-radius: 4px; }
         .status-online { background: #d4edda; color: #155724; }
-        .status-offline { background: #f8d7da; color: #721c24; }
         
         .nav-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; background: #e9ecef; padding: 5px; border-radius: 6px; }
         .nav-tab { flex: 1; min-width: 90px; padding: 8px 5px; text-align: center; background: #fff; border: 1px solid #ced4da; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; color: #495057; }
@@ -102,13 +101,17 @@
         <input type="text" id="slipNo" placeholder="E.G. 963">
         <label>ITEM NAME:</label>
         <input type="text" id="itemName" placeholder="E.G. STICK">
+        <label>PARTY / CUSTOMER NAME:</label>
+        <input type="text" id="partyName" placeholder="CUSTOMER NAME">
+        <label>MACHINE RATE PER HOUR (PKR):</label>
+        <input type="number" id="ratePerHour" value="1250" oninput="calculateBillingOnly()">
         <label>SELECT PP GRANULES:</label>
         <select id="materialType">
             <option value="BLACK PP">BLACK PP</option>
             <option value="PURE PP">PURE PP</option>
         </select>
         <label>MACHINE NUMBER:</label>
-        <input type="text" id="machineNo" placeholder="E.G. 160">
+        <input type="text" id="machineNo" placeholder="E.G. 160 TON">
         <label>CYCLE TIME (SEC):</label>
         <input type="number" id="cycleTime" value="23" oninput="calculateBillingOnly()">
         <label>MOULD CAVITIES:</label>
@@ -125,10 +128,7 @@
     <!-- PAGE 3: BILLING -->
     <div id="page3" class="page">
         <h3>BILLING SUMMARY & REPORTS</h3>
-        <label>PARTY / CUSTOMER NAME:</label>
-        <input type="text" id="partyName" placeholder="CUSTOMER NAME">
-        <label>MACHINE RATE PER HOUR (PKR):</label>
-        <input type="number" id="ratePerHour" value="1250" oninput="calculateBillingOnly()">
+        <div style="font-weight:bold; margin-bottom:5px; color:var(--primary);">CUSTOMER: <span id="displayPartyName">---</span></div>
         
         <div class="table-responsive" style="margin-top:10px;">
             <table>
@@ -263,6 +263,10 @@
         let ratePerHour = parseFloat(document.getElementById('ratePerHour').value) || 0;
         let cycleTime = parseFloat(document.getElementById('cycleTime').value) || 0;
         let cavities = parseFloat(document.getElementById('cavities').value) || 1;
+        let partyName = document.getElementById('partyName').value || 'UNSPECIFIED';
+        
+        document.getElementById('displayPartyName').textContent = partyName;
+
         let colorCards = document.querySelectorAll('#colorCardsContainer > div');
         let billingBody = document.getElementById('billingTableBody');
         billingBody.innerHTML = '';
