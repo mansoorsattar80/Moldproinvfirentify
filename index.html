@@ -6,53 +6,183 @@
     <title>Moulding Management Software</title>
     <!-- Bootstrap CSS for styling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .machine-grid-item {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+        .app-section {
+            display: none;
+        }
+        .app-section.active {
+            display: block;
+        }
+    </style>
 </head>
 <body class="bg-light">
 
     <div class="container my-4">
         <div class="card shadow-sm">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Job Billing & Specs</h5>
+                <h5 class="mb-0">Moulding Management Software</h5>
                 <button class="btn btn-light btn-sm text-primary fw-bold">Logout</button>
             </div>
             <div class="card-body">
-                <form id="job-billing-form">
-                    <!-- Slip / Job # -->
-                    <div class="mb-3">
-                        <label for="slipNo" class="form-label">Slip / Job #</label>
-                        <input type="text" class="form-control" id="slipNo" value="101">
-                    </div>
+                
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills mb-4" id="appTabs">
+                    <li class="nav-item">
+                        <button class="nav-link" onclick="switchSection('inventory', event)">1. Inventory</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link active" onclick="switchSection('billing', event)">2. Billing</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" onclick="switchSection('production', event)">3. Production</button>
+                    </li>
+                </ul>
 
-                    <!-- Item Name -->
+                <!-- SECTION 1: INVENTORY -->
+                <div id="inventory-section" class="app-section">
+                    <h4>Inventory Management</h4>
+                    <p class="text-muted">Manage your raw materials and granules stock here.</p>
                     <div class="mb-3">
-                        <label for="itemName" class="form-label">Item Name</label>
-                        <input type="text" class="form-control" id="itemName" value="CAP">
+                        <label class="form-label">Material Name</label>
+                        <input type="text" class="form-control" value="BLACK PP Granules">
                     </div>
-
-                    <!-- Dynamic Assigned Machines Section -->
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Assigned Machines</label>
-                        <div id="machine-container">
-                            <!-- Dynamic rows will appear here -->
+                        <label class="form-label">Stock Quantity (Kg)</label>
+                        <input type="number" class="form-control" value="5000">
+                    </div>
+                    <button class="btn btn-primary">Update Inventory</button>
+                </div>
+
+                <!-- SECTION 2: BILLING (Includes Job Specs, Machine Grid, & Bags Breakdown) -->
+                <div id="billing-section" class="app-section active">
+                    <form id="job-billing-form">
+                        <h4 class="mb-3">Job Billing & Specs</h4>
+                        
+                        <!-- Slip / Job # -->
+                        <div class="mb-3">
+                            <label for="slipNo" class="form-label">Slip / Job #</label>
+                            <input type="text" class="form-control" id="slipNo" value="101">
                         </div>
-                        <button type="button" class="btn btn-success btn-sm mt-2" id="add-machine-btn">+ Add Machine</button>
-                    </div>
 
-                    <!-- PP Granules Material -->
+                        <!-- Item Name -->
+                        <div class="mb-3">
+                            <label for="itemName" class="form-label">Item Name</label>
+                            <input type="text" class="form-control" id="itemName" value="CAP">
+                        </div>
+
+                        <!-- Grid Assigned Machines Section -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Assigned Machines</label>
+                            <div id="machine-grid-container">
+                                <!-- Dynamic grid rows will appear here -->
+                            </div>
+                            <button type="button" class="btn btn-success btn-sm mt-2" id="add-machine-btn">+ Add Machine</button>
+                        </div>
+
+                        <!-- PP Granules Material -->
+                        <div class="mb-3">
+                            <label for="material" class="form-label">PP Granules Material</label>
+                            <input type="text" class="form-control" id="material" value="BLACK PP">
+                        </div>
+
+                        <!-- Cycle Time & Cavity -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Cycle Time (Sec)</label>
+                                <input type="number" class="form-control" value="20">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mould Cavity</label>
+                                <input type="number" class="form-control" value="2">
+                            </div>
+                        </div>
+
+                        <!-- Rate Per Hour -->
+                        <div class="mb-3">
+                            <label class="form-label">Rate Per Hour (PKR)</label>
+                            <input type="number" class="form-control" value="1200">
+                        </div>
+
+                        <!-- Production Breakdown (Colors & Weights) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Production Breakdown (Colors & Weights)</label>
+                            <table class="table table-bordered">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Color</th>
+                                        <th>Bags</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="color-rows-container">
+                                    <tr>
+                                        <td><input type="text" class="form-control" placeholder="Enter color"></td>
+                                        <td><input type="number" class="form-control" value="1"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" class="form-control" placeholder="Enter color"></td>
+                                        <td><input type="number" class="form-control" value="1"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button type="button" class="btn btn-success btn-sm" id="add-color-btn">+ Add Color Row</button>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100 mt-3">Save Job Specifications</button>
+                    </form>
+                </div>
+
+                <!-- SECTION 3: PRODUCTION -->
+                <div id="production-section" class="app-section">
+                    <h4>Daily Production Database</h4>
+                    <p class="text-muted">Track daily machine outputs and shifts.</p>
                     <div class="mb-3">
-                        <label for="material" class="form-label">PP Granules Material</label>
-                        <input type="text" class="form-control" id="material" value="BLACK PP">
+                        <label class="form-label">Shift</label>
+                        <select class="form-select">
+                            <option>MORNING</option>
+                            <option>EVENING</option>
+                            <option>NIGHT</option>
+                        </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Parts Produced (Pcs)</label>
+                        <input type="number" class="form-control" value="1000">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Scrap / Waste (Kg)</label>
+                        <input type="number" class="form-control" value="1.5">
+                    </div>
+                    <button class="btn btn-primary">Save Entry to Production DB</button>
+                </div>
 
-                    <!-- Submit / Test Button -->
-                    <button type="submit" class="btn btn-primary w-100">Save Job Specifications</button>
-                </form>
             </div>
         </div>
     </div>
 
     <!-- JavaScript Logic -->
     <script>
+        // Tab switching function
+        function switchSection(sectionName, eventObj) {
+            document.querySelectorAll('.app-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+            
+            if(sectionName === 'inventory') {
+                document.getElementById('inventory-section').classList.add('active');
+            } else if(sectionName === 'billing') {
+                document.getElementById('billing-section').classList.add('active');
+            } else if(sectionName === 'production') {
+                document.getElementById('production-section').classList.add('active');
+            }
+            if(eventObj) eventObj.target.classList.add('active');
+        }
+
         // List of available machines
         const availableMachines = [
             "M/C NO-01",
@@ -61,19 +191,19 @@
             "MACHINE NO 06"
         ];
 
-        // Function to add a new machine row
-        function addMachineRow(selectedValue = "") {
-            const container = document.getElementById('machine-container');
+        // Function to add a machine row into the grid layout
+        function addMachineGridRow(selectedValue = "") {
+            const container = document.getElementById('machine-grid-container');
             
-            // Create wrapper row
-            const row = document.createElement('div');
-            row.className = 'input-group mb-2 machine-row';
+            const gridItem = document.createElement('div');
+            gridItem.className = 'machine-grid-item row align-items-center g-2';
             
-            // Create select dropdown
+            const colSelect = document.createElement('div');
+            colSelect.className = 'col-8';
+            
             const select = document.createElement('select');
             select.className = 'form-select machine-select';
             
-            // Default placeholder option
             const defaultOpt = document.createElement('option');
             defaultOpt.value = "";
             defaultOpt.textContent = "-- Select Machine --";
@@ -81,7 +211,6 @@
             if (!selectedValue) defaultOpt.selected = true;
             select.appendChild(defaultOpt);
 
-            // Populate available machines
             availableMachines.forEach(machine => {
                 const option = document.createElement('option');
                 option.value = machine;
@@ -91,47 +220,60 @@
                 }
                 select.appendChild(option);
             });
+            colSelect.appendChild(select);
+
+            const colBtn = document.createElement('div');
+            colBtn.className = 'col-4 text-end';
             
-            // Create remove button
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
-            removeBtn.className = 'btn btn-outline-danger';
+            removeBtn.className = 'btn btn-outline-danger btn-sm w-100';
             removeBtn.textContent = 'Remove';
             removeBtn.onclick = function() {
-                row.remove();
+                gridItem.remove();
             };
-            
-            // Assemble row
-            row.appendChild(select);
-            row.appendChild(removeBtn);
-            container.appendChild(row);
+            colBtn.appendChild(removeBtn);
+
+            gridItem.appendChild(colSelect);
+            gridItem.appendChild(colBtn);
+            container.appendChild(gridItem);
         }
 
-        // Event listener for the "Add Machine" button
+        // Event listener for the Add Machine button
         document.getElementById('add-machine-btn').addEventListener('click', function() {
-            addMachineRow();
+            addMachineGridRow();
         });
 
-        // Add one default row on page load so it's ready to use
+        // Add dynamic color row functionality with blank inputs
+        document.getElementById('add-color-btn').addEventListener('click', function() {
+            const tbody = document.getElementById('color-rows-container');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="form-control" placeholder="Enter color"></td>
+                <td><input type="number" class="form-control" placeholder="Bags"></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Initialize with one default machine row on load
         window.addEventListener('DOMContentLoaded', () => {
-            addMachineRow("M/C NO-01");
+            addMachineGridRow("M/C NO-01");
         });
 
-        // Form submission handling to gather selected values
+        // Form submission collector
         document.getElementById('job-billing-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const selects = document.querySelectorAll('.machine-select');
             let selectedMachines = [];
-            
             selects.forEach(select => {
                 if(select.value) {
                     selectedMachines.push(select.value);
                 }
             });
 
-            console.log("Saved Machines:", selectedMachines);
-            alert("Successfully saved with machines: " + selectedMachines.join(', '));
+            console.log("Grid Assigned Machines:", selectedMachines);
+            alert("Saved successfully with machines: " + selectedMachines.join(', '));
         });
     </script>
 </body>
