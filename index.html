@@ -9,6 +9,9 @@
             --primary-color: #2196F3;
             --secondary-color: #4CAF50;
             --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --whatsapp-color: #25D366;
+            --print-color: #607d8b;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
             --text-color: #333333;
@@ -24,7 +27,7 @@
         }
 
         .container {
-            max-width: 850px;
+            max-width: 900px;
             margin: 0 auto;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -44,12 +47,14 @@
             margin-bottom: 12px;
         }
 
-        h2 {
+        h2, h3 {
             text-align: center;
-            font-size: 18px;
             color: #1a365d;
-            margin-bottom: 15px;
+            margin-top: 5px;
         }
+
+        h2 { font-size: 18px; }
+        h3 { font-size: 14px; margin: 15px 0 10px 0; }
 
         .form-grid {
             display: grid;
@@ -84,12 +89,12 @@
 
         .section-title {
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             color: #4a5568;
-            margin: 15px 0 10px 0;
+            margin: 15px 0 8px 0;
             border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 5px;
+            padding-bottom: 4px;
         }
 
         .table-responsive {
@@ -129,33 +134,51 @@
 
         .btn {
             padding: 8px 12px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: bold;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             color: white;
+            margin: 2px;
         }
 
-        .btn-primary {
-            background-color: var(--primary-color);
-        }
-
-        .btn-success {
-            background-color: var(--secondary-color);
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-            padding: 4px 8px;
-            font-size: 11px;
-        }
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-success { background-color: var(--secondary-color); width: 100%; margin-top: 10px; }
+        .btn-danger { background-color: var(--danger-color); padding: 4px 8px; font-size: 11px; }
+        .btn-warning { background-color: var(--warning-color); padding: 4px 8px; font-size: 11px; color: #fff; }
+        .btn-print { background-color: var(--print-color); padding: 4px 8px; font-size: 11px; }
+        .btn-whatsapp { background-color: var(--whatsapp-color); padding: 4px 8px; font-size: 11px; }
 
         .btn-container {
-            margin-top: 10px;
+            margin-top: 8px;
             margin-bottom: 15px;
+        }
+
+        .records-section {
+            margin-top: 25px;
+            border-top: 2px dashed #cbd5e1;
+            padding-top: 15px;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .container, .container * {
+                visibility: visible;
+            }
+            .container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none;
+                box-shadow: none;
+            }
+            .btn, .status-banner, .btn-container, .records-section, input[type="hidden"] {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -165,34 +188,35 @@
     <div class="status-banner">RUNNING ON LOCAL DEVICE STORAGE</div>
     <h2>MOULDING PRODUCTION & BILLING SOFTWARE</h2>
 
-    <!-- Upper Slip Header Information Fields -->
+    <input type="hidden" id="editRecordId" value="">
+
+    <!-- Header Fields -->
     <div class="form-grid">
         <div class="form-group">
             <label>ITEM #</label>
-            <input type="text" value="A220">
+            <input type="text" id="itemNo" placeholder="e.g. A220">
         </div>
         <div class="form-group">
             <label>START PRD DATE</label>
-            <input type="text" value="10/08/2026">
+            <input type="date" id="startDate">
         </div>
         <div class="form-group">
             <label>ENDING PRD DATE</label>
-            <input type="text" value="15/08/2026">
+            <input type="date" id="endDate">
         </div>
         <div class="form-group">
             <label>NAME</label>
-            <input type="text" value="Body">
+            <input type="text" id="itemName" placeholder="e.g. Body">
         </div>
         <div class="form-group">
             <label>DEMAND QUANTITY</label>
-            <input type="text" value="10000 Pcs">
+            <input type="text" id="demandQty" placeholder="e.g. 10000 Pcs">
         </div>
-        
-        <!-- Material Combobox Connected to Inventory -->
         <div class="form-group">
             <label>MATERIAL (INVENTORY)</label>
-            <select id="materialSelect" onchange="checkNewMaterial(this)">
-                <option value="Crystal Hi Impact" selected>Crystal Hi Impact</option>
+            <select id="materialSelect" onchange="handleMaterialChange(this)">
+                <option value="" disabled selected>-- Select Material --</option>
+                <option value="Crystal Hi Impact">Crystal Hi Impact</option>
                 <option value="ABS Natural">ABS Natural</option>
                 <option value="Polypropylene (PP)">Polypropylene (PP)</option>
                 <option value="HDPE">HDPE</option>
@@ -200,10 +224,9 @@
                 <option value="-- ADD NEW MATERIAL --">+ Add New Material...</option>
             </select>
         </div>
-
         <div class="form-group">
             <label>ITEM GM.</label>
-            <input type="text" value="44g">
+            <input type="text" id="itemGm" placeholder="e.g. 44g">
         </div>
     </div>
 
@@ -223,95 +246,235 @@
                 </tr>
             </thead>
             <tbody id="receivedGoodsBody">
-                <tr>
-                    <td>1</td>
-                    <td><input type="text" value="A-220 Body Blue"></td>
-                    <td><input type="number" value="2500"></td>
-                    <td><input type="number" value="10"></td>
-                    <td><input type="number" step="0.01" value="113.25"></td>
-                    <td><input type="number" step="0.01" value="112.25"></td>
-                    <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td><input type="text" value="A-220 Body Green"></td>
-                    <td><input type="number" value="2500"></td>
-                    <td><input type="number" value="10"></td>
-                    <td><input type="number" step="0.01" value="114.10"></td>
-                    <td><input type="number" step="0.01" value="113.10"></td>
-                    <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td><input type="text" value="A-220 Body Orange"></td>
-                    <td><input type="number" value="2500"></td>
-                    <td><input type="number" value="10"></td>
-                    <td><input type="number" step="0.01" value="112.30"></td>
-                    <td><input type="number" step="0.01" value="111.30"></td>
-                    <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td><input type="text" value="A-220 Body Yellow"></td>
-                    <td><input type="number" value="2500"></td>
-                    <td><input type="number" value="10"></td>
-                    <td><input type="number" step="0.01" value="111.75"></td>
-                    <td><input type="number" step="0.01" value="110.75"></td>
-                    <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
-                </tr>
+                <!-- Starts completely empty -->
             </tbody>
         </table>
     </div>
     <div class="btn-container">
-        <button class="btn btn-primary" onclick="addGoodsRow()">+ ADD GOODS ROW</button>
+        <button class="btn btn-primary" onclick="addGoodsRow()">+ ADD ROW</button>
     </div>
 
-    <button class="btn btn-success" onclick="saveRecord()">SAVE SLIP RECORD</button>
+    <button class="btn btn-success" onclick="saveRecord()">SAVE / UPDATE RECORD</button>
+
+    <!-- Saved Reports / Records Section -->
+    <div class="records-section">
+        <h3>SAVED PRODUCTION RECORDS & REPORTS</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item #</th>
+                        <th>Name</th>
+                        <th>Material</th>
+                        <th>Demand Qty</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="savedRecordsTableBody">
+                    <tr>
+                        <td colspan="5" style="color: #6c757d;">No saved records found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
-    function checkNewMaterial(selectElement) {
+    window.onload = function() {
+        loadSavedRecords();
+    };
+
+    function handleMaterialChange(selectElement) {
         if (selectElement.value === "-- ADD NEW MATERIAL --") {
-            const newNodeName = prompt("Enter new material name from inventory:");
-            if (newNodeName && newNodeName.trim() !== "") {
-                const newOption = document.createElement("option");
-                newOption.value = newNodeName;
-                newOption.text = newNodeName;
-                selectElement.insertBefore(newOption, selectElement.lastElementChild);
-                selectElement.value = newNodeName;
+            const newMat = prompt("Enter new material name:");
+            if (newMat && newMat.trim() !== "") {
+                const opt = document.createElement("option");
+                opt.value = newMat.trim();
+                opt.text = newMat.trim();
+                selectElement.insertBefore(opt, selectElement.lastElementChild);
+                selectElement.value = newMat.trim();
             } else {
                 selectElement.selectedIndex = 0;
             }
         }
     }
 
-    function addGoodsRow() {
+    function addGoodsRow(data = {}) {
         const tbody = document.getElementById('receivedGoodsBody');
         const rowCount = tbody.rows.length + 1;
         const newRow = document.createElement('tr');
+        
         newRow.innerHTML = `
             <td>${rowCount}</td>
-            <td><input type="text" placeholder="Item Name"></td>
-            <td><input type="number" placeholder="Qty"></td>
-            <td><input type="number" placeholder="Boray"></td>
-            <td><input type="number" step="0.01" placeholder="Gross Wt"></td>
-            <td><input type="number" step="0.01" placeholder="Net Wt"></td>
+            <td><input type="text" value="${data.item || ''}" placeholder="Color/Item"></td>
+            <td><input type="number" value="${data.qty || ''}" placeholder="Qty"></td>
+            <td><input type="number" value="${data.boray || ''}" placeholder="Boray"></td>
+            <td><input type="number" step="0.01" value="${data.gross || ''}" placeholder="Gross Wt"></td>
+            <td><input type="number" step="0.01" value="${data.net || ''}" placeholder="Net Wt"></td>
             <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
         `;
         tbody.appendChild(newRow);
+        updateSerialNumbers();
     }
 
     function deleteRow(button) {
         const row = button.closest('tr');
-        const tbody = row.closest('tbody');
         row.remove();
-        Array.from(tbody.rows).forEach((r, index) => {
-            r.cells[0].innerText = index + 1;
+        updateSerialNumbers();
+    }
+
+    function updateSerialNumbers() {
+        const tbody = document.getElementById('receivedGoodsBody');
+        Array.from(tbody.rows).forEach((row, index) => {
+            row.cells[0].innerText = index + 1;
         });
     }
 
     function saveRecord() {
-        alert("Slip record with selected inventory material saved successfully!");
+        const recordId = document.getElementById('editRecordId').value || 'REC_' + Date.now();
+        
+        const headerData = {
+            id: recordId,
+            itemNo: document.getElementById('itemNo').value,
+            startDate: document.getElementById('startDate').value,
+            endDate: document.getElementById('endDate').value,
+            itemName: document.getElementById('itemName').value,
+            demandQty: document.getElementById('demandQty').value,
+            material: document.getElementById('materialSelect').value,
+            itemGm: document.getElementById('itemGm').value,
+            rows: []
+        };
+
+        const tbody = document.getElementById('receivedGoodsBody');
+        if (tbody.rows.length === 0) {
+            alert("Please add at least one row in the received goods grid.");
+            return;
+        }
+
+        for (let row of tbody.rows) {
+            const inputs = row.querySelectorAll('input');
+            headerData.rows.push({
+                item: inputs[0].value,
+                qty: inputs[1].value,
+                boray: inputs[2].value,
+                gross: inputs[3].value,
+                net: inputs[4].value
+            });
+        }
+
+        let allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
+        allRecords[recordId] = headerData;
+        localStorage.setItem('moulding_records', JSON.stringify(allRecords));
+
+        alert("Record saved successfully!");
+        clearForm();
+        loadSavedRecords();
+    }
+
+    function loadSavedRecords() {
+        const tbody = document.getElementById('savedRecordsTableBody');
+        const allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
+        tbody.innerHTML = "";
+
+        const keys = Object.keys(allRecords);
+        if (keys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="color: #6c757d;">No saved records found.</td></tr>`;
+            return;
+        }
+
+        keys.forEach(key => {
+            const rec = allRecords[key];
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${rec.itemNo || 'N/A'}</td>
+                <td>${rec.itemName || ''}</td>
+                <td>${rec.material || ''}</td>
+                <td>${rec.demandQty || ''}</td>
+                <td>
+                    <button class="btn btn-warning" onclick="editRecord('${key}')">EDIT</button>
+                    <button class="btn btn-print" onclick="printRecord('${key}')">PRINT / PDF</button>
+                    <button class="btn btn-whatsapp" onclick="sendWhatsApp('${key}')">WHATSAPP</button>
+                    <button class="btn btn-danger" onclick="deleteRecord('${key}')">DEL</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function editRecord(id) {
+        const allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
+        const rec = allRecords[id];
+        if (!rec) return;
+
+        document.getElementById('editRecordId').value = rec.id;
+        document.getElementById('itemNo').value = rec.itemNo || '';
+        document.getElementById('startDate').value = rec.startDate || '';
+        document.getElementById('endDate').value = rec.endDate || '';
+        document.getElementById('itemName').value = rec.itemName || '';
+        document.getElementById('demandQty').value = rec.demandQty || '';
+        document.getElementById('materialSelect').value = rec.material || '';
+        document.getElementById('itemGm').value = rec.itemGm || '';
+
+        const tbody = document.getElementById('receivedGoodsBody');
+        tbody.innerHTML = "";
+        if (rec.rows && rec.rows.length > 0) {
+            rec.rows.forEach(r => addGoodsRow(r));
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function printRecord(id) {
+        editRecord(id);
+        setTimeout(() => {
+            window.print();
+        }, 300);
+    }
+
+    function sendWhatsApp(id) {
+        const allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
+        const rec = allRecords[id];
+        if (!rec) return;
+
+        let text = `*MOULDING PRODUCTION SLIP*\n`;
+        text += `Item #: ${rec.itemNo}\n`;
+        text += `Name: ${rec.itemName}\n`;
+        text += `Material: ${rec.material}\n`;
+        text += `Demand Qty: ${rec.demandQty}\n`;
+        text += `Start Date: ${rec.startDate} | End Date: ${rec.endDate}\n`;
+        text += `Item Gm: ${rec.itemGm}\n\n`;
+        text += `*Received Goods:*\n`;
+
+        if (rec.rows) {
+            rec.rows.forEach((r, idx) => {
+                text += `${idx + 1}. ${r.item} - Qty: ${r.qty} | Boray: ${r.boray} | Net Wt: ${r.net}\n`;
+            });
+        }
+
+        const encodedText = encodeURIComponent(text);
+        window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+    }
+
+    function deleteRecord(id) {
+        if (confirm("Are you sure you want to delete this saved record?")) {
+            let allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
+            delete allRecords[id];
+            localStorage.setItem('moulding_records', JSON.stringify(allRecords));
+            loadSavedRecords();
+        }
+    }
+
+    function clearForm() {
+        document.getElementById('editRecordId').value = "";
+        document.getElementById('itemNo').value = "";
+        document.getElementById('startDate').value = "";
+        document.getElementById('endDate').value = "";
+        document.getElementById('itemName').value = "";
+        document.getElementById('demandQty').value = "";
+        document.getElementById('materialSelect').selectedIndex = 0;
+        document.getElementById('itemGm').value = "";
+        document.getElementById('receivedGoodsBody').innerHTML = "";
     }
 </script>
 
