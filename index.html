@@ -448,7 +448,7 @@
         });
     }
 
-    let inventoryData = { "BLACK PP": { opening: 500, purchased: 200 } };
+    let inventoryData = { "BLACK PP": { opening: 500, purchased: 200 }, "PP PURE": { opening: 500, purchased: 0 } };
     let transactions = []; 
     let itemsData = [
         { color: "STICK GREEN", qty: 3000, bags: 2, gross: 16.30, scrap: 0.1, net: 16.20 },
@@ -800,14 +800,15 @@
             totalNet += item.net;
         });
 
-        // Consumption is deducted exclusively from Net Weight as requested
+        // Consumption is deducted exclusively from Net Weight
         let totalConsumption = totalNet;
 
         let selectedMaterial = document.getElementById('materialType').value;
         let jobStartDate = document.getElementById('startDate').value;
         
+        // Remove prior consumption entries to avoid duplicate accumulation, then record strictly for the selected material
+        transactions = transactions.filter(t => t.type !== 'consumption' || t.jobDate !== jobStartDate);
         if (selectedMaterial && totalConsumption > 0 && jobStartDate) {
-            transactions = transactions.filter(t => !(t.type === 'consumption' && t.jobDate === jobStartDate && t.material === selectedMaterial));
             transactions.push({ date: jobStartDate, jobDate: jobStartDate, type: 'consumption', material: selectedMaterial, qty: totalConsumption });
         }
 
