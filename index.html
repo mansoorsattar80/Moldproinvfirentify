@@ -87,6 +87,34 @@
             display: none;
         }
 
+        /* Custom Modal Overlay */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+        }
+        .custom-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .custom-modal-content h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
         /* App container hidden by default */
         .container {
             max-width: 1000px;
@@ -189,6 +217,25 @@
         <input type="password" id="loginPassword" placeholder="Password">
         <button onclick="handleLogin()">Login to Software</button>
         <div id="loginError">Invalid email or password</div>
+    </div>
+</div>
+
+<!-- Edit Material Custom Modal -->
+<div id="editMaterialModal" class="custom-modal">
+    <div class="custom-modal-content">
+        <h4>✏️ Edit Granule Material</h4>
+        <div class="input-group" style="margin-bottom: 10px;">
+            <label>Material Name</label>
+            <input type="text" id="modalEditName">
+        </div>
+        <div class="input-group" style="margin-bottom: 15px;">
+            <label>Opening Stock (Kg)</label>
+            <input type="number" id="modalEditOpening" step="0.1">
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-danger" onclick="closeEditModal()" style="padding: 8px;">Cancel</button>
+            <button type="button" class="btn-success" onclick="saveEditMaterial()" style="padding: 8px;">Save Changes</button>
+        </div>
     </div>
 </div>
 
@@ -669,15 +716,27 @@
         }
     }
 
+    let editingOriginalMaterial = "";
     function editInventory(material) {
-        let newName = prompt("Edit Granule / Material Name:", material);
-        if (!newName) return;
-        newName = newName.trim();
-        if (!newName) return;
+        editingOriginalMaterial = material;
+        document.getElementById('modalEditName').value = material;
+        document.getElementById('modalEditOpening').value = inventoryData[material].opening || 0;
+        document.getElementById('editMaterialModal').style.display = 'flex';
+    }
 
-        let currentData = inventoryData[material];
-        let newOpening = parseFloat(prompt(`Edit Opening Stock (Kg) for ${newName}:`, currentData.opening));
-        if (isNaN(newOpening)) newOpening = currentData.opening;
+    function closeEditModal() {
+        document.getElementById('editMaterialModal').style.display = 'none';
+    }
+
+    function saveEditMaterial() {
+        let newName = document.getElementById('modalEditName').value.trim();
+        let newOpening = parseFloat(document.getElementById('modalEditOpening').value) || 0;
+        let material = editingOriginalMaterial;
+
+        if (!newName) {
+            alert("Material name cannot be empty.");
+            return;
+        }
 
         if (newName !== material) {
             inventoryData[newName] = { opening: newOpening, purchased: 0 };
@@ -691,6 +750,7 @@
             inventoryData[material].opening = newOpening;
         }
 
+        closeEditModal();
         updateMaterialDropdown();
         calculateBilling();
         syncToFirebase();
