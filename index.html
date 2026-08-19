@@ -347,7 +347,7 @@
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
         auth = firebase.auth();
-        auth.signOut(); // Ensure clean session on load
+        auth.signOut(); 
         document.getElementById('syncStatus').innerText = "🟢 Connected to Real-Time Cloud Database";
     } catch (e) {
         document.getElementById('syncStatus').innerText = "⚠️ Running Offline";
@@ -364,10 +364,8 @@
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'block';
                 
-                // Show who is logged in
                 document.getElementById('loggedInUserDisplay').innerText = "👤 Logged in as: " + userCredential.user.email;
                 
-                // Detect and display device type
                 const ua = navigator.userAgent;
                 let deviceName = "Unknown Device";
                 if (/android/i.test(ua)) {
@@ -396,6 +394,7 @@
     }
 
     let inventoryData = { "Black PP": { opening: 500, purchased: 200 } };
+    let transactions = []; // Stores date-stamped purchases and consumptions
     let itemsData = [
         { color: "Stick Green", qty: 3000, bags: 2, gross: 16.30, net: 16.20 },
         { color: "Pink", qty: 3000, bags: 2, gross: 16.35, net: 16.25 }
@@ -415,13 +414,11 @@
 
     function initializeAppLogic() {
         if (db) {
-            // Track and increment app open count in Firebase
             const counterRef = db.ref('mouldingAppStats/totalOpens');
             counterRef.transaction((currentValue) => {
                 return (currentValue || 0) + 1;
             });
 
-            // Display total open count live
             counterRef.on('value', (snapshot) => {
                 const count = snapshot.val() || 0;
                 document.getElementById('visitCountDisplay').innerText = "📊 Total App Opens: " + count;
@@ -433,6 +430,7 @@
                     isRemoteUpdate = true;
                     showToast("📥 Live Update: Data changed by another device");
                     if (data.inventoryData) inventoryData = data.inventoryData;
+                    if (data.transactions) transactions = data.transactions;
                     if (data.itemsData) itemsData = data.itemsData;
                     if (data.specs) {
                         if (document.getElementById('slipNo')) document.getElementById('slipNo').value = data.specs.slipNo || '';
@@ -484,6 +482,7 @@
             };
             db.ref('mouldingApp').set({
                 inventoryData: inventoryData,
+                transactions: transactions,
                 itemsData: itemsData,
                 specs: specs
             }).then(() => {
@@ -519,8 +518,7 @@
         newMat = newMat.trim();
         if (!newMat || inventoryData[newMat]) return;
         let opening = parseFloat(prompt(`Enter Opening Stock (Kg):`, "0")) || 0;
-        let purchased = parseFloat(prompt(`Enter Purchased Stock (Kg):`, "0")) || 0;
-        inventoryData[newMat] = { opening: opening, purchased: purchased };
+        inventoryData[newMat] = { opening: opening, purchased: 0 };
         updateMaterialDropdown();
         document.getElementById('materialType').value = newMat;
         calculateBilling();
@@ -656,8 +654,9 @@
         let material = prompt(`Enter Granule Type (${keys.join(", ")}):`, keys[0]);
         if (!material || !inventoryData[material]) return;
         let qty = parseFloat(prompt(`Enter purchase quantity in Kg:`, "100"));
-        if (!isNaN(qty) && qty > 0) {
-            inventoryData[material].purchased += qty;
+        let pDate = prompt(`Enter Purchase Date (YYYY-MM-DD):`, new Date().toISOString().split('T')[0]);
+        if (!isNaN(qty) && qty > 0 && pDate) {
+            transactions.push({ date: pDate, type: 'purchase', material: material, qty: qty });
             calculateBilling();
             syncToFirebase();
         }
@@ -665,8 +664,7 @@
 
     function editInventory(material) {
         let data = inventoryData[material];
-        data.opening = parseFloat(prompt(`Edit Opening Stock:`, data.opening)) || data.opening;
-        data.purchased = parseFloat(prompt(`Edit Purchased Stock:`, data.purchased)) || data.purchased;
+        data.opening = parseFloat(prompt(`Edit Base Opening Stock:`, data.opening)) || data.opening;
         calculateBilling();
         syncToFirebase();
     }
@@ -681,40 +679,17 @@
     }
 
     function confirmResetInventory() {
-        if (confirm("Clear all inventory?")) {
+        if (confirm("Clear all inventory and logs?")) {
             inventoryData = {};
+            transactions = [];
             updateMaterialDropdown();
             calculateBilling();
             syncToFirebase();
         }
     }
 
-    function updateInventoryDisplay(consumedMap) {
-        const tbody = document.getElementById('inventoryTableBody');
-        tbody.innerHTML = "";
-        let keys = Object.keys(inventoryData);
-        if (keys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="color: #64748b; padding: 15px;">No inventory items added.</td></tr>`;
-            return;
-        }
-        keys.forEach(material => {
-            let opening = inventoryData[material].opening;
-            let purchased = inventoryData[material].purchased;
-            let consumed = consumedMap[material] || 0;
-            let closing = (opening + purchased) - consumed;
-            let row = tbody.insertRow();
-            row.innerHTML = `
-                <td style="font-weight: 600; text-align: left; padding-left: 8px;">${material}</td>
-                <td>${opening.toFixed(1)}</td>
-                <td style="color: var(--success-color);">+${purchased.toFixed(1)}</td>
-                <td style="color: var(--danger-color);">-${consumed.toFixed(1)}</td>
-                <td style="font-weight: bold; color: ${closing < 0 ? 'var(--danger-color)' : 'var(--primary-color)'};">${closing.toFixed(1)}</td>
-                <td>
-                    <button type="button" class="action-btn" onclick="editInventory('${material}')">Edit</button>
-                    <button type="button" class="remove-card-btn" onclick="deleteMaterial('${material}')">X</button>
-                </td>
-            `;
-        });
+    function filterInventory() {
+        calculateBillingOnly();
     }
 
     function calculateBilling() {
@@ -731,10 +706,62 @@
         });
 
         let selectedMaterial = document.getElementById('materialType').value;
-        let consumedMap = {};
-        if (selectedMaterial) consumedMap[selectedMaterial] = totalNet;
+        let jobStartDate = document.getElementById('startDate').value;
+        
+        // Automatically record consumption log for current job if material is selected
+        if (selectedMaterial && totalNet > 0 && jobStartDate) {
+            // Remove previous consumption entry for this job/date to prevent duplicates, then push fresh
+            transactions = transactions.filter(t => !(t.type === 'consumption' && t.jobDate === jobStartDate && t.material === selectedMaterial));
+            transactions.push({ date: jobStartDate, jobDate: jobStartDate, type: 'consumption', material: selectedMaterial, qty: totalNet });
+        }
 
-        updateInventoryDisplay(consumedMap);
+        let fromDate = document.getElementById('stockFromDate').value;
+        let toDate = document.getElementById('stockToDate').value;
+
+        // Calculate dynamic ledger per material based on date filter
+        const tbody = document.getElementById('inventoryTableBody');
+        tbody.innerHTML = "";
+        let keys = Object.keys(inventoryData);
+        
+        if (keys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="color: #64748b; padding: 15px;">No inventory items added.</td></tr>`;
+        } else {
+            keys.forEach(material => {
+                let baseOpening = inventoryData[material].opening || 0;
+                let priorPurchases = 0;
+                let priorConsumption = 0;
+                let periodPurchases = 0;
+                let periodConsumption = 0;
+
+                transactions.forEach(t => {
+                    if (t.material === material) {
+                        if (fromDate && t.date < fromDate) {
+                            if (t.type === 'purchase') priorPurchases += t.qty;
+                            if (t.type === 'consumption') priorConsumption += t.qty;
+                        } else if ((!fromDate || t.date >= fromDate) && (!toDate || t.date <= toDate)) {
+                            if (t.type === 'purchase') periodPurchases += t.qty;
+                            if (t.type === 'consumption') periodConsumption += t.qty;
+                        }
+                    }
+                });
+
+                let openingStock = baseOpening + priorPurchases - priorConsumption;
+                let closingStock = (openingStock + periodPurchases) - periodConsumption;
+
+                let row = tbody.insertRow();
+                row.innerHTML = `
+                    <td style="font-weight: 600; text-align: left; padding-left: 8px;">${material}</td>
+                    <td>${openingStock.toFixed(1)}</td>
+                    <td style="color: var(--success-color);">+${periodPurchases.toFixed(1)}</td>
+                    <td style="color: var(--danger-color);">-${periodConsumption.toFixed(1)}</td>
+                    <td style="font-weight: bold; color: ${closingStock < 0 ? 'var(--danger-color)' : 'var(--primary-color)'};">${closingStock.toFixed(1)}</td>
+                    <td>
+                        <button type="button" class="action-btn" onclick="editInventory('${material}')">Edit</button>
+                        <button type="button" class="remove-card-btn" onclick="deleteMaterial('${material}')">X</button>
+                    </td>
+                `;
+            });
+        }
 
         let mouldPcs = parseFloat(document.getElementById('mouldCavity').value) || 1;
         let cycleTimeSec = parseFloat(document.getElementById('cycleTime').value) || 0;
@@ -754,7 +781,6 @@
     }
 
     function saveSpecFields() { calculateBilling(); }
-    function filterInventory() { calculateBilling(); }
 </script>
 
 </body>
