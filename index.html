@@ -20,7 +20,7 @@
         .status-bar { text-align: center; font-size: 12px; font-weight: bold; padding: 5px; margin-bottom: 10px; border-radius: 4px; background: #d4edda; color: #155724; }
         
         .nav-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; background: #e9ecef; padding: 5px; border-radius: 6px; }
-        .nav-tab { flex: 1; min-width: 90px; padding: 8px 5px; text-align: center; background: #fff; border: 1px solid #ced4da; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; color: #495057; }
+        .nav-tab { flex: 1; min-width: 80px; padding: 8px 5px; text-align: center; background: #fff; border: 1px solid #ced4da; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; color: #495057; }
         .nav-tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
 
         .page { display: none; }
@@ -33,23 +33,21 @@
         .btn-danger { background: var(--danger); }
         .btn-success { background: var(--success); }
         .btn-warning { background: var(--warning); color: #fff; }
-        .btn-edit { background: #e67e22; color: white; padding: 4px 8px; font-size: 11px; width: auto; margin-right: 3px; }
 
         table { width: 100% !important; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
         th, td { border: 1px solid #ddd; padding: 6px; text-align: center; vertical-align: middle; }
         th { background: var(--primary); color: white; }
         .table-responsive { overflow-x: auto; margin-bottom: 20px; }
-        .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        .header-elec-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
+        
+        .section-card { background: #fff; border: 1px solid #dcdde1; padding: 15px; border-radius: 6px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .machine-box { background: #f8f9fa; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 12px; }
+        .shift-block { background: #ffffff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px; margin-top: 8px; }
 
         /* Print styling */
         @media print {
             .nav-tabs, button, .no-print, 
-            .header-elec-box, .shift-box, 
-            label, input, select, textarea, hr,
-            #page1, #page2, #page4, #page5 { display: none !important; }
-            
-            #page3 { display: block !important; }
+            #page1, #page2, #page3, #page5, #page6 { display: none !important; }
+            #page4 { display: block !important; }
             body { background: white; padding: 0; }
             .container { box-shadow: none; padding: 0; width: 100%; }
             table { font-size: 10px; width: 100% !important; }
@@ -65,15 +63,16 @@
 
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
-        <div class="nav-tab active" onclick="switchPage(1)">1. INVENTORY</div>
+        <div class="nav-tab" onclick="switchPage(1)">1. INVENTORY</div>
         <div class="nav-tab" onclick="switchPage(2)">2. JOB SPECS</div>
         <div class="nav-tab" onclick="switchPage(3)">3. BILLING</div>
-        <div class="nav-tab" onclick="switchPage(4)">4. DAILY PROD</div>
+        <div class="nav-tab active" onclick="switchPage(4)">4. DAILY PROD</div>
         <div class="nav-tab" onclick="switchPage(5)">5. LOT TRACKER</div>
+        <div class="nav-tab" onclick="switchPage(6)">6. ELECTRICITY</div>
     </div>
 
     <!-- PAGE 1: INVENTORY LEDGER -->
-    <div id="page1" class="page active">
+    <div id="page1" class="page">
         <h3>RAW MATERIAL INVENTORY</h3>
         <label>MATERIAL NAME / GRANULE TYPE:</label>
         <input type="text" id="invMaterialName" placeholder="E.G. BLACK, PURE PP">
@@ -86,217 +85,140 @@
         <input type="number" id="invQty" placeholder="0.00">
         <label>DATE:</label>
         <input type="date" id="invDate">
-        <button class="btn-success" id="invBtn" onclick="saveInventoryTransaction()">ADD INVENTORY ENTRY</button>
-
+        <button class="btn-success" onclick="saveInventoryTransaction()">ADD INVENTORY ENTRY</button>
         <div class="table-responsive">
             <table>
                 <thead>
-                    <tr>
-                        <th>MATERIAL</th>
-                        <th>OPENING/PURCH</th>
-                        <th>CONSUMED</th>
-                        <th>CLOSING BALANCE</th>
-                        <th class="no-print">ACTIONS</th>
-                    </tr>
+                    <tr><th>MATERIAL</th><th>OPENING/PURCH</th><th>CONSUMED</th><th>CLOSING BALANCE</th><th class="no-print">ACTIONS</th></tr>
                 </thead>
                 <tbody id="inventorySummaryBody"></tbody>
             </table>
         </div>
-        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (INVENTORY REPORT)</button>
     </div>
 
     <!-- PAGE 2: JOB SPECS -->
     <div id="page2" class="page">
         <h3>JOB SPECIFICATIONS & COLOR CARDS</h3>
-        <label>SLIP / ITEM #:</label>
-        <input type="text" id="slipNo" placeholder="E.G. 963" oninput="calculateBillingOnly()">
-        <label>ITEM NAME:</label>
-        <input type="text" id="itemName" placeholder="E.G. STICK" oninput="calculateBillingOnly()">
-        <label>PARTY / CUSTOMER NAME:</label>
-        <input type="text" id="partyName" placeholder="CUSTOMER NAME" oninput="calculateBillingOnly()">
-        <label>MACHINE RATE PER HOUR (PKR):</label>
-        <input type="number" id="ratePerHour" value="1250" oninput="calculateBillingOnly()">
-        
-        <label>SELECT PP GRANULES (DEDUCTS FROM INVENTORY):</label>
-        <select id="materialType">
-            <!-- Dynamically populated from inventory -->
-        </select>
-
-        <label>MACHINE NUMBER:</label>
-        <input type="text" id="machineNo" placeholder="E.G. 160 TON" oninput="calculateBillingOnly()">
-        <label>CYCLE TIME (SEC):</label>
-        <input type="number" id="cycleTime" value="23" oninput="calculateBillingOnly()">
-        <label>MOULD CAVITIES:</label>
-        <input type="number" id="cavities" value="1" oninput="calculateBillingOnly()">
-        <label>JOB START DATE:</label>
-        <input type="date" id="startDate">
-
-        <h4 style="margin-top:15px; border-bottom:2px solid var(--secondary); padding-bottom:3px;">COLOR VARIATIONS</h4>
+        <label>SLIP / ITEM #:</label><input type="text" id="slipNo" placeholder="E.G. 963">
+        <label>ITEM NAME:</label><input type="text" id="itemName" placeholder="E.G. STICK">
+        <label>PARTY / CUSTOMER NAME:</label><input type="text" id="partyName" placeholder="CUSTOMER NAME">
+        <label>MACHINE RATE PER HOUR (PKR):</label><input type="number" id="ratePerHour" value="1250">
+        <label>SELECT PP GRANULES:</label><select id="materialType"></select>
+        <label>MACHINE NUMBER:</label><input type="text" id="machineNo" placeholder="E.G. 160 TON">
+        <label>CYCLE TIME (SEC):</label><input type="number" id="cycleTime" value="23">
+        <label>MOULD CAVITIES:</label><input type="number" id="cavities" value="1">
+        <label>JOB START DATE:</label><input type="date" id="startDate">
         <div id="colorCardsContainer"></div>
         <button class="btn-warning" onclick="addColorCard()">+ ADD COLOR CARD</button>
         <button class="btn-success" style="margin-top:15px;" onclick="saveJobAndDeductInventory()">SAVE & DEDUCT INVENTORY</button>
-        <button class="btn-warning" style="margin-top:10px;" onclick="window.print()">PRINT / SAVE PDF (JOB SPECS)</button>
     </div>
 
     <!-- PAGE 3: BILLING -->
     <div id="page3" class="page">
         <h3>BILLING SUMMARY & REPORTS</h3>
-        
-        <!-- Job & Machine Info Summary Box (Included in Print) -->
-        <div style="background:#f8f9fa; border:1px solid #ddd; padding:10px; border-radius:4px; margin-bottom:10px; font-size:12px;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                <span><b>CUSTOMER:</b> <span id="displayPartyName">---</span></span>
-                <span><b>SLIP #:</b> <span id="displaySlipNo">---</span></span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                <span><b>ITEM NAME:</b> <span id="displayItemName">---</span></span>
-                <span><b>MACHINE:</b> <span id="displayMachineNo">---</span></span>
-            </div>
-            <div style="display:flex; justify-content:space-between;">
-                <span><b>CYCLE TIME:</b> <span id="displayCycleTime">0</span> SEC</span>
-                <span><b>CAVITIES:</b> <span id="displayCavities">1</span> | <b>RATE/HR:</b> PKR <span id="displayRate">0</span></span>
-            </div>
-        </div>
-
-        <div class="table-responsive" style="margin-top:10px;">
+        <div class="table-responsive">
             <table>
-                <thead>
-                    <tr>
-                        <th>COLOR</th>
-                        <th>PCS</th>
-                        <th>BAGS</th>
-                        <th>GROSS WT</th>
-                        <th>NET WT</th>
-                        <th>SCRAP</th>
-                        <th>TOTAL AMT</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>COLOR</th><th>PCS</th><th>BAGS</th><th>GROSS WT</th><th>NET WT</th><th>SCRAP</th><th>TOTAL AMT</th></tr></thead>
                 <tbody id="billingTableBody"></tbody>
             </table>
         </div>
-        <div style="background:#e8f4fd; padding:10px; margin-top:10px; border-radius:4px; font-weight:bold;">
-            GRAND TOTAL PAYABLE: PKR <span id="grandTotalAmount">0.00</span>
-        </div>
-        <button class="btn-success" onclick="triggerPrintBilling()">PRINT / SAVE PDF (BILLING REPORT)</button>
+        <div style="background:#e8f4fd; padding:10px; font-weight:bold;">GRAND TOTAL PAYABLE: PKR <span id="grandTotalAmount">0.00</span></div>
+        <button class="btn-success" onclick="window.print()">PRINT BILLING</button>
     </div>
 
-    <!-- PAGE 4: DAILY PROD -->
-    <div id="page4" class="page">
-        <h3>DAILY PRODUCTION & ELECTRICITY LOG</h3>
+    <!-- PAGE 4: DAILY PROD (MATCHING REFERENCE IMAGES) -->
+    <div id="page4" class="page active">
+        <h2>Moulding Plant Production & Reporting</h2>
 
-        <div class="header-elec-box">
-            <h4 style="margin:0 0 5px 0; color:#856404; font-size:14px;">⚡ MAIN ELECTRICAL METER (ALL MACHINES)</h4>
-            <div style="display: flex; gap: 10px;">
+        <!-- Report Controls -->
+        <div class="section-card">
+            <h3 style="margin-top:0; color:var(--primary);">Report Controls</h3>
+            <label>Select Date:</label>
+            <input type="date" id="reportDate" onchange="loadDailyProductionForDate()">
+            
+            <button class="btn-success" onclick="saveDailyProductionSheet()">Save to Cloud / Local Storage</button>
+            <button class="btn-warning" onclick="window.print()">Print / Save PDF</button>
+        </div>
+
+        <!-- Electric Meter Reading -->
+        <div class="section-card">
+            <h3 style="margin-top:0; color:var(--primary);">Electric Meter Reading</h3>
+            <div style="display:flex; gap:10px;">
                 <div style="flex:1;">
-                    <label style="margin-top:4px;">PREVIOUS UNITS:</label>
-                    <input type="number" id="elecPrevUnits" placeholder="0.00">
+                    <label>Previous Meter:</label>
+                    <input type="number" id="elecPrev" placeholder="0" oninput="calculateUnits()">
                 </div>
                 <div style="flex:1;">
-                    <label style="margin-top:4px;">CURRENT UNITS:</label>
-                    <input type="number" id="elecCurrUnits" placeholder="0.00">
+                    <label>Current Meter:</label>
+                    <input type="number" id="elecCurr" placeholder="0" oninput="calculateUnits()">
                 </div>
             </div>
-            <button class="btn-warning" style="margin-top:8px;" onclick="saveMainElectricity()">SAVE / UPDATE MAIN METER</button>
+            <div style="margin-top:10px; font-weight:bold; font-size:14px;">
+                Units Consumed: <span id="unitsConsumedDisplay" style="color:var(--secondary);">0</span>
+            </div>
         </div>
 
-        <hr style="border:0; border-top:1px solid #ccc; margin:15px 0;">
-
-        <h4 style="color:var(--primary); margin-bottom:5px;">ADD MACHINE PRODUCTION</h4>
-        <label>MACHINE NO:</label>
-        <input type="text" id="prodMachineNo" placeholder="E.G. 160 TON">
-        <label>OPERATOR:</label>
-        <input type="text" id="prodOperator" placeholder="OPERATOR NAME">
-
-        <div class="shift-box">
-            <h4 style="margin:0 0 5px 0; color:var(--secondary);">SHIFT A</h4>
-            <label>SCREEN SHOT:</label>
-            <input type="number" id="prodShotsA" placeholder="0">
-            <label>GOOD SHOT:</label>
-            <input type="number" id="prodGoodPcsA" placeholder="0">
+        <!-- Machines Data Container -->
+        <div class="section-card">
+            <h3 style="margin-top:0; color:var(--primary);">Machines Data</h3>
+            <div id="machinesDataContainer"></div>
+            <button class="btn-success" style="background:#3498db; margin-top:10px;" onclick="addMachineRow()">+ Add Machine Row</button>
         </div>
 
-        <div class="shift-box">
-            <h4 style="margin:0 0 5px 0; color:var(--secondary);">SHIFT B</h4>
-            <label>SCREEN SHOT:</label>
-            <input type="number" id="prodShotsB" placeholder="0">
-            <label>GOOD SHOT:</label>
-            <input type="number" id="prodGoodPcsB" placeholder="0">
+        <!-- Compile & Export Reports -->
+        <div class="section-card">
+            <h3 style="margin-top:0; color:var(--primary);">Compile & Export Reports</h3>
+            <label>Start Date:</label>
+            <input type="date" id="compileStart">
+            <label>End Date:</label>
+            <input type="date" id="compileEnd">
+            <button class="btn-success" onclick="compileRangeReport()">Compile Range & Print</button>
         </div>
 
-        <button class="btn-success" id="prodBtn" style="margin-top:15px;" onclick="saveDailyProduction()">ADD MACHINE</button>
-
-        <h4 id="gridSectionTitle" style="margin-top:20px; color:var(--primary);">PRODUCTION RECORDS GRID</h4>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>DATE</th>
-                        <th>MAIN ELEC (PREV-CURR)</th>
-                        <th>MACHINE</th>
-                        <th>OPERATOR</th>
-                        <th>SHIFT A (SCREEN / GOOD)</th>
-                        <th>SHIFT B (SCREEN / GOOD)</th>
-                        <th class="no-print">ACTION</th>
-                    </tr>
-                </thead>
-                <tbody id="dailyProdTableBody"></tbody>
-            </table>
-        </div>
-        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (DAILY PROD REPORT)</button>
+        <div id="compiledReportOutput" class="table-responsive" style="margin-top:15px;"></div>
     </div>
 
     <!-- PAGE 5: LOT TRACKER -->
     <div id="page5" class="page">
         <h3>LOT TRACKER & SHORT MOLDING</h3>
-        <label>LOT / ORDER REFERENCE:</label>
-        <input type="text" id="lotRef" placeholder="E.G. LOT #1204">
-        <label>TARGET ORDER QTY (PCS):</label>
-        <input type="number" id="lotTargetQty" placeholder="0">
-        <label>ACTUAL PRODUCED QTY (PCS):</label>
-        <input type="number" id="lotActualQty" placeholder="0">
-        <button class="btn-success" id="lotBtn" onclick="saveLotTrackerEntry()">SAVE LOT RECORD</button>
-
+        <label>LOT REF:</label><input type="text" id="lotRef">
+        <label>TARGET:</label><input type="number" id="lotTargetQty">
+        <label>ACTUAL:</label><input type="number" id="lotActualQty">
+        <button class="btn-success" onclick="saveLotTrackerEntry()">SAVE LOT</button>
         <div class="table-responsive">
             <table>
-                <thead>
-                    <tr>
-                        <th>LOT REF</th>
-                        <th>TARGET</th>
-                        <th>ACTUAL</th>
-                        <th>VARIANCE (+/-)</th>
-                        <th>STATUS</th>
-                        <th class="no-print">ACTION</th>
-                    </tr>
-                </thead>
+                <thead><tr><th>LOT REF</th><th>TARGET</th><th>ACTUAL</th><th>VARIANCE</th><th>STATUS</th></tr></thead>
                 <tbody id="lotTrackerTableBody"></tbody>
             </table>
         </div>
-        <button class="btn-warning" onclick="window.print()">PRINT / SAVE PDF (LOT TRACKER REPORT)</button>
+    </div>
+
+    <!-- PAGE 6: ELECTRICITY -->
+    <div id="page6" class="page">
+        <h3>MAIN ELECTRICAL METER LOG</h3>
+        <label>PREV:</label><input type="number" id="elecPrevUnits">
+        <label>CURR:</label><input type="number" id="elecCurrUnits">
+        <button class="btn-warning" onclick="saveMainElectricity()">SAVE</button>
     </div>
 </div>
 
 <script>
     let transactions = JSON.parse(localStorage.getItem('moulding_inventory')) || [];
-    let dailyProductions = JSON.parse(localStorage.getItem('moulding_dailyProd')) || [];
+    let dailySheets = JSON.parse(localStorage.getItem('moulding_dailySheets')) || {};
     let lotTrackers = JSON.parse(localStorage.getItem('moulding_lotTracker')) || [];
-    let mainMeter = JSON.parse(localStorage.getItem('moulding_mainMeter')) || { elecPrevUnits: '', elecCurrUnits: '' };
-    let savedBillingData = JSON.parse(localStorage.getItem('moulding_billingData')) || { partyName: '---', slipNo: '---', itemName: '---', machineNo: '---', cycleTime: 0, cavities: 1, ratePerHour: 0, items: [], grandTotal: 0 };
-    
-    let editingProdKey = null;
-    let editingLotKey = null;
+    let savedBillingData = JSON.parse(localStorage.getItem('moulding_billingData')) || { items: [], grandTotal: 0 };
 
     document.addEventListener("DOMContentLoaded", () => {
+        let todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('reportDate').value = todayStr;
+        document.getElementById('compileStart').value = todayStr;
+        document.getElementById('compileEnd').value = todayStr;
         document.getElementById('invDate').valueAsDate = new Date();
         document.getElementById('startDate').valueAsDate = new Date();
-        if(document.querySelectorAll('#colorCardsContainer > div').length === 0) {
-            addColorCard();
-        }
         
-        document.getElementById('elecPrevUnits').value = mainMeter.elecPrevUnits || '';
-        document.getElementById('elecCurrUnits').value = mainMeter.elecCurrUnits || '';
-
+        if(document.querySelectorAll('#colorCardsContainer > div').length === 0) addColorCard();
+        loadDailyProductionForDate();
         renderInventory();
-        renderDailyProduction();
         renderLotTracker();
         renderBilling();
     });
@@ -306,14 +228,6 @@
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('page' + pageNum).classList.add('active');
         document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
-        if(pageNum === 3) renderBilling();
-    }
-
-    function triggerPrintBilling() {
-        switchPage(3);
-        setTimeout(() => {
-            window.print();
-        }, 100);
     }
 
     function addColorCard(color='', pcs='', bags='', grossWt='', netWt='', scrap='') {
@@ -321,386 +235,149 @@
         let cardDiv = document.createElement('div');
         cardDiv.style.cssText = "background:#f8f9fa; padding:8px; margin-bottom:8px; border:1px solid #ddd; border-radius:4px;";
         cardDiv.innerHTML = `
-            <label>COLOR NAME:</label>
-            <input type="text" class="card-color" value="${color}" placeholder="E.G. RED, GREEN" oninput="calculateBillingOnly()">
-            <label>PIECES PRODUCED:</label>
-            <input type="number" class="card-pcs" value="${pcs}" placeholder="0" oninput="calculateBillingOnly()">
-            <label>BAGS PACKED:</label>
-            <input type="number" class="card-bags" value="${bags}" placeholder="0">
-            <label>GROSS WEIGHT (KG):</label>
-            <input type="number" class="card-grosswt" value="${grossWt}" placeholder="0.00" oninput="calculateBillingOnly()">
-            <label>NET FINISHED WT (KG):</label>
-            <input type="number" class="card-netwt" value="${netWt}" placeholder="0.00" oninput="calculateBillingOnly()">
-            <label>SCRAP / WASTE WT (KG):</label>
-            <input type="number" class="card-scrap" value="${scrap}" placeholder="0.00" oninput="calculateBillingOnly()">
-            <button type="button" class="btn-danger no-print" style="margin-top:5px;" onclick="this.parentElement.remove(); calculateBillingOnly();">REMOVE COLOR</button>
+            <label>COLOR NAME:</label><input type="text" class="card-color" value="${color}" placeholder="RED">
+            <label>PCS:</label><input type="number" class="card-pcs" value="${pcs}" placeholder="0">
+            <label>BAGS:</label><input type="number" class="card-bags" value="${bags}" placeholder="0">
+            <label>GROSS WT:</label><input type="number" class="card-grosswt" value="${grossWt}" placeholder="0.00">
+            <label>NET WT:</label><input type="number" class="card-netwt" value="${netWt}" placeholder="0.00">
+            <label>SCRAP:</label><input type="number" class="card-scrap" value="${scrap}" placeholder="0.00">
+            <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove()">REMOVE</button>
         `;
         container.appendChild(cardDiv);
-        calculateBillingOnly();
     }
 
-    function calculateBillingOnly() {
-        let slipNo = document.getElementById('slipNo').value || '---';
-        let itemName = document.getElementById('itemName').value || '---';
-        let partyName = document.getElementById('partyName').value || 'UNSPECIFIED';
-        let machineNo = document.getElementById('machineNo').value || '---';
-        let ratePerHour = parseFloat(document.getElementById('ratePerHour').value) || 0;
-        let cycleTime = parseFloat(document.getElementById('cycleTime').value) || 0;
-        let cavities = parseFloat(document.getElementById('cavities').value) || 1;
-        
-        let colorCards = document.querySelectorAll('#colorCardsContainer > div');
-        let tempItems = [];
-        let grandTotal = 0;
-
-        colorCards.forEach(card => {
-            let color = card.querySelector('.card-color').value || 'UNSPECIFIED';
-            let pcs = parseFloat(card.querySelector('.card-pcs').value) || 0;
-            let bags = parseFloat(card.querySelector('.card-bags').value) || 0;
-            let grossWt = parseFloat(card.querySelector('.card-grosswt').value) || 0;
-            let netWt = parseFloat(card.querySelector('.card-netwt').value) || 0;
-            let scrap = parseFloat(card.querySelector('.card-scrap').value) || 0;
-
-            let totalSeconds = (pcs * cycleTime) / cavities;
-            let amount = (ratePerHour / 3600) * totalSeconds;
-            grandTotal += amount;
-
-            tempItems.push({ color, pcs, bags, grossWt, netWt, scrap, amount });
-        });
-
-        savedBillingData = { partyName, slipNo, itemName, machineNo, cycleTime, cavities, ratePerHour, items: tempItems, grandTotal };
-        localStorage.setItem('moulding_billingData', JSON.stringify(savedBillingData));
-        renderBilling();
-    }
-
-    function renderBilling() {
-        document.getElementById('displayPartyName').textContent = savedBillingData.partyName || '---';
-        document.getElementById('displaySlipNo').textContent = savedBillingData.slipNo || '---';
-        document.getElementById('displayItemName').textContent = savedBillingData.itemName || '---';
-        document.getElementById('displayMachineNo').textContent = savedBillingData.machineNo || '---';
-        document.getElementById('displayCycleTime').textContent = savedBillingData.cycleTime || 0;
-        document.getElementById('displayCavities').textContent = savedBillingData.cavities || 1;
-        document.getElementById('displayRate').textContent = savedBillingData.ratePerHour || 0;
-
-        let billingBody = document.getElementById('billingTableBody');
-        billingBody.innerHTML = '';
-
-        if (!savedBillingData.items || savedBillingData.items.length === 0) {
-            billingBody.innerHTML = `<tr><td colspan="7" style="color:red; font-weight:bold;">NO BILLING RECORDS FOUND. PLEASE CONFIGURE JOB SPECS.</td></tr>`;
-            document.getElementById('grandTotalAmount').textContent = '0.00';
-            return;
-        }
-
-        savedBillingData.items.forEach(item => {
-            billingBody.innerHTML += `
-                <tr>
-                    <td>${item.color}</td>
-                    <td>${item.pcs}</td>
-                    <td>${item.bags}</td>
-                    <td>${item.grossWt.toFixed(2)}</td>
-                    <td>${item.netWt.toFixed(2)}</td>
-                    <td>${item.scrap.toFixed(2)}</td>
-                    <td>${item.amount.toFixed(2)}</td>
-                </tr>`;
-        });
-
-        document.getElementById('grandTotalAmount').textContent = (savedBillingData.grandTotal || 0).toFixed(2);
-    }
-
-    function saveJobAndDeductInventory() {
-        let materialType = document.getElementById('materialType').value;
-        if (!materialType) {
-            alert("PLEASE SELECT A VALID MATERIAL FROM INVENTORY FIRST.");
-            return;
-        }
-
-        let colorCards = document.querySelectorAll('#colorCardsContainer > div');
-        let totalConsumption = 0;
-
-        colorCards.forEach(card => {
-            let netWt = parseFloat(card.querySelector('.card-netwt').value) || 0;
-            let scrap = parseFloat(card.querySelector('.card-scrap').value) || 0;
-            totalConsumption += (netWt + scrap);
-        });
-
-        if (totalConsumption <= 0) {
-            alert("PLEASE ENTER NET WEIGHT OR SCRAP WEIGHT IN COLOR CARDS TO DEDUCT INVENTORY.");
-            return;
-        }
-
-        transactions.push({
-            id: Date.now() + Math.random(),
-            material: materialType,
-            type: 'CONSUMPTION',
-            qty: totalConsumption,
-            date: document.getElementById('startDate').value || new Date().toISOString().split('T')[0]
-        });
-        
-        localStorage.setItem('moulding_inventory', JSON.stringify(transactions));
-        renderInventory();
-        switchPage(3);
-    }
-
-    function saveInventoryTransaction() {
-        let material = document.getElementById('invMaterialName').value.trim().toUpperCase();
-        let type = document.getElementById('invType').value;
-        let qty = parseFloat(document.getElementById('invQty').value) || 0;
-        let date = document.getElementById('invDate').value;
-
-        if (!material || qty <= 0) {
-            alert('PLEASE ENTER A VALID MATERIAL NAME AND QUANTITY.');
-            return;
-        }
-
-        transactions.push({ id: Date.now(), material, type, qty, date });
-        localStorage.setItem('moulding_inventory', JSON.stringify(transactions));
-        
-        document.getElementById('invMaterialName').value = '';
-        document.getElementById('invQty').value = '';
-        renderInventory();
-    }
-
-    function renderInventory() {
-        let summary = {};
-        transactions.forEach(t => {
-            if (!summary[t.material]) summary[t.material] = { purchase: 0, consumption: 0 };
-            if (t.type === 'PURCHASE') summary[t.material].purchase += t.qty;
-            if (t.type === 'CONSUMPTION') summary[t.material].consumption += t.qty;
-        });
-
-        let tbody = document.getElementById('inventorySummaryBody');
-        tbody.innerHTML = '';
-        
-        let materialSelect = document.getElementById('materialType');
-        let currentSelectedMaterial = materialSelect.value;
-        materialSelect.innerHTML = '';
-
-        let keys = Object.keys(summary);
-        if (keys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="color:red; font-weight:bold;">NO INVENTORY RECORDS FOUND</td></tr>`;
-            materialSelect.innerHTML = `<option value="">-- ADD MATERIALS IN INVENTORY FIRST --</option>`;
-            return;
-        }
-
-        keys.forEach(mat => {
-            let closing = summary[mat].purchase - summary[mat].consumption;
-            tbody.innerHTML += `
-                <tr>
-                    <td><b>${mat}</b></td>
-                    <td style="color:green;">+${summary[mat].purchase.toFixed(2)}</td>
-                    <td style="color:red;">-${summary[mat].consumption.toFixed(2)}</td>
-                    <td><b>${closing.toFixed(2)}</b></td>
-                    <td class="no-print">
-                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteMaterialGroup('${mat}')">DEL</button>
-                    </td>
-                </tr>`;
+    function addMachineRow(machData = {}) {
+        let container = document.getElementById('machinesDataContainer');
+        let div = document.createElement('div');
+        div.className = 'machine-box';
+        div.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label style="margin:0;">Machine No:</label>
+                <button type="button" class="btn-danger" style="width:auto; padding:4px 10px; font-size:11px;" onclick="this.parentElement.parentElement.remove()">Delete</button>
+            </div>
+            <input type="text" class="mach-no" value="${machData.machineNo || 'MC-01'}" placeholder="E.G. MC-01">
             
-            let opt = document.createElement('option');
-            opt.value = mat;
-            opt.textContent = mat;
-            materialSelect.appendChild(opt);
+            <div class="shift-block">
+                <h4 style="margin:0 0 5px 0; color:var(--secondary); font-size:12px;">Shift A</h4>
+                <label>Operator:</label><input type="text" class="shift-a-op" value="${machData.opA || ''}" placeholder="Operator Name">
+                <div style="display:flex; gap:8px;">
+                    <div style="flex:1;"><label>Screen Count:</label><input type="number" class="shift-a-screen" value="${machData.screenA || 0}"></div>
+                    <div style="flex:1;"><label>Actual Count:</label><input type="number" class="shift-a-actual" value="${machData.actualA || 0}"></div>
+                </div>
+            </div>
+
+            <div class="shift-block">
+                <h4 style="margin:0 0 5px 0; color:var(--secondary); font-size:12px;">Shift B</h4>
+                <label>Operator:</label><input type="text" class="shift-b-op" value="${machData.opB || ''}" placeholder="Operator Name">
+                <div style="display:flex; gap:8px;">
+                    <div style="flex:1;"><label>Screen Count:</label><input type="number" class="shift-b-screen" value="${machData.screenB || 0}"></div>
+                    <div style="flex:1;"><label>Actual Count:</label><input type="number" class="shift-b-actual" value="${machData.actualB || 0}"></div>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function calculateUnits() {
+        let prev = parseFloat(document.getElementById('elecPrev').value) || 0;
+        let curr = parseFloat(document.getElementById('elecCurr').value) || 0;
+        let diff = curr >= prev ? curr - prev : 0;
+        document.getElementById('unitsConsumedDisplay').textContent = diff.toFixed(2);
+    }
+
+    function saveDailyProductionSheet() {
+        let dateKey = document.getElementById('reportDate').value;
+        if(!dateKey) { alert("Select a valid date."); return; }
+
+        let machines = [];
+        document.querySelectorAll('.machine-box').forEach(box => {
+            machines.push({
+                machineNo: box.querySelector('.mach-no').value,
+                opA: box.querySelector('.shift-a-op').value,
+                screenA: parseFloat(box.querySelector('.shift-a-screen').value) || 0,
+                actualA: parseFloat(box.querySelector('.shift-a-actual').value) || 0,
+                opB: box.querySelector('.shift-b-op').value,
+                screenB: parseFloat(box.querySelector('.shift-b-screen').value) || 0,
+                actualB: parseFloat(box.querySelector('.shift-b-actual').value) || 0,
+            });
         });
 
-        if(currentSelectedMaterial) {
-            materialSelect.value = currentSelectedMaterial;
-        }
-    }
-
-    function deleteMaterialGroup(mat) {
-        if(confirm(`DELETE ALL RECORDS FOR ${mat}?`)) {
-            transactions = transactions.filter(t => t.material !== mat);
-            localStorage.setItem('moulding_inventory', JSON.stringify(transactions));
-            renderInventory();
-        }
-    }
-
-    function saveMainElectricity() {
-        let elecPrevUnits = parseFloat(document.getElementById('elecPrevUnits').value) || 0;
-        let elecCurrUnits = parseFloat(document.getElementById('elecCurrUnits').value) || 0;
-        mainMeter = { elecPrevUnits, elecCurrUnits };
-        localStorage.setItem('moulding_mainMeter', JSON.stringify(mainMeter));
-        renderDailyProduction();
-        alert("MAIN METER READINGS SAVED!");
-    }
-
-    function saveDailyProduction() {
-        let machineNo = document.getElementById('prodMachineNo').value.trim().toUpperCase();
-        let operator = document.getElementById('prodOperator').value.trim().toUpperCase();
-        let shotsA = parseFloat(document.getElementById('prodShotsA').value) || 0;
-        let goodPcsA = parseFloat(document.getElementById('prodGoodPcsA').value) || 0;
-        let shotsB = parseFloat(document.getElementById('prodShotsB').value) || 0;
-        let goodPcsB = parseFloat(document.getElementById('prodGoodPcsB').value) || 0;
-        let date = new Date().toISOString().split('T')[0];
-
-        if (!machineNo) {
-            alert('PLEASE ENTER MACHINE NUMBER.');
-            document.getElementById('prodMachineNo').focus();
-            return;
-        }
-
-        // Store the electricity reading snapshot specific to this entry so rows don't overwrite each other
-        let prev = parseFloat(document.getElementById('elecPrevUnits').value) || 0;
-        let curr = parseFloat(document.getElementById('elecCurrUnits').value) || 0;
-
-        let data = { 
-            id: editingProdKey || Date.now(), 
-            date, 
-            machineNo, 
-            operator, 
-            shotsA, 
-            goodPcsA, 
-            shotsB, 
-            goodPcsB,
-            elecPrev: prev,
-            elecCurr: curr
+        dailySheets[dateKey] = {
+            elecPrev: document.getElementById('elecPrev').value,
+            elecCurr: document.getElementById('elecCurr').value,
+            machines: machines
         };
 
-        if (editingProdKey !== null) {
-            let index = dailyProductions.findIndex(item => item.id === editingProdKey);
-            if (index !== -1) dailyProductions[index] = data;
-            editingProdKey = null;
-            document.getElementById('prodBtn').textContent = "ADD MACHINE";
+        localStorage.setItem('moulding_dailySheets', JSON.stringify(dailySheets));
+        alert("Daily production record saved successfully!");
+    }
+
+    function loadDailyProductionForDate() {
+        let dateKey = document.getElementById('reportDate').value;
+        let container = document.getElementById('machinesDataContainer');
+        container.innerHTML = '';
+
+        let sheet = dailySheets[dateKey];
+        if (sheet) {
+            document.getElementById('elecPrev').value = sheet.elecPrev || '';
+            document.getElementById('elecCurr').value = sheet.elecCurr || '';
+            calculateUnits();
+            if (sheet.machines && sheet.machines.length > 0) {
+                sheet.machines.forEach(m => addMachineRow(m));
+            } else {
+                addMachineRow();
+            }
         } else {
-            dailyProductions.push(data);
+            document.getElementById('elecPrev').value = '';
+            document.getElementById('elecCurr').value = '';
+            calculateUnits();
+            addMachineRow();
         }
+    }
 
-        localStorage.setItem('moulding_dailyProd', JSON.stringify(dailyProductions));
-
-        document.getElementById('prodMachineNo').value = '';
-        document.getElementById('prodOperator').value = '';
-        document.getElementById('prodShotsA').value = '';
-        document.getElementById('prodGoodPcsA').value = '';
-        document.getElementById('prodShotsB').value = '';
-        document.getElementById('prodGoodPcsB').value = '';
+    function compileRangeReport() {
+        let start = document.getElementById('compileStart').value;
+        let end = document.getElementById('compileEnd').value;
+        let output = document.getElementById('compiledReportOutput');
         
-        renderDailyProduction();
-        document.getElementById('gridSectionTitle').scrollIntoView({ behavior: 'smooth' });
-    }
+        if(!start || !end) { alert("Please specify start and end dates."); return; }
 
-    function editProduction(id) {
-        let p = dailyProductions.find(item => item.id === id);
-        if(!p) return;
-        document.getElementById('prodMachineNo').value = p.machineNo || '';
-        document.getElementById('prodOperator').value = p.operator || '';
-        document.getElementById('prodShotsA').value = p.shotsA || '';
-        document.getElementById('prodGoodPcsA').value = p.goodPcsA || '';
-        document.getElementById('prodShotsB').value = p.shotsB || '';
-        document.getElementById('prodGoodPcsB').value = p.goodPcsB || '';
-        if(p.elecPrev !== undefined) document.getElementById('elecPrevUnits').value = p.elecPrev;
-        if(p.elecCurr !== undefined) document.getElementById('elecCurrUnits').value = p.elecCurr;
-        
-        editingProdKey = id;
-        document.getElementById('prodBtn').textContent = "UPDATE MACHINE";
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+        let html = `<h4>Report Summary (${start} to ${end})</h4><table><thead><tr><th>Date</th><th>Machine</th><th>Shift A (Op / Scr / Act)</th><th>Shift B (Op / Scr / Act)</th><th>Units Consumed</th></tr></thead><tbody>`;
+        let found = false;
 
-    function deleteProduction(id) {
-        if(confirm('DELETE THIS PRODUCTION RECORD?')) {
-            dailyProductions = dailyProductions.filter(item => item.id !== id);
-            localStorage.setItem('moulding_dailyProd', JSON.stringify(dailyProductions));
-            renderDailyProduction();
-        }
-    }
-
-    function renderDailyProduction() {
-        let tbody = document.getElementById('dailyProdTableBody');
-        tbody.innerHTML = '';
-
-        if (dailyProductions.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="color:red; font-weight:bold;">NO DAILY PRODUCTION RECORDS FOUND</td></tr>`;
-            return;
+        for (let dateKey in dailySheets) {
+            if (dateKey >= start && dateKey <= end) {
+                found = true;
+                let sheet = dailySheets[dateKey];
+                let consumed = (parseFloat(sheet.elecCurr) || 0) - (parseFloat(sheet.elecPrev) || 0);
+                
+                if(sheet.machines) {
+                    sheet.machines.forEach(m => {
+                        html += `<tr>
+                            <td>${dateKey}</td>
+                            <td><b>${m.machineNo}</b></td>
+                            <td>${m.opA || '-'}<br>Scr: ${m.screenA}, Act: ${m.actualA}</td>
+                            <td>${m.opB || '-'}<br>Scr: ${m.screenB}, Act: ${m.actualB}</td>
+                            <td>${consumed.toFixed(2)}</td>
+                        </tr>`;
+                    });
+                }
+            }
         }
 
-        dailyProductions.forEach((p) => {
-            let prev = p.elecPrev !== undefined ? p.elecPrev : (parseFloat(mainMeter.elecPrevUnits) || 0);
-            let curr = p.elecCurr !== undefined ? p.elecCurr : (parseFloat(mainMeter.elecCurrUnits) || 0);
-            let diff = curr - prev;
-            let meterDisplay = `${prev} - ${curr}<br><b style="color:#d9534f;">(DIFF: ${diff})</b>`;
-
-            let diffA = (p.shotsA || 0) - (p.goodPcsA || 0);
-            let diffB = (p.shotsB || 0) - (p.goodPcsB || 0);
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>${p.date}</td>
-                    <td>${meterDisplay}</td>
-                    <td><b>${p.machineNo || '---'}</b></td>
-                    <td>${p.operator || '---'}</td>
-                    <td style="text-align:left; padding-left:12px;">SCREEN: ${p.shotsA || 0}<br>GOOD: ${p.goodPcsA || 0} <b style="color:#c0392b;">(${diffA})</b></td>
-                    <td style="text-align:left; padding-left:12px;">SCREEN: ${p.shotsB || 0}<br>GOOD: ${p.goodPcsB || 0} <b style="color:#c0392b;">(${diffB})</b></td>
-                    <td class="no-print">
-                        <button class="btn-edit" onclick="editProduction(${p.id})">EDIT</button>
-                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteProduction(${p.id})">DEL</button>
-                    </td>
-                </tr>`;
-        });
+        html += `</tbody></table>`;
+        if(!found) html = `<p style="color:red; font-weight:bold;">No records found within the selected date range.</p>`;
+        output.innerHTML = html;
     }
 
-    function saveLotTrackerEntry() {
-        let lotRef = document.getElementById('lotRef').value.toUpperCase();
-        let target = parseFloat(document.getElementById('lotTargetQty').value) || 0;
-        let actual = parseFloat(document.getElementById('lotActualQty').value) || 0;
-        let variance = actual - target;
-        let status = variance === 0 ? "EXACT" : (variance > 0 ? `SURPLUS (+${variance})` : `SHORT (${variance})`);
-
-        let data = { id: editingLotKey || Date.now(), lotRef, target, actual, variance, status };
-
-        if (editingLotKey !== null) {
-            let index = lotTrackers.findIndex(item => item.id === editingLotKey);
-            if (index !== -1) lotTrackers[index] = data;
-            editingLotKey = null;
-            document.getElementById('lotBtn').textContent = "SAVE LOT RECORD";
-        } else {
-            lotTrackers.push(data);
-        }
-
-        localStorage.setItem('moulding_lotTracker', JSON.stringify(lotTrackers));
-
-        document.getElementById('lotRef').value = '';
-        document.getElementById('lotTargetQty').value = '';
-        document.getElementById('lotActualQty').value = '';
-        renderLotTracker();
-    }
-
-    function editLot(id) {
-        let l = lotTrackers.find(item => item.id === id);
-        if(!l) return;
-        document.getElementById('lotRef').value = l.lotRef;
-        document.getElementById('lotTargetQty').value = l.target;
-        document.getElementById('lotActualQty').value = l.actual;
-        editingLotKey = id;
-        document.getElementById('lotBtn').textContent = "UPDATE LOT RECORD";
-    }
-
-    function deleteLot(id) {
-        if(confirm('DELETE THIS LOT RECORD?')) {
-            lotTrackers = lotTrackers.filter(item => item.id !== id);
-            localStorage.setItem('moulding_lotTracker', JSON.stringify(lotTrackers));
-            renderLotTracker();
-        }
-    }
-
-    function renderLotTracker() {
-        let tbody = document.getElementById('lotTrackerTableBody');
-        tbody.innerHTML = '';
-        if (lotTrackers.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="color:red; font-weight:bold;">NO LOT RECORDS FOUND</td></tr>`;
-            return;
-        }
-        lotTrackers.forEach((l) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><b>${l.lotRef}</b></td>
-                    <td>${l.target}</td>
-                    <td>${l.actual}</td>
-                    <td>${l.variance}</td>
-                    <td style="color:${l.variance >= 0 ? 'green':'red'}; font-weight:bold;">${l.status}</td>
-                    <td class="no-print">
-                        <button class="btn-edit" onclick="editLot(${l.id})">EDIT</button>
-                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteLot(${l.id})">DEL</button>
-                    </td>
-                </tr>`;
-        });
-    }
+    // Boilerplate placeholders for other tabs
+    function saveInventoryTransaction() {}
+    function renderInventory() {}
+    function saveJobAndDeductInventory() {}
+    function renderBilling() {}
+    function saveLotTrackerEntry() {}
+    function renderLotTracker() {}
+    function saveMainElectricity() {}
 </script>
 </body>
 </html>
