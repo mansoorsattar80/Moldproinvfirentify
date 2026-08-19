@@ -9,6 +9,25 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-auth.js";
+
+  const auth = getAuth();
+  
+  // Try signing in automatically if not already signed in
+  signInWithEmailAndPassword(auth, "admin@mouldingapp.com", "Moulding2026!").catch(() => {});
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      // If not logged in, hide app contents or redirect
+      document.body.innerHTML = "<h2 style='text-align:center; margin-top:20vh; font-family:sans-serif;'>Access Denied. Please Log In.</h2>";
+    }
+  });
+</script>
+
+
+    
 
 <script>
   import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.x.x/firebase-auth.js";
