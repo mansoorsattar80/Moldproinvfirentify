@@ -42,7 +42,7 @@
         .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
         .header-elec-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
 
-        /* Print styling: specifically targets printing billing report from Page 3 */
+        /* Print styling */
         @media print {
             .nav-tabs, button, .no-print, 
             .header-elec-box, .shift-box, 
@@ -109,11 +109,11 @@
     <div id="page2" class="page">
         <h3>JOB SPECIFICATIONS & COLOR CARDS</h3>
         <label>SLIP / ITEM #:</label>
-        <input type="text" id="slipNo" placeholder="E.G. 963">
+        <input type="text" id="slipNo" placeholder="E.G. 963" oninput="calculateBillingOnly()">
         <label>ITEM NAME:</label>
-        <input type="text" id="itemName" placeholder="E.G. STICK">
+        <input type="text" id="itemName" placeholder="E.G. STICK" oninput="calculateBillingOnly()">
         <label>PARTY / CUSTOMER NAME:</label>
-        <input type="text" id="partyName" placeholder="CUSTOMER NAME">
+        <input type="text" id="partyName" placeholder="CUSTOMER NAME" oninput="calculateBillingOnly()">
         <label>MACHINE RATE PER HOUR (PKR):</label>
         <input type="number" id="ratePerHour" value="1250" oninput="calculateBillingOnly()">
         
@@ -123,7 +123,7 @@
         </select>
 
         <label>MACHINE NUMBER:</label>
-        <input type="text" id="machineNo" placeholder="E.G. 160 TON">
+        <input type="text" id="machineNo" placeholder="E.G. 160 TON" oninput="calculateBillingOnly()">
         <label>CYCLE TIME (SEC):</label>
         <input type="number" id="cycleTime" value="23" oninput="calculateBillingOnly()">
         <label>MOULD CAVITIES:</label>
@@ -141,8 +141,23 @@
     <!-- PAGE 3: BILLING -->
     <div id="page3" class="page">
         <h3>BILLING SUMMARY & REPORTS</h3>
-        <div style="font-weight:bold; margin-bottom:5px; color:var(--primary);">CUSTOMER: <span id="displayPartyName">---</span></div>
         
+        <!-- Job & Machine Info Summary Box -->
+        <div style="background:#f8f9fa; border:1px solid #ddd; padding:10px; border-radius:4px; margin-bottom:10px; font-size:12px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span><b>CUSTOMER:</b> <span id="displayPartyName">---</span></span>
+                <span><b>SLIP #:</b> <span id="displaySlipNo">---</span></span>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span><b>ITEM NAME:</b> <span id="displayItemName">---</span></span>
+                <span><b>MACHINE:</b> <span id="displayMachineNo">---</span></span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span><b>CYCLE TIME:</b> <span id="displayCycleTime">0</span> SEC</span>
+                <span><b>CAVITIES:</b> <span id="displayCavities">1</span> | <b>RATE/HR:</b> PKR <span id="displayRate">0</span></span>
+            </div>
+        </div>
+
         <div class="table-responsive" style="margin-top:10px;">
             <table>
                 <thead>
@@ -265,7 +280,7 @@
     let dailyProductions = JSON.parse(localStorage.getItem('moulding_dailyProd')) || [];
     let lotTrackers = JSON.parse(localStorage.getItem('moulding_lotTracker')) || [];
     let mainMeter = JSON.parse(localStorage.getItem('moulding_mainMeter')) || { elecPrevUnits: '', elecCurrUnits: '' };
-    let savedBillingData = JSON.parse(localStorage.getItem('moulding_billingData')) || { partyName: '---', items: [], grandTotal: 0 };
+    let savedBillingData = JSON.parse(localStorage.getItem('moulding_billingData')) || { partyName: '---', slipNo: '---', itemName: '---', machineNo: '---', cycleTime: 0, cavities: 1, ratePerHour: 0, items: [], grandTotal: 0 };
     
     let editingProdKey = null;
     let editingLotKey = null;
@@ -325,12 +340,21 @@
     }
 
     function calculateBillingOnly() {
+        let slipNo = document.getElementById('slipNo').value || '---';
+        let itemName = document.getElementById('itemName').value || '---';
+        let partyName = document.getElementById('partyName').value || 'UNSPECIFIED';
+        let machineNo = document.getElementById('machineNo').value || '---';
         let ratePerHour = parseFloat(document.getElementById('ratePerHour').value) || 0;
         let cycleTime = parseFloat(document.getElementById('cycleTime').value) || 0;
         let cavities = parseFloat(document.getElementById('cavities').value) || 1;
-        let partyName = document.getElementById('partyName').value || 'UNSPECIFIED';
         
         document.getElementById('displayPartyName').textContent = partyName;
+        document.getElementById('displaySlipNo').textContent = slipNo;
+        document.getElementById('displayItemName').textContent = itemName;
+        document.getElementById('displayMachineNo').textContent = machineNo;
+        document.getElementById('displayCycleTime').textContent = cycleTime;
+        document.getElementById('displayCavities').textContent = cavities;
+        document.getElementById('displayRate').textContent = ratePerHour;
 
         let colorCards = document.querySelectorAll('#colorCardsContainer > div');
         let billingBody = document.getElementById('billingTableBody');
@@ -366,13 +390,19 @@
 
         document.getElementById('grandTotalAmount').textContent = grandTotal.toFixed(2);
         
-        savedBillingData = { partyName, items: tempItems, grandTotal };
+        savedBillingData = { partyName, slipNo, itemName, machineNo, cycleTime, cavities, ratePerHour, items: tempItems, grandTotal };
         localStorage.setItem('moulding_billingData', JSON.stringify(savedBillingData));
     }
 
     function renderBilling() {
-        let partyName = savedBillingData.partyName || '---';
-        document.getElementById('displayPartyName').textContent = partyName;
+        document.getElementById('displayPartyName').textContent = savedBillingData.partyName || '---';
+        document.getElementById('displaySlipNo').textContent = savedBillingData.slipNo || '---';
+        document.getElementById('displayItemName').textContent = savedBillingData.itemName || '---';
+        document.getElementById('displayMachineNo').textContent = savedBillingData.machineNo || '---';
+        document.getElementById('displayCycleTime').textContent = savedBillingData.cycleTime || 0;
+        document.getElementById('displayCavities').textContent = savedBillingData.cavities || 1;
+        document.getElementById('displayRate').textContent = savedBillingData.ratePerHour || 0;
+
         let billingBody = document.getElementById('billingTableBody');
         billingBody.innerHTML = '';
 
