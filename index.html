@@ -104,10 +104,10 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 4px;
+            gap: 2px;
             background: #f8fafc;
             border: 1px solid #e2e8f0;
-            padding: 8px 12px;
+            padding: 10px 12px;
             border-radius: 6px;
             margin-bottom: 12px;
             font-size: 12px;
@@ -125,7 +125,7 @@
             flex: none !important;
             position: absolute;
             right: 10px;
-            top: 10px;
+            top: 12px;
         }
 
         #liveToast {
@@ -197,7 +197,7 @@
 <div class="container" id="appContainer">
     <!-- Logged in User Bar with Device Info -->
     <div class="user-bar">
-        <span id="loggedInUserDisplay">👤 Logged in as: </span>
+        <span id="loggedInUserDisplay" style="font-size: 13px;">👤 Logged in as: </span>
         <span id="deviceInfoDisplay" style="font-size: 11px; color: #64748b;">📱 Device: Detecting...</span>
         <button type="button" class="logout-btn" onclick="handleLogout()">Logout</button>
     </div>
