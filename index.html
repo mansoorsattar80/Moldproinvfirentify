@@ -3,535 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moulding Production & Management System</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --success: #27ae60;
-            --warning: #e67e22;
-            --danger: #e74c3c;
-            --bg: #f8f9fa;
-            --border: #cbd5e1;
-        }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; color: #334155; margin: 0; padding: 10px; }
-        
-        /* Layout mode container wrapper */
-        .viewport-wrapper { max-width: 950px; margin: 0 auto; transition: all 0.3s ease; }
-        .viewport-wrapper.desktop-mode { max-width: 1200px !important; }
-
-        .container { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        
-        /* Login Screen */
-        #loginScreen { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; }
-        #appContainer { display: none; }
-
-        /* Top Header Control bar */
-        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        .view-mode-toggle { background: var(--warning); color: white; padding: 4px 8px; font-size: 11px; border-radius: 4px; cursor: pointer; }
-
-        /* 3-Page Navigation Tabs */
-        .tab-nav { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid var(--border); padding-bottom: 8px; flex-wrap: wrap; }
-        .tab-btn { background: #e2e8f0; color: #475569; border: none; padding: 8px 12px; font-weight: 600; border-radius: 6px; cursor: pointer; flex: 1; min-width: 100px; text-align: center; font-size: 12px; }
-        .tab-btn.active { background: var(--secondary); color: white; }
-        
-        .page-content { display: none; }
-        .page-content.active { display: block; }
-
-        h2 { color: var(--primary); margin-top: 0; font-size: 18px; border-bottom: 2px solid var(--secondary); padding-bottom: 6px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        .input-group { display: flex; flex-direction: column; }
-        label { font-size: 11px; font-weight: 600; margin-bottom: 3px; color: #475569; }
-        input, select { padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; text-transform: uppercase; width: 100%; box-sizing: border-box; background: #fff; }
-        
-        .table-container { width: 100%; overflow-x: auto; margin-bottom: 15px; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 12px; min-width: 500px; }
-        th, td { border: 1px solid var(--border); padding: 8px; text-align: center; }
-        th { background-color: var(--primary); color: white; font-weight: 500; font-size: 11px; }
-        
-        .btn-container { display: flex; gap: 8px; justify-content: flex-start; margin-bottom: 15px; flex-wrap: wrap; }
-        button { background-color: var(--secondary); color: white; border: none; padding: 9px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; }
-        .btn-success { background-color: var(--success); }
-        .btn-danger { background-color: var(--danger); }
-        .btn-warning { background-color: var(--warning); }
-        
-        .summary-box { background: var(--bg); border: 1px solid var(--border); padding: 10px; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
-        .summary-item { display: flex; flex-direction: column; }
-        .summary-label { font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; }
-        .summary-value { font-size: 14px; font-weight: bold; color: var(--primary); margin-top: 2px; }
-
-        /* Desktop Mode Forced Overrides */
-        .viewport-wrapper.desktop-mode .form-grid { grid-template-columns: repeat(4, 1fr); }
-        .viewport-wrapper.desktop-mode table { min-width: 100%; }
-    </style>
+    <title>Moulding Management Software</title>
+    <!-- Bootstrap CSS for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-light">
 
-    <!-- LOGIN SCREEN -->
-    <div id="loginScreen">
-        <h2 style="border:none; text-align:center; color:var(--primary);">Software Login</h2>
-        <div class="input-group" style="margin-bottom: 12px; text-align:left;">
-            <label>Username</label>
-            <input type="text" id="loginUser" value="admin" style="text-transform:none;">
+    <div class="container my-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Job Billing & Specs</h5>
+                <button class="btn btn-light btn-sm text-primary fw-bold">Logout</button>
+            </div>
+            <div class="card-body">
+                <form id="job-billing-form">
+                    <!-- Slip / Job # -->
+                    <div class="mb-3">
+                        <label for="slipNo" class="form-label">Slip / Job #</label>
+                        <input type="text" class="form-control" id="slipNo" value="101">
+                    </div>
+
+                    <!-- Item Name -->
+                    <div class="mb-3">
+                        <label for="itemName" class="form-label">Item Name</label>
+                        <input type="text" class="form-control" id="itemName" value="CAP">
+                    </div>
+
+                    <!-- Dynamic Assigned Machines Section -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Assigned Machines</label>
+                        <div id="machine-container">
+                            <!-- Dynamic rows will appear here -->
+                        </div>
+                        <button type="button" class="btn btn-success btn-sm mt-2" id="add-machine-btn">+ Add Machine</button>
+                    </div>
+
+                    <!-- PP Granules Material -->
+                    <div class="mb-3">
+                        <label for="material" class="form-label">PP Granules Material</label>
+                        <input type="text" class="form-control" id="material" value="BLACK PP">
+                    </div>
+
+                    <!-- Submit / Test Button -->
+                    <button type="submit" class="btn btn-primary w-100">Save Job Specifications</button>
+                </form>
+            </div>
         </div>
-        <div class="input-group" style="margin-bottom: 20px; text-align:left;">
-            <label>Password</label>
-            <input type="password" id="loginPass" value="1234" style="text-transform:none;">
-        </div>
-        <button class="btn-success" onclick="handleLogin()" style="width:100%;">Login to System</button>
     </div>
 
-    <!-- MAIN APP CONTAINER WRAPPER -->
-    <div class="viewport-wrapper" id="viewportWrapper">
-        <div class="container" id="appContainer">
-            <div class="app-header">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <h2 style="border:none; margin:0; font-size:16px;">Moulding Software</h2>
-                    <button class="view-mode-toggle" id="modeToggleBtn" onclick="toggleDesktopMode()">🖥️ Desktop View</button>
-                </div>
-                <button class="btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="handleLogout()">Logout</button>
-            </div>
+    <!-- JavaScript Logic -->
+    <script>
+        // List of available machines
+        const availableMachines = [
+            "M/C NO-01",
+            "M/C NO-02",
+            "M/C NO-06",
+            "MACHINE NO 06"
+        ];
+
+        // Function to add a new machine row
+        function addMachineRow(selectedValue = "") {
+            const container = document.getElementById('machine-container');
             
-            <!-- 3 Main Navigation Pages -->
-            <div class="tab-nav">
-                <button class="tab-btn active" onclick="switchPage('inventoryPage', this)">1. Inventory</button>
-                <button class="tab-btn" onclick="switchPage('billingPage', this)">2. Billing</button>
-                <button class="tab-btn" onclick="switchPage('productionPage', this)">3. Production</button>
-            </div>
+            // Create wrapper row
+            const row = document.createElement('div');
+            row.className = 'input-group mb-2 machine-row';
+            
+            // Create select dropdown
+            const select = document.createElement('select');
+            select.className = 'form-select machine-select';
+            
+            // Default placeholder option
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = "";
+            defaultOpt.textContent = "-- Select Machine --";
+            defaultOpt.disabled = true;
+            if (!selectedValue) defaultOpt.selected = true;
+            select.appendChild(defaultOpt);
 
-            <!-- PAGE 1: INVENTORY -->
-            <div id="inventoryPage" class="page-content active">
-                <h2>Raw Material Inventory Ledger</h2>
-                <div class="btn-container">
-                    <button class="btn-success" onclick="addMaterial()">+ Add Material</button>
-                    <button onclick="addPurchase()">+ Purchase</button>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Material</th>
-                                <th>Opening</th>
-                                <th>Purch.</th>
-                                <th>Cons.</th>
-                                <th>Closing</th>
-                                <th>Act</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventoryTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- PAGE 2: BILLING -->
-            <div id="billingPage" class="page-content">
-                <h2>Job Billing & Specs</h2>
-                <div class="form-grid">
-                    <div class="input-group">
-                        <label>Slip / Job #</label>
-                        <input type="text" id="billSlip" value="101" oninput="calculateBilling()">
-                    </div>
-                    <div class="input-group">
-                        <label>Item Name</label>
-                        <input type="text" id="billItem" value="CAP" oninput="calculateBilling()">
-                    </div>
-                    <div class="input-group">
-                        <label>Machine</label>
-                        <select id="billMachine"></select>
-                    </div>
-                    <div class="input-group">
-                        <label>PP Material</label>
-                        <select id="billMaterial" onchange="calculateBilling()"></select>
-                    </div>
-                    <div class="input-group">
-                        <label>Cycle (Sec)</label>
-                        <input type="number" id="billCycle" value="20" step="0.1" oninput="calculateBilling()">
-                    </div>
-                    <div class="input-group">
-                        <label>Cavity</label>
-                        <input type="number" id="billCavity" value="2" step="1" oninput="calculateBilling()">
-                    </div>
-                    <div class="input-group">
-                        <label>Rate / Hr (PKR)</label>
-                        <input type="number" id="billRate" value="1200" step="0.01" oninput="calculateBilling()">
-                    </div>
-                </div>
-
-                <h3 style="font-size: 13px; margin-top: 15px; color: var(--primary);">Production Breakdown (Colors & Weights)</h3>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Color</th>
-                                <th>Bags</th>
-                                <th>Qty (Pcs)</th>
-                                <th>Gross (Kg)</th>
-                                <th>Net (Kg)</th>
-                                <th>Act</th>
-                            </tr>
-                        </thead>
-                        <tbody id="billingRows"></tbody>
-                    </table>
-                </div>
-                <button class="btn-success" onclick="addBillingRow()" style="margin-bottom: 15px;">+ Add Color Row</button>
-
-                <div class="summary-box">
-                    <div class="summary-item"><span class="summary-label">Total Qty</span><span class="summary-value" id="sumQty">0 Pcs</span></div>
-                    <div class="summary-item"><span class="summary-label">Total Gross</span><span class="summary-value" id="sumGross">0.00 Kg</span></div>
-                    <div class="summary-item"><span class="summary-label">Total Net</span><span class="summary-value" id="sumNet">0.00 Kg</span></div>
-                    <div class="summary-item"><span class="summary-label">Total Hours</span><span class="summary-value" id="sumHours">0.00 Hrs</span></div>
-                    <div class="summary-item"><span class="summary-label">Payable</span><span class="summary-value" id="sumAmount" style="color: var(--success);">0.00 PKR</span></div>
-                </div>
-            </div>
-
-            <!-- PAGE 3: PRODUCTION -->
-            <div id="productionPage" class="page-content">
-                <h2>Daily Production Database</h2>
-                <div class="form-grid">
-                    <div class="input-group">
-                        <label>Date</label>
-                        <input type="date" id="prodDate">
-                    </div>
-                    <div class="input-group">
-                        <label>Shift</label>
-                        <select id="prodShift">
-                            <option>MORNING</option>
-                            <option>EVENING</option>
-                            <option>NIGHT</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Machine No</label>
-                        <select id="prodMachine"></select>
-                    </div>
-                    <div class="input-group">
-                        <label>Output (Pcs)</label>
-                        <input type="number" id="prodPcs" value="1000">
-                    </div>
-                    <div class="input-group">
-                        <label>Scrap (Kg)</label>
-                        <input type="number" id="prodScrap" value="1.5" step="0.1">
-                    </div>
-                    <div class="input-group">
-                        <label>Prev Read</label>
-                        <input type="number" id="prodPrevReading" value="12000" step="0.1" oninput="calculateMeterDiff()">
-                    </div>
-                    <div class="input-group">
-                        <label>Curr Read</label>
-                        <input type="number" id="prodCurrReading" value="12250" step="0.1" oninput="calculateMeterDiff()">
-                    </div>
-                    <div class="input-group">
-                        <label>Meter Diff</label>
-                        <input type="number" id="prodMeterDiff" value="250" step="0.1" readonly style="background:#e2e8f0; font-weight:bold;">
-                    </div>
-                </div>
-                <div class="btn-container">
-                    <button class="btn-success" onclick="saveProductionEntry()">Save Entry</button>
-                    <button class="btn-warning" onclick="addNewMachine()">+ Add Machine</button>
-                </div>
-
-                <div class="table-container" style="margin-top: 15px;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Shift</th>
-                                <th>Machine</th>
-                                <th>Pcs</th>
-                                <th>Scrap</th>
-                                <th>Prev</th>
-                                <th>Curr</th>
-                                <th>Diff</th>
-                                <th>Act</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productionTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-<script>
-    let inventoryData = JSON.parse(localStorage.getItem('db_inventory')) || {
-        "BLACK PP": { opening: 400, purchased: 100 },
-        "PP PURE": { opening: 500, purchased: 0 }
-    };
-
-    let billingRowsData = JSON.parse(localStorage.getItem('db_billing')) || [
-        { color: "GREEN", bags: 2, qty: 2000, gross: 12.0, net: 10.5 },
-        { color: "BLUE", bags: 2, qty: 2000, gross: 12.0, net: 10.5 }
-    ];
-
-    let machineList = JSON.parse(localStorage.getItem('db_machines')) || ["M/C NO-01", "M/C NO-02", "M/C NO-06"];
-    
-    let productionDatabase = JSON.parse(localStorage.getItem('db_production')) || [
-        { id: 1, date: "2026-08-19", shift: "MORNING", machine: "M/C NO-01", pcs: 2500, scrap: 0.8, prevRead: 12000, currRead: 12250, diff: 250 }
-    ];
-
-    function toggleDesktopMode() {
-        let wrapper = document.getElementById('viewportWrapper');
-        let btn = document.getElementById('modeToggleBtn');
-        wrapper.classList.toggle('desktop-mode');
-        if(wrapper.classList.contains('desktop-mode')) {
-            btn.innerHTML = "📱 Mobile View";
-        } else {
-            btn.innerHTML = "🖥️ Desktop View";
+            // Populate available machines
+            availableMachines.forEach(machine => {
+                const option = document.createElement('option');
+                option.value = machine;
+                option.textContent = machine;
+                if (machine === selectedValue) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+            
+            // Create remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn btn-outline-danger';
+            removeBtn.textContent = 'Remove';
+            removeBtn.onclick = function() {
+                row.remove();
+            };
+            
+            // Assemble row
+            row.appendChild(select);
+            row.appendChild(removeBtn);
+            container.appendChild(row);
         }
-    }
 
-    function handleLogin() {
-        let u = document.getElementById('loginUser').value.trim();
-        let p = document.getElementById('loginPass').value.trim();
-        if(u === "admin" && p === "1234") {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('appContainer').style.display = 'block';
-            initApp();
-        } else {
-            alert("Invalid username or password! (Default: admin / 1234)");
-        }
-    }
-
-    function handleLogout() {
-        document.getElementById('appContainer').style.display = 'none';
-        document.getElementById('loginScreen').style.display = 'block';
-    }
-
-    function switchPage(pageId, btn) {
-        document.querySelectorAll('.page-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
-        btn.classList.add('active');
-        
-        if(pageId === 'inventoryPage') renderInventory();
-        if(pageId === 'billingPage') {
-            updateAllDropdowns();
-            renderBillingRows();
-        }
-        if(pageId === 'productionPage') {
-            updateAllDropdowns();
-            renderProductionDatabase();
-            calculateMeterDiff();
-        }
-    }
-
-    function addMaterial() {
-        let name = prompt("Enter new material name (e.g. WHITE PP):");
-        if(!name) return;
-        name = name.toUpperCase().trim();
-        if(inventoryData[name]) return alert("Material already exists!");
-        let open = parseFloat(prompt("Enter opening stock (Kg):", "0")) || 0;
-        inventoryData[name] = { opening: open, purchased: 0 };
-        saveAllData();
-        renderInventory();
-        updateAllDropdowns();
-    }
-
-    function addPurchase() {
-        let keys = Object.keys(inventoryData);
-        let mat = prompt(`Select Material (${keys.join(", ")}):`, keys[0]);
-        if(!mat || !inventoryData[mat.toUpperCase()]) return;
-        mat = mat.toUpperCase();
-        let qty = parseFloat(prompt("Enter purchased quantity (Kg):", "50"));
-        if(!isNaN(qty)) {
-            inventoryData[mat].purchased += qty;
-            saveAllData();
-            renderInventory();
-        }
-    }
-
-    function renderInventory() {
-        let tbody = document.getElementById('inventoryTableBody');
-        tbody.innerHTML = "";
-        
-        let activeMaterial = document.getElementById('billMaterial').value;
-        let totalConsumption = 0;
-        billingRowsData.forEach(row => totalConsumption += row.net);
-
-        Object.keys(inventoryData).forEach(mat => {
-            let item = inventoryData[mat];
-            let consumed = (mat === activeMaterial) ? totalConsumption : 0;
-            let closing = (item.opening + item.purchased) - consumed;
-
-            tbody.innerHTML += `
-                <tr>
-                    <td style="font-weight:600">${mat}</td>
-                    <td>${item.opening.toFixed(1)}</td>
-                    <td style="color:var(--success)">+${item.purchased.toFixed(1)}</td>
-                    <td style="color:var(--danger)">-${consumed.toFixed(1)}</td>
-                    <td style="font-weight:bold">${closing.toFixed(1)}</td>
-                    <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteMaterial('${mat}')">X</button></td>
-                </tr>
-            `;
-        });
-        updateAllDropdowns();
-    }
-
-    function deleteMaterial(mat) {
-        delete inventoryData[mat];
-        saveAllData();
-        renderInventory();
-    }
-
-    function updateAllDropdowns() {
-        let matSelect = document.getElementById('billMaterial');
-        let currentMat = matSelect.value;
-        matSelect.innerHTML = "";
-        Object.keys(inventoryData).forEach(mat => {
-            let opt = document.createElement('option');
-            opt.value = mat;
-            opt.textContent = mat;
-            if(mat === currentMat) opt.selected = true;
-            matSelect.appendChild(opt);
+        // Event listener for the "Add Machine" button
+        document.getElementById('add-machine-btn').addEventListener('click', function() {
+            addMachineRow();
         });
 
-        let billMacSelect = document.getElementById('billMachine');
-        let prodMacSelect = document.getElementById('prodMachine');
-        let currentBillMac = billMacSelect.value;
-        let currentProdMac = prodMacSelect.value;
-
-        billMacSelect.innerHTML = "";
-        prodMacSelect.innerHTML = "";
-
-        machineList.forEach(m => {
-            let opt1 = document.createElement('option');
-            opt1.value = m;
-            opt1.textContent = m;
-            if(m === currentBillMac) opt1.selected = true;
-            billMacSelect.appendChild(opt1);
-
-            let opt2 = document.createElement('option');
-            opt2.value = m;
-            opt2.textContent = m;
-            if(m === currentProdMac) opt2.selected = true;
-            prodMacSelect.appendChild(opt2);
-        });
-    }
-
-    function renderBillingRows() {
-        let tbody = document.getElementById('billingRows');
-        tbody.innerHTML = "";
-        billingRowsData.forEach((row, idx) => {
-            if(row.bags === undefined) row.bags = 1;
-            if(row.gross === undefined) row.gross = row.net;
-            tbody.innerHTML += `
-                <tr>
-                    <td><input type="text" value="${row.color}" oninput="billingRowsData[${idx}].color = this.value.toUpperCase(); saveAllData(); calculateBilling()"></td>
-                    <td><input type="number" style="width:50px;" value="${row.bags}" oninput="billingRowsData[${idx}].bags = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
-                    <td><input type="number" style="width:75px;" value="${row.qty}" oninput="billingRowsData[${idx}].qty = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
-                    <td><input type="number" style="width:65px;" step="0.01" value="${row.gross}" oninput="billingRowsData[${idx}].gross = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
-                    <td><input type="number" style="width:65px;" step="0.01" value="${row.net}" oninput="billingRowsData[${idx}].net = parseFloat(this.value)||0; saveAllData(); calculateBilling(); renderInventory()"></td>
-                    <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="billingRowsData.splice(${idx},1); saveAllData(); renderBillingRows(); renderInventory()">X</button></td>
-                </tr>
-            `;
-        });
-        calculateBilling();
-    }
-
-    function addBillingRow() {
-        billingRowsData.push({ color: "NEW", bags: 1, qty: 1000, gross: 6.0, net: 5.0 });
-        saveAllData();
-        renderBillingRows();
-    }
-
-    function calculateBilling() {
-        let totalQty = 0, totalGross = 0, totalNet = 0;
-        billingRowsData.forEach(r => {
-            totalQty += r.qty;
-            totalGross += (r.gross || 0);
-            totalNet += r.net;
+        // Add one default row on page load so it's ready to use
+        window.addEventListener('DOMContentLoaded', () => {
+            addMachineRow("M/C NO-01");
         });
 
-        let cycle = parseFloat(document.getElementById('billCycle').value) || 0;
-        let cavity = parseFloat(document.getElementById('billCavity').value) || 1;
-        let rateHour = parseFloat(document.getElementById('billRate').value) || 0;
+        // Form submission handling to gather selected values
+        document.getElementById('job-billing-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const selects = document.querySelectorAll('.machine-select');
+            let selectedMachines = [];
+            
+            selects.forEach(select => {
+                if(select.value) {
+                    selectedMachines.push(select.value);
+                }
+            });
 
-        let totalHours = cavity > 0 ? (totalQty * cycle) / (cavity * 3600) : 0;
-        let effectiveRate = (rateHour / 3600) * cycle;
-        let totalAmount = totalQty * effectiveRate;
-
-        document.getElementById('sumQty').innerText = totalQty.toLocaleString() + ' Pcs';
-        document.getElementById('sumGross').innerText = totalGross.toFixed(2) + ' Kg';
-        document.getElementById('sumNet').innerText = totalNet.toFixed(2) + ' Kg';
-        document.getElementById('sumHours').innerText = totalHours.toFixed(2) + ' Hrs';
-        document.getElementById('sumAmount').innerText = totalAmount.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' PKR';
-    }
-
-    function addNewMachine() {
-        let newMac = prompt("Enter new machine name/number (e.g. M/C NO-07):");
-        if(!newMac) return;
-        newMac = newMac.toUpperCase().trim();
-        if(machineList.includes(newMac)) return alert("Machine already exists!");
-        machineList.push(newMac);
-        saveAllData();
-        updateAllDropdowns();
-        document.getElementById('prodMachine').value = newMac;
-        document.getElementById('billMachine').value = newMac;
-    }
-
-    function calculateMeterDiff() {
-        let prev = parseFloat(document.getElementById('prodPrevReading').value) || 0;
-        let curr = parseFloat(document.getElementById('prodCurrReading').value) || 0;
-        let diff = curr - prev;
-        document.getElementById('prodMeterDiff').value = diff >= 0 ? diff.toFixed(1) : 0;
-    }
-
-    function renderProductionDatabase() {
-        let tbody = document.getElementById('productionTableBody');
-        tbody.innerHTML = "";
-        productionDatabase.forEach((p, idx) => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${p.date}</td>
-                    <td>${p.shift}</td>
-                    <td>${p.machine}</td>
-                    <td>${p.pcs.toLocaleString()}</td>
-                    <td>${p.scrap.toFixed(1)}</td>
-                    <td>${p.prevRead !== undefined ? p.prevRead : '-'}</td>
-                    <td>${p.currRead !== undefined ? p.currRead : '-'}</td>
-                    <td style="font-weight:bold; color:var(--secondary);">${p.diff !== undefined ? p.diff : '-'}</td>
-                    <td><button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteProductionEntry(${idx})">X</button></td>
-                </tr>
-            `;
+            console.log("Saved Machines:", selectedMachines);
+            alert("Successfully saved with machines: " + selectedMachines.join(', '));
         });
-    }
-
-    function saveProductionEntry() {
-        let date = document.getElementById('prodDate').value || new Date().toISOString().split('T')[0];
-        let shift = document.getElementById('prodShift').value;
-        let machine = document.getElementById('prodMachine').value;
-        let pcs = parseFloat(document.getElementById('prodPcs').value) || 0;
-        let scrap = parseFloat(document.getElementById('prodScrap').value) || 0;
-        let prevRead = parseFloat(document.getElementById('prodPrevReading').value) || 0;
-        let currRead = parseFloat(document.getElementById('prodCurrReading').value) || 0;
-        let diff = parseFloat(document.getElementById('prodMeterDiff').value) || 0;
-
-        productionDatabase.unshift({ id: Date.now(), date, shift, machine, pcs, scrap, prevRead, currRead, diff });
-        saveAllData();
-        renderProductionDatabase();
-        alert("Production entry successfully saved!");
-    }
-
-    function deleteProductionEntry(idx) {
-        productionDatabase.splice(idx, 1);
-        saveAllData();
-        renderProductionDatabase();
-    }
-
-    function saveAllData() {
-        localStorage.setItem('db_inventory', JSON.stringify(inventoryData));
-        localStorage.setItem('db_billing', JSON.stringify(billingRowsData));
-        localStorage.setItem('db_machines', JSON.stringify(machineList));
-        localStorage.setItem('db_production', JSON.stringify(productionDatabase));
-    }
-
-    function initApp() {
-        document.getElementById('prodDate').value = new Date().toISOString().split('T')[0];
-        updateAllDropdowns();
-        calculateMeterDiff();
-        renderInventory();
-    }
-</script>
-
+    </script>
 </body>
 </html>
