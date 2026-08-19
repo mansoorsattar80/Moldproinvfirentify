@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moulding Production & Billing Software</title>
+    <title>MOULDING PRODUCTION & BILLING SOFTWARE</title>
     <!-- Firebase App (Core SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <!-- Firebase Firestore -->
@@ -18,7 +18,7 @@
             --light: #ecf0f1;
             --dark: #2c3e50;
         }
-        body { font-family: Arial, sans-serif; margin: 0; padding: 10px; background: #f4f6f7; color: #333; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 10px; background: #f4f6f7; color: #333; text-transform: uppercase; }
         .container { max-width: 100%; margin: auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: var(--primary); font-size: 20px; margin-bottom: 5px; }
         .status-bar { text-align: center; font-size: 12px; font-weight: bold; padding: 5px; margin-bottom: 10px; border-radius: 4px; }
@@ -34,12 +34,13 @@
         .page.active { display: block; }
 
         label { font-weight: bold; font-size: 13px; display: block; margin-top: 8px; color: #555; }
-        input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        button { background: var(--secondary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; margin-top: 5px; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 4px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; text-transform: uppercase; }
+        button { background: var(--secondary); color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; width: 100%; margin-top: 5px; text-transform: uppercase; }
         button:hover { opacity: 0.9; }
         .btn-danger { background: var(--danger); }
         .btn-success { background: var(--success); }
         .btn-warning { background: var(--warning); color: #fff; }
+        .btn-edit { background: #e67e22; color: white; padding: 4px 8px; font-size: 11px; width: auto; margin-right: 3px; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
         th, td { border: 1px solid #ddd; padding: 6px; text-align: center; }
@@ -53,10 +54,10 @@
 <body>
 
 <div class="container">
-    <div id="connectionStatus" class="status-bar status-offline">CONNECTING TO FIREBASE...</div>
-    <h2>MOULDING PRODUCTION & BILLING</h2>
+    <div id="connectionStatus" class="status-bar status-online">LOCAL STORAGE & CLOUD READY</div>
+    <h2>MOULDING PRODUCTION & BILLING SOFTWARE</h2>
     <div style="text-align:center; font-size:11px; color:#666; margin-bottom:10px;">
-        📊 TOTAL APP OPENS: <span id="appOpenCount">1</span> | <a href="#" onclick="logoutUser()">Logout</a>
+        📊 TOTAL APP OPENS: <span id="appOpenCount">1</span> | <a href="#" onclick="logoutUser()">LOGOUT</a>
     </div>
 
     <!-- Navigation Tabs -->
@@ -70,29 +71,29 @@
 
     <!-- PAGE 1: INVENTORY LEDGER -->
     <div id="page1" class="page active">
-        <h3>Raw Material Inventory</h3>
-        <label>Material Name / Granule Type:</label>
-        <input type="text" id="invMaterialName" placeholder="e.g. BLACK PP, PURE PP">
-        <label>Transaction Type:</label>
+        <h3>RAW MATERIAL INVENTORY</h3>
+        <label>MATERIAL NAME / GRANULE TYPE:</label>
+        <input type="text" id="invMaterialName" placeholder="E.G. BLACK PP, PURE PP">
+        <label>TRANSACTION TYPE:</label>
         <select id="invType">
-            <option value="purchase">Purchase / Opening Stock (+)</option>
-            <option value="consumption">Manual Consumption (-)</option>
+            <option value="PURCHASE">PURCHASE / OPENING STOCK (+)</option>
+            <option value="CONSUMPTION">MANUAL CONSUMPTION (-)</option>
         </select>
-        <label>Quantity (Kg):</label>
+        <label>QUANTITY (KG):</label>
         <input type="number" id="invQty" placeholder="0.00">
-        <label>Date:</label>
+        <label>DATE:</label>
         <input type="date" id="invDate">
-        <button class="btn-success" onclick="addInventoryTransaction()">Add Inventory Entry</button>
+        <button class="btn-success" id="invBtn" onclick="addInventoryTransaction()">ADD INVENTORY ENTRY</button>
 
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>Material</th>
-                        <th>Opening/Purch</th>
-                        <th>Consumed</th>
-                        <th>Closing Balance</th>
-                        <th>Actions</th>
+                        <th>MATERIAL</th>
+                        <th>OPENING/PURCH</th>
+                        <th>CONSUMED</th>
+                        <th>CLOSING BALANCE</th>
+                        <th>ACTIONS</th>
                     </tr>
                 </thead>
                 <tbody id="inventorySummaryBody"></tbody>
@@ -102,83 +103,83 @@
 
     <!-- PAGE 2: JOB SPECS & COLOR VARIATIONS -->
     <div id="page2" class="page">
-        <h3>Job Specifications & Color Cards</h3>
-        <label>Slip / Item #:</label>
-        <input type="text" id="slipNo" placeholder="e.g. 963">
-        <label>Item Name:</label>
-        <input type="text" id="itemName" placeholder="e.g. STICK">
-        <label>Select PP Granules:</label>
+        <h3>JOB SPECIFICATIONS & COLOR CARDS</h3>
+        <label>SLIP / ITEM #:</label>
+        <input type="text" id="slipNo" placeholder="E.G. 963">
+        <label>ITEM NAME:</label>
+        <input type="text" id="itemName" placeholder="E.G. STICK">
+        <label>SELECT PP GRANULES:</label>
         <select id="materialType">
             <option value="BLACK PP">BLACK PP</option>
             <option value="PURE PP">PURE PP</option>
         </select>
-        <label>Machine Number:</label>
-        <input type="text" id="machineNo" placeholder="e.g. 160 Ton">
-        <label>Cycle Time (Sec):</label>
+        <label>MACHINE NUMBER:</label>
+        <input type="text" id="machineNo" placeholder="E.G. 160 TON">
+        <label>CYCLE TIME (SEC):</label>
         <input type="number" id="cycleTime" value="20">
-        <label>Mould Cavities:</label>
+        <label>MOULD CAVITIES:</label>
         <input type="number" id="cavities" value="1">
-        <label>Job Start Date:</label>
+        <label>JOB START DATE:</label>
         <input type="date" id="startDate">
 
-        <h4 style="margin-top:15px; border-bottom:2px solid var(--secondary); padding-bottom:3px;">Color Variations</h4>
+        <h4 style="margin-top:15px; border-bottom:2px solid var(--secondary); padding-bottom:3px;">COLOR VARIATIONS</h4>
         <div id="colorCardsContainer"></div>
-        <button class="btn-warning" onclick="addColorCard()">+ Add Color Card</button>
-        <button class="btn-success" style="margin-top:15px;" onclick="saveJobSpecs()">Save Job Specs & Calculate</button>
+        <button class="btn-warning" onclick="addColorCard()">+ ADD COLOR CARD</button>
+        <button class="btn-success" style="margin-top:15px;" onclick="saveJobSpecs()">SAVE JOB SPECS & CALCULATE</button>
     </div>
 
     <!-- PAGE 3: BILLING SUMMARY -->
     <div id="page3" class="page">
-        <h3>Billing Summary & Reports</h3>
-        <label>Party / Customer Name:</label>
-        <input type="text" id="partyName" placeholder="Customer Name">
-        <label>Moulding Rate Per Kg (PKR):</label>
+        <h3>BILLING SUMMARY & REPORTS</h3>
+        <label>PARTY / CUSTOMER NAME:</label>
+        <input type="text" id="partyName" placeholder="CUSTOMER NAME">
+        <label>MOULDING RATE PER KG (PKR):</label>
         <input type="number" id="mouldingRate" value="150" oninput="calculateBillingOnly()">
         
         <div class="table-responsive" style="margin-top:10px;">
             <table>
                 <thead>
                     <tr>
-                        <th>Color</th>
-                        <th>Pcs</th>
-                        <th>Bags</th>
-                        <th>Net Wt</th>
-                        <th>Scrap</th>
-                        <th>Total Amt</th>
+                        <th>COLOR</th>
+                        <th>PCS</th>
+                        <th>BAGS</th>
+                        <th>NET WT</th>
+                        <th>SCRAP</th>
+                        <th>TOTAL AMT</th>
                     </tr>
                 </thead>
                 <tbody id="billingTableBody"></tbody>
             </table>
         </div>
         <div style="background:#e8f4fd; padding:10px; margin-top:10px; border-radius:4px; font-weight:bold;">
-            Grand Total Payable: PKR <span id="grandTotalAmount">0.00</span>
+            GRAND TOTAL PAYABLE: PKR <span id="grandTotalAmount">0.00</span>
         </div>
-        <button class="btn-success" onclick="window.print()">Print / Save PDF</button>
+        <button class="btn-success" onclick="window.print()">PRINT / SAVE PDF</button>
     </div>
 
     <!-- PAGE 4: DAILY PRODUCTION LOG -->
     <div id="page4" class="page">
-        <h3>Daily Production Log</h3>
-        <label>Select Shift:</label>
+        <h3>DAILY PRODUCTION LOG</h3>
+        <label>SELECT SHIFT:</label>
         <select id="prodShift">
-            <option value="Shift A">Shift A</option>
-            <option value="Shift B">Shift B</option>
+            <option value="SHIFT A">SHIFT A</option>
+            <option value="SHIFT B">SHIFT B</option>
         </select>
-        <label>Actual Shots Produced:</label>
+        <label>ACTUAL SHOTS PRODUCED:</label>
         <input type="number" id="prodShots" placeholder="0">
-        <label>Good Production Pieces:</label>
+        <label>GOOD PRODUCTION PIECES:</label>
         <input type="number" id="prodGoodPcs" placeholder="0">
-        <button class="btn-success" onclick="addDailyProduction()">Log Production</button>
+        <button class="btn-success" id="prodBtn" onclick="addDailyProduction()">LOG PRODUCTION</button>
 
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Shift</th>
-                        <th>Shots</th>
-                        <th>Good Pcs</th>
-                        <th>Action</th>
+                        <th>DATE</th>
+                        <th>SHIFT</th>
+                        <th>SHOTS</th>
+                        <th>GOOD PCS</th>
+                        <th>ACTION</th>
                     </tr>
                 </thead>
                 <tbody id="dailyProdTableBody"></tbody>
@@ -188,25 +189,25 @@
 
     <!-- PAGE 5: LOT MANAGEMENT & SHORT MOLDING TRACKER -->
     <div id="page5" class="page">
-        <h3>Lot Tracker & Short Molding</h3>
-        <label>Lot / Order Reference:</label>
-        <input type="text" id="lotRef" placeholder="e.g. Lot #1204">
-        <label>Target Order Qty (Pcs):</label>
+        <h3>LOT TRACKER & SHORT MOLDING</h3>
+        <label>LOT / ORDER REFERENCE:</label>
+        <input type="text" id="lotRef" placeholder="E.G. LOT #1204">
+        <label>TARGET ORDER QTY (PCS):</label>
         <input type="number" id="lotTargetQty" placeholder="0">
-        <label>Actual Produced Qty (Pcs):</label>
+        <label>ACTUAL PRODUCED QTY (PCS):</label>
         <input type="number" id="lotActualQty" placeholder="0">
-        <button class="btn-success" onclick="saveLotTrackerEntry()">Save Lot Record</button>
+        <button class="btn-success" id="lotBtn" onclick="saveLotTrackerEntry()">SAVE LOT RECORD</button>
 
         <div class="table-responsive">
             <table>
                 <thead>
                     <tr>
-                        <th>Lot Ref</th>
-                        <th>Target</th>
-                        <th>Actual</th>
-                        <th>Variance (+/-)</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>LOT REF</th>
+                        <th>TARGET</th>
+                        <th>ACTUAL</th>
+                        <th>VARIANCE (+/-)</th>
+                        <th>STATUS</th>
+                        <th>ACTION</th>
                     </tr>
                 </thead>
                 <tbody id="lotTrackerTableBody"></tbody>
@@ -215,18 +216,7 @@
     </div>
 </div>
 
-<!-- Generic Edit Modal -->
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <h3>Edit Record</h3>
-        <div id="modalBody"></div>
-        <button class="btn-success" onclick="saveModalChanges()">Save Changes</button>
-        <button class="btn-danger" onclick="closeModal()" style="margin-top:5px;">Cancel</button>
-    </div>
-</div>
-
 <script>
-    // Initialize Firebase (Placeholder config - active on user firebase hosting)
     const firebaseConfig = {
         apiKey: "AIzaSyDummyKeyForAppStructure99",
         authDomain: "moldpro-app.firebaseapp.com",
@@ -236,20 +226,24 @@
         appId: "1:12345:web:abcde"
     };
     if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
     }
-    const db = firebase.firestore();
+    let db = null;
+    try { db = firebase.firestore(); } catch(e) {}
 
     let transactions = [];
     let jobCards = [];
     let dailyProductions = [];
     let lotTrackers = [];
-    let currentEditingId = null;
+
+    let editingInvIndex = null;
+    let editingProdIndex = null;
+    let editingLotIndex = null;
 
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('invDate').valueAsDate = new Date();
         document.getElementById('startDate').valueAsDate = new Date();
-        loadDataFromFirebase();
+        loadData();
         incrementAppOpen();
     });
 
@@ -265,17 +259,17 @@
         let cardDiv = document.createElement('div');
         cardDiv.style.cssText = "background:#f8f9fa; padding:8px; margin-bottom:8px; border:1px solid #ddd; border-radius:4px;";
         cardDiv.innerHTML = `
-            <label>Color Name:</label>
-            <input type="text" class="card-color" placeholder="e.g. RED, GREEN">
-            <label>Pieces Produced:</label>
+            <label>COLOR NAME:</label>
+            <input type="text" class="card-color" placeholder="E.G. RED, GREEN">
+            <label>PIECES PRODUCED:</label>
             <input type="number" class="card-pcs" placeholder="0" oninput="calculateBillingOnly()">
-            <label>Bags Packed:</label>
+            <label>BAGS PACKED:</label>
             <input type="number" class="card-bags" placeholder="0">
-            <label>Net Finished Wt (Kg):</label>
+            <label>NET FINISHED WT (KG):</label>
             <input type="number" class="card-netwt" placeholder="0.00" oninput="calculateBillingOnly()">
-            <label>Scrap / Waste Wt (Kg):</label>
+            <label>SCRAP / WASTE WT (KG):</label>
             <input type="number" class="card-scrap" placeholder="0.00" oninput="calculateBillingOnly()">
-            <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove(); calculateBillingOnly();">Remove Color</button>
+            <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove(); calculateBillingOnly();">REMOVE COLOR</button>
         `;
         container.appendChild(cardDiv);
     }
@@ -290,7 +284,7 @@
         let totalScrap = 0;
 
         colorCards.forEach(card => {
-            let color = card.querySelector('.card-color').value || 'Unspecified';
+            let color = card.querySelector('.card-color').value || 'UNSPECIFIED';
             let pcs = parseFloat(card.querySelector('.card-pcs').value) || 0;
             let bags = parseFloat(card.querySelector('.card-bags').value) || 0;
             let netWt = parseFloat(card.querySelector('.card-netwt').value) || 0;
@@ -314,18 +308,17 @@
 
         document.getElementById('grandTotalAmount').textContent = grandTotal.toFixed(2);
 
-        // Targeted Consumption Deduction Isolation Fix
         let totalConsumption = totalNet + totalScrap;
         let selectedMaterial = document.getElementById('materialType').value;
         let jobStartDate = document.getElementById('startDate').value;
 
-        transactions = transactions.filter(t => !(t.type === 'consumption' && t.jobDate === jobStartDate));
+        transactions = transactions.filter(t => !(t.type === 'CONSUMPTION' && t.jobDate === jobStartDate));
         if (selectedMaterial && totalConsumption > 0 && jobStartDate) {
             transactions.push({
                 date: jobStartDate,
                 jobDate: jobStartDate,
-                type: 'consumption',
-                material: selectedMaterial, // Strictly linked ONLY to the selected granule type
+                type: 'CONSUMPTION',
+                material: selectedMaterial,
                 qty: totalConsumption
             });
         }
@@ -339,47 +332,68 @@
         let date = document.getElementById('invDate').value;
 
         if (!material || qty <= 0) {
-            alert('Please enter a valid material name and quantity.');
+            alert('PLEASE ENTER A VALID MATERIAL NAME AND QUANTITY.');
             return;
         }
 
-        transactions.push({ material, type, qty, date });
-        saveDataToFirebase();
+        if (editingInvIndex !== null) {
+            transactions[editingInvIndex] = { material, type, qty, date };
+            editingInvIndex = null;
+            document.getElementById('invBtn').textContent = "ADD INVENTORY ENTRY";
+        } else {
+            transactions.push({ material, type, qty, date });
+        }
+
+        saveData();
         document.getElementById('invMaterialName').value = '';
         document.getElementById('invQty').value = '';
+    }
+
+    function editInventory(index) {
+        let t = transactions[index];
+        document.getElementById('invMaterialName').value = t.material;
+        document.getElementById('invType').value = t.type;
+        document.getElementById('invQty').value = t.qty;
+        document.getElementById('invDate').value = t.date || '';
+        editingInvIndex = index;
+        document.getElementById('invBtn').textContent = "UPDATE INVENTORY ENTRY";
     }
 
     function renderInventory() {
         let summary = {};
         transactions.forEach(t => {
             if (!summary[t.material]) summary[t.material] = { purchase: 0, consumption: 0 };
-            if (t.type === 'purchase') summary[t.material].purchase += t.qty;
-            if (t.type === 'consumption') summary[t.material].consumption += t.qty;
+            if (t.type === 'PURCHASE') summary[t.material].purchase += t.qty;
+            if (t.type === 'CONSUMPTION') summary[t.material].consumption += t.qty;
         });
 
         let tbody = document.getElementById('inventorySummaryBody');
         tbody.innerHTML = '';
         for (let mat in summary) {
             let closing = summary[mat].purchase - summary[mat].consumption;
+            let originalIndex = transactions.findIndex(t => t.material === mat);
             tbody.innerHTML += `
                 <tr>
                     <td><b>${mat}</b></td>
                     <td style="color:green;">+${summary[mat].purchase.toFixed(2)}</td>
                     <td style="color:red;">-${summary[mat].consumption.toFixed(2)}</td>
                     <td><b>${closing.toFixed(2)}</b></td>
-                    <td><button class="btn-danger" style="padding:2px 5px; font-size:10px;" onclick="deleteMaterial('${mat}')">Del</button></td>
+                    <td>
+                        <button class="btn-edit" onclick="editInventory(${originalIndex})">EDIT</button>
+                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteMaterial('${mat}')">DEL</button>
+                    </td>
                 </tr>`;
         }
     }
 
     function deleteMaterial(mat) {
         transactions = transactions.filter(t => t.material !== mat);
-        saveDataToFirebase();
+        saveData();
     }
 
     function saveJobSpecs() {
         calculateBillingOnly();
-        alert('Job specifications and billing successfully updated and synchronized.');
+        alert('JOB SPECIFICATIONS AND BILLING SUCCESSFULLY UPDATED AND SYNCHRONIZED.');
         switchPage(3);
     }
 
@@ -389,9 +403,27 @@
         let goodPcs = parseFloat(document.getElementById('prodGoodPcs').value) || 0;
         let date = new Date().toISOString().split('T')[0];
 
-        dailyProductions.push({ date, shift, shots, goodPcs });
-        saveDataToFirebase();
+        if (editingProdIndex !== null) {
+            dailyProductions[editingProdIndex] = { date: dailyProductions[editingProdIndex].date, shift, shots, goodPcs };
+            editingProdIndex = null;
+            document.getElementById('prodBtn').textContent = "LOG PRODUCTION";
+        } else {
+            dailyProductions.push({ date, shift, shots, goodPcs });
+        }
+
+        saveData();
         renderDailyProduction();
+        document.getElementById('prodShots').value = '';
+        document.getElementById('prodGoodPcs').value = '';
+    }
+
+    function editProduction(index) {
+        let p = dailyProductions[index];
+        document.getElementById('prodShift').value = p.shift;
+        document.getElementById('prodShots').value = p.shots;
+        document.getElementById('prodGoodPcs').value = p.goodPcs;
+        editingProdIndex = index;
+        document.getElementById('prodBtn').textContent = "UPDATE PRODUCTION";
     }
 
     function renderDailyProduction() {
@@ -404,21 +436,43 @@
                     <td>${p.shift}</td>
                     <td>${p.shots}</td>
                     <td>${p.goodPcs}</td>
-                    <td><button class="btn-danger" style="padding:2px 5px; font-size:10px;" onclick="dailyProductions.splice(${index},1); saveDataToFirebase(); renderDailyProduction();">Del</button></td>
+                    <td>
+                        <button class="btn-edit" onclick="editProduction(${index})">EDIT</button>
+                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="dailyProductions.splice(${index},1); saveData(); renderDailyProduction();">DEL</button>
+                    </td>
                 </tr>`;
         });
     }
 
     function saveLotTrackerEntry() {
-        let lotRef = document.getElementById('lotRef').value;
+        let lotRef = document.getElementById('lotRef').value.toUpperCase();
         let target = parseFloat(document.getElementById('lotTargetQty').value) || 0;
         let actual = parseFloat(document.getElementById('lotActualQty').value) || 0;
         let variance = actual - target;
         let status = variance === 0 ? "EXACT" : (variance > 0 ? `SURPLUS (+${variance})` : `SHORT (${variance})`);
 
-        lotTrackers.push({ lotRef, target, actual, variance, status });
-        saveDataToFirebase();
+        if (editingLotIndex !== null) {
+            lotTrackers[editingLotIndex] = { lotRef, target, actual, variance, status };
+            editingLotIndex = null;
+            document.getElementById('lotBtn').textContent = "SAVE LOT RECORD";
+        } else {
+            lotTrackers.push({ lotRef, target, actual, variance, status });
+        }
+
+        saveData();
         renderLotTracker();
+        document.getElementById('lotRef').value = '';
+        document.getElementById('lotTargetQty').value = '';
+        document.getElementById('lotActualQty').value = '';
+    }
+
+    function editLot(index) {
+        let l = lotTrackers[index];
+        document.getElementById('lotRef').value = l.lotRef;
+        document.getElementById('lotTargetQty').value = l.target;
+        document.getElementById('lotActualQty').value = l.actual;
+        editingLotIndex = index;
+        document.getElementById('lotBtn').textContent = "UPDATE LOT RECORD";
     }
 
     function renderLotTracker() {
@@ -432,39 +486,60 @@
                     <td>${l.actual}</td>
                     <td>${l.variance}</td>
                     <td style="color:${l.variance >= 0 ? 'green':'red'}; font-weight:bold;">${l.status}</td>
-                    <td><button class="btn-danger" style="padding:2px 5px; font-size:10px;" onclick="lotTrackers.splice(${index},1); saveDataToFirebase(); renderLotTracker();">Del</button></td>
+                    <td>
+                        <button class="btn-edit" onclick="editLot(${index})">EDIT</button>
+                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="lotTrackers.splice(${index},1); saveData(); renderLotTracker();">DEL</button>
+                    </td>
                 </tr>`;
         });
     }
 
-    function saveDataToFirebase() {
-        db.collection("mouldingApp").doc("masterData").set({
-            transactions, jobCards, dailyProductions, lotTrackers
-        }).then(() => {
-            document.getElementById('connectionStatus').className = "status-bar status-online";
-            document.getElementById('connectionStatus').textContent = "STATUS: FIREBASE REAL-TIME CLOUD SYNCHRONIZED";
+    function saveData() {
+        let dataToSave = { transactions, jobCards, dailyProductions, lotTrackers };
+        localStorage.setItem('mouldingAppData', JSON.stringify(dataToSave));
+
+        if (db) {
+            db.collection("mouldingApp").doc("masterData").set(dataToSave).then(() => {
+                document.getElementById('connectionStatus').className = "status-bar status-online";
+                document.getElementById('connectionStatus').textContent = "CLOUD & LOCAL SYNCED";
+            }).catch(err => {
+                document.getElementById('connectionStatus').className = "status-bar status-offline";
+                document.getElementById('connectionStatus').textContent = "OFFLINE MODE (SAVED LOCALLY)";
+            });
+        }
+        renderInventory();
+        renderDailyProduction();
+        renderLotTracker();
+    }
+
+    function loadData() {
+        let localData = localStorage.getItem('mouldingAppData');
+        if (localData) {
+            let data = JSON.parse(localData);
+            transactions = data.transactions || [];
+            jobCards = data.jobCards || [];
+            dailyProductions = data.dailyProductions || [];
+            lotTrackers = data.lotTrackers || [];
             renderInventory();
             renderDailyProduction();
             renderLotTracker();
-        }).catch(err => {
-            document.getElementById('connectionStatus').className = "status-bar status-offline";
-            document.getElementById('connectionStatus').textContent = "STATUS: OFFLINE / SYNC ERROR";
-        });
-    }
+        }
 
-    function loadDataFromFirebase() {
-        db.collection("mouldingApp").doc("masterData").get().then((doc) => {
-            if (doc.exists) {
-                let data = doc.data();
-                transactions = data.transactions || [];
-                jobCards = data.jobCards || [];
-                dailyProductions = data.dailyProductions || [];
-                lotTrackers = data.lotTrackers || [];
-                renderInventory();
-                renderDailyProduction();
-                renderLotTracker();
-            }
-        });
+        if (db) {
+            db.collection("mouldingApp").doc("masterData").get().then((doc) => {
+                if (doc.exists) {
+                    let data = doc.data();
+                    transactions = data.transactions || [];
+                    jobCards = data.jobCards || [];
+                    dailyProductions = data.dailyProductions || [];
+                    lotTrackers = data.lotTrackers || [];
+                    localStorage.setItem('mouldingAppData', JSON.stringify(data));
+                    renderInventory();
+                    renderDailyProduction();
+                    renderLotTracker();
+                }
+            }).catch(err => {});
+        }
     }
 
     function incrementAppOpen() {
@@ -475,7 +550,7 @@
     }
 
     function logoutUser() {
-        alert('Session closed securely.');
+        alert('SESSION CLOSED SECURELY.');
         location.reload();
     }
 </script>
