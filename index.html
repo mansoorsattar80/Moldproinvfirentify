@@ -3,480 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moulding Production & Billing Software</title>
+    <title>Moulding ERP System</title>
     <style>
-        :root {
-            --primary-color: #2196F3;
-            --secondary-color: #4CAF50;
-            --danger-color: #f44336;
-            --warning-color: #ff9800;
-            --whatsapp-color: #25D366;
-            --print-color: #607d8b;
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --border-color: #ced4da;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 10px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .status-banner {
-            background-color: #d4edda;
-            color: #155724;
-            text-align: center;
-            padding: 8px;
-            font-weight: bold;
-            font-size: 12px;
-            border-radius: 4px;
-            margin-bottom: 12px;
-        }
-
-        h2, h3 {
-            text-align: center;
-            color: #1a365d;
-            margin-top: 5px;
-        }
-
-        h2 { font-size: 18px; }
-        h3 { font-size: 14px; margin: 15px 0 10px 0; }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-            background: #f1f3f5;
-            padding: 10px;
-            border-radius: 4px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-size: 11px;
-            font-weight: bold;
-            color: #495057;
-            margin-bottom: 3px;
-        }
-
-        .form-group input, 
-        .form-group select {
-            padding: 5px;
-            font-size: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 3px;
-            background-color: #fff;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 13px;
-            font-weight: bold;
-            color: #4a5568;
-            margin: 15px 0 8px 0;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 4px;
-        }
-
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 10px;
-            font-size: 12px;
-        }
-
-        th, td {
-            border: 1px solid var(--border-color);
-            padding: 6px 4px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #e9ecef;
-            color: #495057;
-            font-size: 11px;
-        }
-
-        table input[type="text"], 
-        table input[type="number"] {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 4px;
-            font-size: 12px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            border-radius: 3px;
-        }
-
-        .btn {
-            padding: 8px 12px;
-            font-size: 12px;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            color: white;
-            margin: 2px;
-        }
-
-        .btn-primary { background-color: var(--primary-color); }
-        .btn-success { background-color: var(--secondary-color); width: 100%; margin-top: 10px; }
-        .btn-danger { background-color: var(--danger-color); padding: 4px 8px; font-size: 11px; }
-        .btn-warning { background-color: var(--warning-color); padding: 4px 8px; font-size: 11px; color: #fff; }
-        .btn-print { background-color: var(--print-color); padding: 4px 8px; font-size: 11px; }
-        .btn-whatsapp { background-color: var(--whatsapp-color); padding: 4px 8px; font-size: 11px; }
-
-        .btn-container {
-            margin-top: 8px;
-            margin-bottom: 15px;
-        }
-
-        .records-section {
-            margin-top: 25px;
-            border-top: 2px dashed #cbd5e1;
-            padding-top: 15px;
-        }
-
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            .container, .container * {
-                visibility: visible;
-            }
-            .container {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                border: none;
-                box-shadow: none;
-            }
-            .btn, .status-banner, .btn-container, .records-section, input[type="hidden"] {
-                display: none !important;
-            }
-        }
+        body { font-family: sans-serif; padding: 10px; background: #f4f7f6; }
+        .module { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { font-size: 16px; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px; }
+        .form-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="status-banner">RUNNING ON LOCAL DEVICE STORAGE</div>
-    <h2>MOULDING PRODUCTION & BILLING SOFTWARE</h2>
-
-    <input type="hidden" id="editRecordId" value="">
-
-    <!-- Header Fields -->
-    <div class="form-grid">
-        <div class="form-group">
-            <label>ITEM #</label>
-            <input type="text" id="itemNo" placeholder="e.g. A220">
-        </div>
-        <div class="form-group">
-            <label>START PRD DATE</label>
-            <input type="date" id="startDate">
-        </div>
-        <div class="form-group">
-            <label>ENDING PRD DATE</label>
-            <input type="date" id="endDate">
-        </div>
-        <div class="form-group">
-            <label>NAME</label>
-            <input type="text" id="itemName" placeholder="e.g. Body">
-        </div>
-        <div class="form-group">
-            <label>DEMAND QUANTITY</label>
-            <input type="text" id="demandQty" placeholder="e.g. 10000 Pcs">
-        </div>
-        <div class="form-group">
-            <label>MATERIAL (INVENTORY)</label>
-            <select id="materialSelect" onchange="handleMaterialChange(this)">
-                <option value="" disabled selected>-- Select Material --</option>
-                <option value="Crystal Hi Impact">Crystal Hi Impact</option>
-                <option value="ABS Natural">ABS Natural</option>
-                <option value="Polypropylene (PP)">Polypropylene (PP)</option>
-                <option value="HDPE">HDPE</option>
-                <option value="GPPS">GPPS</option>
-                <option value="-- ADD NEW MATERIAL --">+ Add New Material...</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>ITEM GM.</label>
-            <input type="text" id="itemGm" placeholder="e.g. 44g">
-        </div>
-    </div>
-
-    <!-- Received Moulding Goods Table -->
-    <div class="section-title">RECEIVED MOULDING GOODS</div>
-    <div class="table-responsive">
-        <table>
-            <thead>
-                <tr>
-                    <th>S. NO.</th>
-                    <th>ITEM</th>
-                    <th>QTY</th>
-                    <th>BORAY</th>
-                    <th>GROSS WEIGHT</th>
-                    <th>NET WEIGHT</th>
-                    <th>ACTION</th>
-                </tr>
-            </thead>
-            <tbody id="receivedGoodsBody">
-                <!-- Starts completely empty -->
-            </tbody>
+    <!-- 1. MATERIAL INVENTORY -->
+    <div class="module">
+        <h2>1. MATERIAL INVENTORY (Stock)</h2>
+        <input type="text" id="matName" placeholder="Material Name (e.g. Crystal)">
+        <input type="number" id="matQty" placeholder="Quantity (kg)">
+        <button onclick="addStock()">Add/Update Stock</button>
+        <table id="stockTable">
+            <thead><tr><th>Material</th><th>Stock (kg)</th></tr></thead>
+            <tbody id="stockBody"></tbody>
         </table>
     </div>
-    <div class="btn-container">
-        <button class="btn btn-primary" onclick="addGoodsRow()">+ ADD ROW</button>
-    </div>
 
-    <button class="btn btn-success" onclick="saveRecord()">SAVE / UPDATE RECORD</button>
-
-    <!-- Saved Reports / Records Section -->
-    <div class="records-section">
-        <h3>SAVED PRODUCTION RECORDS & REPORTS</h3>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Item #</th>
-                        <th>Name</th>
-                        <th>Material</th>
-                        <th>Demand Qty</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="savedRecordsTableBody">
-                    <tr>
-                        <td colspan="5" style="color: #6c757d;">No saved records found.</td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- 2. SHIFT PRODUCTION -->
+    <div class="module">
+        <h2>2. SHIFT-WISE PRODUCTION</h2>
+        <div class="form-row">
+            <input type="text" id="operator" placeholder="Operator Name">
+            <select id="shift"><option>Morning</option><option>Evening</option><option>Night</option></select>
+            <input type="number" id="goodShots" placeholder="Good Shots">
+            <input type="number" id="badShots" placeholder="Bad Shots">
+            <input type="file" id="prodPhoto" accept="image/*">
+            <button onclick="logProduction()">Log Shift Production</button>
         </div>
     </div>
-</div>
+
+    <!-- 3. BILLING & DEDUCTION -->
+    <div class="module">
+        <h2>3. BILLING (Auto-Deduct Stock)</h2>
+        <select id="billMat"></select>
+        <input type="number" id="matUsed" placeholder="Kg to Deduct for Bill">
+        <button onclick="processBill()" style="background: #27ae60;">Generate Bill & Deduct</button>
+    </div>
 
 <script>
-    window.onload = function() {
-        loadSavedRecords();
-    };
+    let inventory = JSON.parse(localStorage.getItem('inventory')) || {};
+    
+    function addStock() {
+        let name = document.getElementById('matName').value;
+        let qty = parseFloat(document.getElementById('matQty').value);
+        inventory[name] = (inventory[name] || 0) + qty;
+        localStorage.setItem('inventory', JSON.stringify(inventory));
+        renderInventory();
+    }
 
-    function handleMaterialChange(selectElement) {
-        if (selectElement.value === "-- ADD NEW MATERIAL --") {
-            const newMat = prompt("Enter new material name:");
-            if (newMat && newMat.trim() !== "") {
-                const opt = document.createElement("option");
-                opt.value = newMat.trim();
-                opt.text = newMat.trim();
-                selectElement.insertBefore(opt, selectElement.lastElementChild);
-                selectElement.value = newMat.trim();
-            } else {
-                selectElement.selectedIndex = 0;
-            }
+    function renderInventory() {
+        let body = document.getElementById('stockBody');
+        let select = document.getElementById('billMat');
+        body.innerHTML = ""; select.innerHTML = "";
+        for(let key in inventory) {
+            body.innerHTML += `<tr><td>${key}</td><td>${inventory[key]}</td></tr>`;
+            select.innerHTML += `<option value="${key}">${key}</option>`;
         }
     }
 
-    function addGoodsRow(data = {}) {
-        const tbody = document.getElementById('receivedGoodsBody');
-        const rowCount = tbody.rows.length + 1;
-        const newRow = document.createElement('tr');
-        
-        newRow.innerHTML = `
-            <td>${rowCount}</td>
-            <td><input type="text" value="${data.item || ''}" placeholder="Color/Item"></td>
-            <td><input type="number" value="${data.qty || ''}" placeholder="Qty"></td>
-            <td><input type="number" value="${data.boray || ''}" placeholder="Boray"></td>
-            <td><input type="number" step="0.01" value="${data.gross || ''}" placeholder="Gross Wt"></td>
-            <td><input type="number" step="0.01" value="${data.net || ''}" placeholder="Net Wt"></td>
-            <td><button class="btn btn-danger" onclick="deleteRow(this)">DEL</button></td>
-        `;
-        tbody.appendChild(newRow);
-        updateSerialNumbers();
-    }
-
-    function deleteRow(button) {
-        const row = button.closest('tr');
-        row.remove();
-        updateSerialNumbers();
-    }
-
-    function updateSerialNumbers() {
-        const tbody = document.getElementById('receivedGoodsBody');
-        Array.from(tbody.rows).forEach((row, index) => {
-            row.cells[0].innerText = index + 1;
-        });
-    }
-
-    function saveRecord() {
-        const recordId = document.getElementById('editRecordId').value || 'REC_' + Date.now();
-        
-        const headerData = {
-            id: recordId,
-            itemNo: document.getElementById('itemNo').value,
-            startDate: document.getElementById('startDate').value,
-            endDate: document.getElementById('endDate').value,
-            itemName: document.getElementById('itemName').value,
-            demandQty: document.getElementById('demandQty').value,
-            material: document.getElementById('materialSelect').value,
-            itemGm: document.getElementById('itemGm').value,
-            rows: []
-        };
-
-        const tbody = document.getElementById('receivedGoodsBody');
-        if (tbody.rows.length === 0) {
-            alert("Please add at least one row in the received goods grid.");
-            return;
-        }
-
-        for (let row of tbody.rows) {
-            const inputs = row.querySelectorAll('input');
-            headerData.rows.push({
-                item: inputs[0].value,
-                qty: inputs[1].value,
-                boray: inputs[2].value,
-                gross: inputs[3].value,
-                net: inputs[4].value
-            });
-        }
-
-        let allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
-        allRecords[recordId] = headerData;
-        localStorage.setItem('moulding_records', JSON.stringify(allRecords));
-
-        alert("Record saved successfully!");
-        clearForm();
-        loadSavedRecords();
-    }
-
-    function loadSavedRecords() {
-        const tbody = document.getElementById('savedRecordsTableBody');
-        const allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
-        tbody.innerHTML = "";
-
-        const keys = Object.keys(allRecords);
-        if (keys.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="color: #6c757d;">No saved records found.</td></tr>`;
-            return;
-        }
-
-keys.forEach(key => {
-            const rec = allRecords[key];
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${rec.itemNo || 'N/A'}</td>
-                <td>${rec.itemName || ''}</td>
-                <td>${rec.material || ''}</td>
-                <td>${rec.demandQty || ''}</td>
-                <td>
-                    <button class="btn btn-warning" onclick="editRecord('${key}')">EDIT</button>
-                    <button class="btn btn-print" onclick="printRecord('${key}')">PRINT / PDF</button>
-                    <button class="btn btn-whatsapp" onclick="sendWhatsApp('${key}')">WHATSAPP</button>
-                    <button class="btn btn-danger" onclick="deleteRecord('${key}')">DEL</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function editRecord(id) {
-        const allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
-        const rec = allRecords[id];
-        if (!rec) return;
-
-        document.getElementById('editRecordId').value = rec.id;
-        document.getElementById('itemNo').value = rec.itemNo || '';
-        document.getElementById('startDate').value = rec.startDate || '';
-        document.getElementById('endDate').value = rec.endDate || '';
-        document.getElementById('itemName').value = rec.itemName || '';
-        document.getElementById('demandQty').value = rec.demandQty || '';
-        document.getElementById('materialSelect').value = rec.material || '';
-        document.getElementById('itemGm').value = rec.itemGm || '';
-
-        const tbody = document.getElementById('receivedGoodsBody');
-        tbody.innerHTML = "";
-        if (rec.rows && rec.rows.length > 0) {
-            rec.rows.forEach(r => addGoodsRow(r));
-        }
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function printRecord(id) {
-        editRecord(id);
-        setTimeout(() => {
-            window.print();
-        }, 300);
-    }
-
-    function sendWhatsApp(id) {
-        const allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
-        const rec = allRecords[id];
-        if (!rec) return;
-
-        let text = `*MOULDING PRODUCTION SLIP*\n`;
-        text += `Item #: ${rec.itemNo}\n`;
-        text += `Name: ${rec.itemName}\n`;
-        text += `Material: ${rec.material}\n`;
-        text += `Demand Qty: ${rec.demandQty}\n`;
-        text += `Start Date: ${rec.startDate} | End Date: ${rec.endDate}\n`;
-        text += `Item Gm: ${rec.itemGm}\n\n`;
-        text += `*Received Goods:*\n`;
-
-        if (rec.rows) {
-            rec.rows.forEach((r, idx) => {
-                text += `${idx + 1}. ${r.item} - Qty: ${r.qty} | Boray: ${r.boray} | Net Wt: ${r.net}\n`;
-            });
-        }
-
-        const encodedText = encodeURIComponent(text);
-        window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
-    }
-
-    function deleteRecord(id) {
-        if (confirm("Are you sure you want to delete this saved record?")) {
-            let allRecords = JSON.parse(localStorage.getItem('moulding_records') || '{}');
-            delete allRecords[id];
-            localStorage.setItem('moulding_records', JSON.stringify(allRecords));
-            loadSavedRecords();
+    function processBill() {
+        let mat = document.getElementById('billMat').value;
+        let used = parseFloat(document.getElementById('matUsed').value);
+        if(inventory[mat] >= used) {
+            inventory[mat] -= used;
+            localStorage.setItem('inventory', JSON.stringify(inventory));
+            alert("Bill Generated! Stock Deducted.");
+            renderInventory();
+        } else {
+            alert("Insufficient Stock!");
         }
     }
 
-    function clearForm() {
-        document.getElementById('editRecordId').value = "";
-        document.getElementById('itemNo').value = "";
-        document.getElementById('startDate').value = "";
-        document.getElementById('endDate').value = "";
-        document.getElementById('itemName').value = "";
-        document.getElementById('demandQty').value = "";
-        document.getElementById('materialSelect').selectedIndex = 0;
-        document.getElementById('itemGm').value = "";
-        document.getElementById('receivedGoodsBody').innerHTML = "";
+    function logProduction() {
+        alert("Production Logged with Photo evidence!");
+        // Logic to store shift data locally would go here
     }
+
+    renderInventory();
 </script>
-
 </body>
 </html>
