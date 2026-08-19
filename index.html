@@ -42,9 +42,14 @@
         .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
         .header-elec-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
 
-        /* Print styles: hide navigation tabs and buttons when printing, keep tables visible */
+        /* Print styles: Hide tabs, buttons, form inputs, and entry sections when printing */
         @media print {
-            .nav-tabs, button, .no-print { display: none !important; }
+            .nav-tabs, button, .no-print, 
+            .header-elec-box, .shift-box, 
+            label, input, select, hr,
+            #page4 > h4:not(#gridSectionTitle),
+            #page4 > label, #page4 > input { display: none !important; }
+            
             .page { display: none !important; }
             .page.active { display: block !important; }
             body { background: white; padding: 0; }
@@ -585,7 +590,7 @@
         let data = { id: editingLotKey || Date.now(), lotRef, target, actual, variance, status };
 
         if (editingLotKey !== null) {
-            let index = lotTrackers.findIndex(item => item.id === editingLotKey);
+            let index = lotTrackers.Item.findIndex(item => item.id === editingLotKey);
             if (index !== -1) lotTrackers[index] = data;
             editingLotKey = null;
             document.getElementById('lotBtn').textContent = "SAVE LOT RECORD";
