@@ -42,20 +42,14 @@
         .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
         .header-elec-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
 
-        /* Report-only Mode: Hide inputs, labels, buttons, and setup sections entirely during print */
+        /* Print styling: specifically targets printing billing report from Page 3 */
         @media print {
             .nav-tabs, button, .no-print, 
             .header-elec-box, .shift-box, 
             label, input, select, textarea, hr,
-            #page1 > h3:first-of-type,
-            #page2 > h3:first-of-type,
-            #page2 > h4,
-            #page3 > h3:first-of-type,
-            #page4 > h4:not(#gridSectionTitle),
-            #page5 > h3:first-of-type { display: none !important; }
+            #page1, #page2, #page4, #page5 { display: none !important; }
             
-            .page { display: none !important; }
-            .page.active { display: block !important; }
+            #page3 { display: block !important; }
             body { background: white; padding: 0; }
             .container { box-shadow: none; padding: 0; width: 100%; }
             table { font-size: 10px; width: 100% !important; }
@@ -168,7 +162,7 @@
         <div style="background:#e8f4fd; padding:10px; margin-top:10px; border-radius:4px; font-weight:bold;">
             GRAND TOTAL PAYABLE: PKR <span id="grandTotalAmount">0.00</span>
         </div>
-        <button class="btn-success" onclick="window.print()">PRINT / SAVE PDF (BILLING REPORT)</button>
+        <button class="btn-success" onclick="triggerPrintBilling()">PRINT / SAVE PDF (BILLING REPORT)</button>
     </div>
 
     <!-- PAGE 4: DAILY PROD -->
@@ -300,6 +294,13 @@
         if(pageNum === 3) renderBilling();
     }
 
+    function triggerPrintBilling() {
+        switchPage(3);
+        setTimeout(() => {
+            window.print();
+        }, 100);
+    }
+
     function addColorCard(color='', pcs='', bags='', grossWt='', netWt='', scrap='') {
         let container = document.getElementById('colorCardsContainer');
         let cardDiv = document.createElement('div');
@@ -365,7 +366,6 @@
 
         document.getElementById('grandTotalAmount').textContent = grandTotal.toFixed(2);
         
-        // Save current state persistently so it displays correctly on page switch or print
         savedBillingData = { partyName, items: tempItems, grandTotal };
         localStorage.setItem('moulding_billingData', JSON.stringify(savedBillingData));
     }
