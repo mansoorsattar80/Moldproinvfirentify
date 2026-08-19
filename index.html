@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moulding 3-Page Production Software</title>
+    <title>Moulding Production & Management System</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -17,6 +17,10 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f1f5f9; color: #334155; margin: 0; padding: 15px; }
         .container { max-width: 950px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
         
+        /* Login Screen */
+        #loginScreen { max-width: 400px; margin: 80px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; }
+        #appContainer { display: none; }
+
         /* 3-Page Navigation Tabs */
         .tab-nav { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
         .tab-btn { background: #e2e8f0; color: #475569; border: none; padding: 10px 16px; font-weight: 600; border-radius: 6px; cursor: pointer; flex: 1; min-width: 130px; text-align: center; }
@@ -50,162 +54,185 @@
 </head>
 <body>
 
-<div class="container">
-    <h2 style="text-align: center; border: none; margin-bottom: 15px;">Moulding Production & Management System</h2>
-    
-    <!-- 3 Main Navigation Pages -->
-    <div class="tab-nav">
-        <button class="tab-btn active" onclick="switchPage('inventoryPage', this)">1. Inventory</button>
-        <button class="tab-btn" onclick="switchPage('billingPage', this)">2. Billing</button>
-        <button class="tab-btn" onclick="switchPage('productionPage', this)">3. Production</button>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen">
+        <h2 style="border:none; text-align:center; color:var(--primary);">Software Login</h2>
+        <div class="input-group" style="margin-bottom: 12px; text-align:left;">
+            <label>Username</label>
+            <input type="text" id="loginUser" value="admin" style="text-transform:none;">
+        </div>
+        <div class="input-group" style="margin-bottom: 20px; text-align:left;">
+            <label>Password</label>
+            <input type="password" id="loginPass" value="1234" style="text-transform:none;">
+        </div>
+        <button class="btn-success" onclick="handleLogin()" style="width:100%;">Login to System</button>
     </div>
 
-    <!-- PAGE 1: INVENTORY -->
-    <div id="inventoryPage" class="page-content active">
-        <h2>Raw Material Inventory Ledger</h2>
-        <div class="btn-container" style="justify-content: flex-start;">
-            <button class="btn-success" onclick="addMaterial()">+ Add Material Type</button>
-            <button onclick="addPurchase()">+ Record Purchase</button>
+    <!-- MAIN APP CONTAINER -->
+    <div class="container" id="appContainer">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="border:none; margin:0;">Moulding Management Software</h2>
+            <button class="btn-danger" style="padding: 5px 10px; font-size: 11px;" onclick="handleLogout()">Logout</button>
         </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Material Name</th>
-                        <th>Opening (Kg)</th>
-                        <th>Purchased (Kg)</th>
-                        <th>Consumed (Kg)</th>
-                        <th>Closing (Kg)</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="inventoryTableBody"></tbody>
-            </table>
+        
+        <!-- 3 Main Navigation Pages -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchPage('inventoryPage', this)">1. Inventory</button>
+            <button class="tab-btn" onclick="switchPage('billingPage', this)">2. Billing</button>
+            <button class="tab-btn" onclick="switchPage('productionPage', this)">3. Production</button>
+        </div>
+
+        <!-- PAGE 1: INVENTORY -->
+        <div id="inventoryPage" class="page-content active">
+            <h2>Raw Material Inventory Ledger</h2>
+            <div class="btn-container" style="justify-content: flex-start;">
+                <button class="btn-success" onclick="addMaterial()">+ Add Material Type</button>
+                <button onclick="addPurchase()">+ Record Purchase</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Material Name</th>
+                            <th>Opening (Kg)</th>
+                            <th>Purchased (Kg)</th>
+                            <th>Consumed (Net Wt)</th>
+                            <th>Closing (Kg)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PAGE 2: BILLING -->
+        <div id="billingPage" class="page-content">
+            <h2>Job Billing & Specs</h2>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Slip / Job #</label>
+                    <input type="text" id="billSlip" value="101" oninput="calculateBilling()">
+                </div>
+                <div class="input-group">
+                    <label>Item Name</label>
+                    <input type="text" id="billItem" value="CAP" oninput="calculateBilling()">
+                </div>
+                <div class="input-group">
+                    <label>Assigned Machine</label>
+                    <select id="billMachine"></select>
+                </div>
+                <div class="input-group">
+                    <label>PP Granules Material</label>
+                    <select id="billMaterial" onchange="calculateBilling()"></select>
+                </div>
+                <div class="input-group">
+                    <label>Cycle Time (Sec)</label>
+                    <input type="number" id="billCycle" value="20" step="0.1" oninput="calculateBilling()">
+                </div>
+                <div class="input-group">
+                    <label>Mould Cavity</label>
+                    <input type="number" id="billCavity" value="2" step="1" oninput="calculateBilling()">
+                </div>
+                <div class="input-group">
+                    <label>Rate Per Hour (PKR)</label>
+                    <input type="number" id="billRate" value="1200" step="0.01" oninput="calculateBilling()">
+                </div>
+            </div>
+
+            <h3 style="font-size: 14px; margin-top: 15px; color: var(--primary);">Production Breakdown (Colors & Weights)</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Color</th>
+                            <th>Bags</th>
+                            <th>Quantity (Pcs)</th>
+                            <th>Gross Weight (Kg)</th>
+                            <th>Net Weight (Kg)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billingRows"></tbody>
+                </table>
+            </div>
+            <button class="btn-success" onclick="addBillingRow()" style="margin-bottom: 15px;">+ Add Color Row</button>
+
+            <div class="summary-box">
+                <div class="summary-item"><span class="summary-label">Total Qty</span><span class="summary-value" id="sumQty">0 Pcs</span></div>
+                <div class="summary-item"><span class="summary-label">Total Gross Wt</span><span class="summary-value" id="sumGross">0.00 Kg</span></div>
+                <div class="summary-item"><span class="summary-label">Total Net Wt</span><span class="summary-value" id="sumNet">0.00 Kg</span></div>
+                <div class="summary-item"><span class="summary-label">Total Hours</span><span class="summary-value" id="sumHours">0.00 Hrs</span></div>
+                <div class="summary-item"><span class="summary-label">Amount Payable</span><span class="summary-value" id="sumAmount" style="color: var(--success);">0.00 PKR</span></div>
+            </div>
+        </div>
+
+        <!-- PAGE 3: PRODUCTION -->
+        <div id="productionPage" class="page-content">
+            <h2>Daily Production Database</h2>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Production Date</label>
+                    <input type="date" id="prodDate">
+                </div>
+                <div class="input-group">
+                    <label>Shift</label>
+                    <select id="prodShift">
+                        <option>MORNING</option>
+                        <option>EVENING</option>
+                        <option>NIGHT</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Machine No</label>
+                    <select id="prodMachine"></select>
+                </div>
+                <div class="input-group">
+                    <label>Parts Produced (Pcs)</label>
+                    <input type="number" id="prodPcs" value="1000">
+                </div>
+                <div class="input-group">
+                    <label>Scrap / Waste (Kg)</label>
+                    <input type="number" id="prodScrap" value="1.5" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>Previous Reading</label>
+                    <input type="number" id="prodPrevReading" value="12000" step="0.1" oninput="calculateMeterDiff()">
+                </div>
+                <div class="input-group">
+                    <label>Current Reading</label>
+                    <input type="number" id="prodCurrReading" value="12250" step="0.1" oninput="calculateMeterDiff()">
+                </div>
+                <div class="input-group">
+                    <label>Meter Diff (Consumed)</label>
+                    <input type="number" id="prodMeterDiff" value="250" step="0.1" readonly style="background:#e2e8f0; font-weight:bold;">
+                </div>
+            </div>
+            <div class="btn-container">
+                <button class="btn-success" onclick="saveProductionEntry()">Save Entry to Production DB</button>
+                <button class="btn-warning" onclick="addNewMachine()">+ Add Machine</button>
+            </div>
+
+            <div class="table-container" style="margin-top: 15px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Shift</th>
+                            <th>Machine</th>
+                            <th>Output (Pcs)</th>
+                            <th>Scrap (Kg)</th>
+                            <th>Prev Read</th>
+                            <th>Curr Read</th>
+                            <th>Diff</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productionTableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
-
-    <!-- PAGE 2: BILLING -->
-    <div id="billingPage" class="page-content">
-        <h2>Job Billing & Specs</h2>
-        <div class="form-grid">
-            <div class="input-group">
-                <label>Slip / Job #</label>
-                <input type="text" id="billSlip" value="101" oninput="calculateBilling()">
-            </div>
-            <div class="input-group">
-                <label>Item Name</label>
-                <input type="text" id="billItem" value="CAP" oninput="calculateBilling()">
-            </div>
-            <div class="input-group">
-                <label>PP Granules Material</label>
-                <select id="billMaterial" onchange="calculateBilling()"></select>
-            </div>
-            <div class="input-group">
-                <label>Cycle Time (Sec)</label>
-                <input type="number" id="billCycle" value="20" step="0.1" oninput="calculateBilling()">
-            </div>
-            <div class="input-group">
-                <label>Mould Cavity</label>
-                <input type="number" id="billCavity" value="2" step="1" oninput="calculateBilling()">
-            </div>
-            <div class="input-group">
-                <label>Rate Per Hour (PKR)</label>
-                <input type="number" id="billRate" value="1200" step="0.01" oninput="calculateBilling()">
-            </div>
-        </div>
-
-        <h3 style="font-size: 14px; margin-top: 15px; color: var(--primary);">Production Breakdown (Colors & Weights)</h3>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Color</th>
-                        <th>Quantity (Pcs)</th>
-                        <th>Gross Weight (Kg)</th>
-                        <th>Net Weight (Kg)</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="billingRows"></tbody>
-            </table>
-        </div>
-        <button class="btn-success" onclick="addBillingRow()" style="margin-bottom: 15px;">+ Add Color Row</button>
-
-        <div class="summary-box">
-            <div class="summary-item"><span class="summary-label">Total Qty</span><span class="summary-value" id="sumQty">0 Pcs</span></div>
-            <div class="summary-item"><span class="summary-label">Total Gross Wt</span><span class="summary-value" id="sumGross">0.00 Kg</span></div>
-            <div class="summary-item"><span class="summary-label">Total Net Wt</span><span class="summary-value" id="sumNet">0.00 Kg</span></div>
-            <div class="summary-item"><span class="summary-label">Total Hours</span><span class="summary-value" id="sumHours">0.00 Hrs</span></div>
-            <div class="summary-item"><span class="summary-label">Amount Payable</span><span class="summary-value" id="sumAmount" style="color: var(--success);">0.00 PKR</span></div>
-        </div>
-    </div>
-
-    <!-- PAGE 3: PRODUCTION -->
-    <div id="productionPage" class="page-content">
-        <h2>Daily Production Database</h2>
-        <div class="form-grid">
-            <div class="input-group">
-                <label>Production Date</label>
-                <input type="date" id="prodDate">
-            </div>
-            <div class="input-group">
-                <label>Shift</label>
-                <select id="prodShift">
-                    <option>MORNING</option>
-                    <option>EVENING</option>
-                    <option>NIGHT</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Machine No</label>
-                <select id="prodMachine"></select>
-            </div>
-            <div class="input-group">
-                <label>Parts Produced (Pcs)</label>
-                <input type="number" id="prodPcs" value="1000">
-            </div>
-            <div class="input-group">
-                <label>Scrap / Waste (Kg)</label>
-                <input type="number" id="prodScrap" value="1.5" step="0.1">
-            </div>
-            <div class="input-group">
-                <label>Previous Reading</label>
-                <input type="number" id="prodPrevReading" value="12000" step="0.1" oninput="calculateMeterDiff()">
-            </div>
-            <div class="input-group">
-                <label>Current Reading</label>
-                <input type="number" id="prodCurrReading" value="12250" step="0.1" oninput="calculateMeterDiff()">
-            </div>
-            <div class="input-group">
-                <label>Meter Diff (Consumed)</label>
-                <input type="number" id="prodMeterDiff" value="250" step="0.1" readonly style="background:#e2e8f0; font-weight:bold;">
-            </div>
-        </div>
-        <div class="btn-container">
-            <button class="btn-success" onclick="saveProductionEntry()">Save Entry to Production DB</button>
-            <button class="btn-warning" onclick="addNewMachine()">+ Add Machine</button>
-        </div>
-
-        <div class="table-container" style="margin-top: 15px;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Shift</th>
-                        <th>Machine</th>
-                        <th>Output (Pcs)</th>
-                        <th>Scrap (Kg)</th>
-                        <th>Prev Read</th>
-                        <th>Curr Read</th>
-                        <th>Diff</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="productionTableBody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
 
 <script>
     // --- DATABASE STORAGE ---
@@ -215,8 +242,8 @@
     };
 
     let billingRowsData = JSON.parse(localStorage.getItem('db_billing')) || [
-        { color: "GREEN", qty: 2000, gross: 12.0, net: 10.5 },
-        { color: "BLUE", qty: 2000, gross: 12.0, net: 10.5 }
+        { color: "GREEN", bags: 2, qty: 2000, gross: 12.0, net: 10.5 },
+        { color: "BLUE", bags: 2, qty: 2000, gross: 12.0, net: 10.5 }
     ];
 
     let machineList = JSON.parse(localStorage.getItem('db_machines')) || ["M/C NO-01", "M/C NO-02", "M/C NO-06"];
@@ -224,6 +251,24 @@
     let productionDatabase = JSON.parse(localStorage.getItem('db_production')) || [
         { id: 1, date: "2026-08-19", shift: "MORNING", machine: "M/C NO-01", pcs: 2500, scrap: 0.8, prevRead: 12000, currRead: 12250, diff: 250 }
     ];
+
+    // --- LOGIN LOGIC ---
+    function handleLogin() {
+        let u = document.getElementById('loginUser').value.trim();
+        let p = document.getElementById('loginPass').value.trim();
+        if(u === "admin" && p === "1234") {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'block';
+            initApp();
+        } else {
+            alert("Invalid username or password! (Default: admin / 1234)");
+        }
+    }
+
+    function handleLogout() {
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'block';
+    }
 
     // Page Switching Function
     function switchPage(pageId, btn) {
@@ -233,9 +278,12 @@
         btn.classList.add('active');
         
         if(pageId === 'inventoryPage') renderInventory();
-        if(pageId === 'billingPage') renderBillingRows();
+        if(pageId === 'billingPage') {
+            updateAllDropdowns();
+            renderBillingRows();
+        }
         if(pageId === 'productionPage') {
-            updateMachineDropdown();
+            updateAllDropdowns();
             renderProductionDatabase();
             calculateMeterDiff();
         }
@@ -251,7 +299,7 @@
         inventoryData[name] = { opening: open, purchased: 0 };
         saveAllData();
         renderInventory();
-        updateMaterialDropdown();
+        updateAllDropdowns();
     }
 
     function addPurchase() {
@@ -291,7 +339,7 @@
                 </tr>
             `;
         });
-        updateMaterialDropdown();
+        updateAllDropdowns();
     }
 
     function deleteMaterial(mat) {
@@ -301,16 +349,40 @@
     }
 
     // --- PAGE 2: BILLING LOGIC ---
-    function updateMaterialDropdown() {
-        let select = document.getElementById('billMaterial');
-        let current = select.value;
-        select.innerHTML = "";
+    function updateAllDropdowns() {
+        // Material Dropdown
+        let matSelect = document.getElementById('billMaterial');
+        let currentMat = matSelect.value;
+        matSelect.innerHTML = "";
         Object.keys(inventoryData).forEach(mat => {
             let opt = document.createElement('option');
             opt.value = mat;
             opt.textContent = mat;
-            if(mat === current) opt.selected = true;
-            select.appendChild(opt);
+            if(mat === currentMat) opt.selected = true;
+            matSelect.appendChild(opt);
+        });
+
+        // Machine Dropdowns (Billing & Production)
+        let billMacSelect = document.getElementById('billMachine');
+        let prodMacSelect = document.getElementById('prodMachine');
+        let currentBillMac = billMacSelect.value;
+        let currentProdMac = prodMacSelect.value;
+
+        billMacSelect.innerHTML = "";
+        prodMacSelect.innerHTML = "";
+
+        machineList.forEach(m => {
+            let opt1 = document.createElement('option');
+            opt1.value = m;
+            opt1.textContent = m;
+            if(m === currentBillMac) opt1.selected = true;
+            billMacSelect.appendChild(opt1);
+
+            let opt2 = document.createElement('option');
+            opt2.value = m;
+            opt2.textContent = m;
+            if(m === currentProdMac) opt2.selected = true;
+            prodMacSelect.appendChild(opt2);
         });
     }
 
@@ -318,10 +390,12 @@
         let tbody = document.getElementById('billingRows');
         tbody.innerHTML = "";
         billingRowsData.forEach((row, idx) => {
-            if(row.gross === undefined) row.gross = row.net; // Fallback for old data
+            if(row.bags === undefined) row.bags = 1;
+            if(row.gross === undefined) row.gross = row.net;
             tbody.innerHTML += `
                 <tr>
                     <td><input type="text" value="${row.color}" oninput="billingRowsData[${idx}].color = this.value.toUpperCase(); saveAllData(); calculateBilling()"></td>
+                    <td><input type="number" style="width:70px;" value="${row.bags}" oninput="billingRowsData[${idx}].bags = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
                     <td><input type="number" value="${row.qty}" oninput="billingRowsData[${idx}].qty = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
                     <td><input type="number" step="0.01" value="${row.gross}" oninput="billingRowsData[${idx}].gross = parseFloat(this.value)||0; saveAllData(); calculateBilling()"></td>
                     <td><input type="number" step="0.01" value="${row.net}" oninput="billingRowsData[${idx}].net = parseFloat(this.value)||0; saveAllData(); calculateBilling(); renderInventory()"></td>
@@ -333,7 +407,7 @@
     }
 
     function addBillingRow() {
-        billingRowsData.push({ color: "NEW", qty: 1000, gross: 6.0, net: 5.0 });
+        billingRowsData.push({ color: "NEW", bags: 1, qty: 1000, gross: 6.0, net: 5.0 });
         saveAllData();
         renderBillingRows();
     }
@@ -362,19 +436,6 @@
     }
 
     // --- PAGE 3: PRODUCTION & METER LOGIC ---
-    function updateMachineDropdown() {
-        let select = document.getElementById('prodMachine');
-        let current = select.value;
-        select.innerHTML = "";
-        machineList.forEach(m => {
-            let opt = document.createElement('option');
-            opt.value = m;
-            opt.textContent = m;
-            if(m === current) opt.selected = true;
-            select.appendChild(opt);
-        });
-    }
-
     function addNewMachine() {
         let newMac = prompt("Enter new machine name/number (e.g. M/C NO-07):");
         if(!newMac) return;
@@ -382,8 +443,9 @@
         if(machineList.includes(newMac)) return alert("Machine already exists!");
         machineList.push(newMac);
         saveAllData();
-        updateMachineDropdown();
+        updateAllDropdowns();
         document.getElementById('prodMachine').value = newMac;
+        document.getElementById('billMachine').value = newMac;
     }
 
     function calculateMeterDiff() {
@@ -426,7 +488,7 @@
         productionDatabase.unshift({ id: Date.now(), date, shift, machine, pcs, scrap, prevRead, currRead, diff });
         saveAllData();
         renderProductionDatabase();
-        alert("Production entry with meter readings successfully saved to database!");
+        alert("Production entry successfully saved to database!");
     }
 
     function deleteProductionEntry(idx) {
@@ -443,12 +505,12 @@
         localStorage.setItem('db_production', JSON.stringify(productionDatabase));
     }
 
-    // Initialize defaults on startup
-    document.getElementById('prodDate').value = new Date().toISOString().split('T')[0];
-    updateMaterialDropdown();
-    updateMachineDropdown();
-    calculateMeterDiff();
-    renderInventory();
+    function initApp() {
+        document.getElementById('prodDate').value = new Date().toISOString().split('T')[0];
+        updateAllDropdowns();
+        calculateMeterDiff();
+        renderInventory();
+    }
 </script>
 
 </body>
