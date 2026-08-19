@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MOULDING PRODUCTION & BILLING SOFTWARE</title>
-    <!-- Firebase App (Core SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <!-- Firebase Firestore -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <style>
         :root {
@@ -25,7 +23,6 @@
         .status-online { background: #d4edda; color: #155724; }
         .status-offline { background: #f8d7da; color: #721c24; }
         
-        /* Navigation Tabs */
         .nav-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; background: #e9ecef; padding: 5px; border-radius: 6px; }
         .nav-tab { flex: 1; min-width: 90px; padding: 8px 5px; text-align: center; background: #fff; border: 1px solid #ced4da; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; color: #495057; }
         .nav-tab.active { background: var(--secondary); color: white; border-color: var(--secondary); }
@@ -46,18 +43,15 @@
         th, td { border: 1px solid #ddd; padding: 6px; text-align: center; }
         th { background: var(--primary); color: white; }
         .table-responsive { overflow-x: auto; }
-        
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; margin: 15% auto; padding: 20px; width: 90%; max-width: 400px; border-radius: 8px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="connectionStatus" class="status-bar status-online">LOCAL STORAGE & CLOUD READY</div>
+    <div id="connectionStatus" class="status-bar status-online">SYSTEM READY</div>
     <h2>MOULDING PRODUCTION & BILLING SOFTWARE</h2>
     <div style="text-align:center; font-size:11px; color:#666; margin-bottom:10px;">
-        📊 TOTAL APP OPENS: <span id="appOpenCount">1</span> | <a href="#" onclick="logoutUser()">LOGOUT</a>
+        📊 TOTAL APP OPENS: <span id="appOpenCount">1</span> | <a href="#" onclick="resetAppData()" style="color:red; font-weight:bold;">RESET DATA</a>
     </div>
 
     <!-- Navigation Tabs -->
@@ -101,7 +95,7 @@
         </div>
     </div>
 
-    <!-- PAGE 2: JOB SPECS & COLOR VARIATIONS -->
+    <!-- PAGE 2: JOB SPECS -->
     <div id="page2" class="page">
         <h3>JOB SPECIFICATIONS & COLOR CARDS</h3>
         <label>SLIP / ITEM #:</label>
@@ -114,27 +108,27 @@
             <option value="PURE PP">PURE PP</option>
         </select>
         <label>MACHINE NUMBER:</label>
-        <input type="text" id="machineNo" placeholder="E.G. 160 TON">
+        <input type="text" id="machineNo" placeholder="E.G. 160">
         <label>CYCLE TIME (SEC):</label>
-        <input type="number" id="cycleTime" value="20">
+        <input type="number" id="cycleTime" value="23" oninput="calculateBillingOnly()">
         <label>MOULD CAVITIES:</label>
-        <input type="number" id="cavities" value="1">
+        <input type="number" id="cavities" value="1" oninput="calculateBillingOnly()">
         <label>JOB START DATE:</label>
         <input type="date" id="startDate">
 
         <h4 style="margin-top:15px; border-bottom:2px solid var(--secondary); padding-bottom:3px;">COLOR VARIATIONS</h4>
         <div id="colorCardsContainer"></div>
         <button class="btn-warning" onclick="addColorCard()">+ ADD COLOR CARD</button>
-        <button class="btn-success" style="margin-top:15px;" onclick="saveJobSpecs()">SAVE JOB SPECS & CALCULATE</button>
+        <button class="btn-success" style="margin-top:15px;" onclick="switchPage(3)">SAVE & VIEW BILLING</button>
     </div>
 
-    <!-- PAGE 3: BILLING SUMMARY -->
+    <!-- PAGE 3: BILLING -->
     <div id="page3" class="page">
         <h3>BILLING SUMMARY & REPORTS</h3>
         <label>PARTY / CUSTOMER NAME:</label>
         <input type="text" id="partyName" placeholder="CUSTOMER NAME">
-        <label>MOULDING RATE PER KG (PKR):</label>
-        <input type="number" id="mouldingRate" value="150" oninput="calculateBillingOnly()">
+        <label>MACHINE RATE PER HOUR (PKR):</label>
+        <input type="number" id="ratePerHour" value="1250" oninput="calculateBillingOnly()">
         
         <div class="table-responsive" style="margin-top:10px;">
             <table>
@@ -143,6 +137,7 @@
                         <th>COLOR</th>
                         <th>PCS</th>
                         <th>BAGS</th>
+                        <th>GROSS WT</th>
                         <th>NET WT</th>
                         <th>SCRAP</th>
                         <th>TOTAL AMT</th>
@@ -157,7 +152,7 @@
         <button class="btn-success" onclick="window.print()">PRINT / SAVE PDF</button>
     </div>
 
-    <!-- PAGE 4: DAILY PRODUCTION LOG -->
+    <!-- PAGE 4: DAILY PROD -->
     <div id="page4" class="page">
         <h3>DAILY PRODUCTION LOG</h3>
         <label>SELECT SHIFT:</label>
@@ -187,7 +182,7 @@
         </div>
     </div>
 
-    <!-- PAGE 5: LOT MANAGEMENT & SHORT MOLDING TRACKER -->
+    <!-- PAGE 5: LOT TRACKER -->
     <div id="page5" class="page">
         <h3>LOT TRACKER & SHORT MOLDING</h3>
         <label>LOT / ORDER REFERENCE:</label>
@@ -217,25 +212,9 @@
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDummyKeyForAppStructure99",
-        authDomain: "moldpro-app.firebaseapp.com",
-        projectId: "moldpro-app",
-        storageBucket: "moldpro-app.appspot.com",
-        messagingSenderId: "123456789",
-        appId: "1:12345:web:abcde"
-    };
-    if (!firebase.apps.length) {
-        try { firebase.initializeApp(firebaseConfig); } catch(e) {}
-    }
-    let db = null;
-    try { db = firebase.firestore(); } catch(e) {}
-
     let transactions = [];
-    let jobCards = [];
     let dailyProductions = [];
     let lotTrackers = [];
-
     let editingInvIndex = null;
     let editingProdIndex = null;
     let editingLotIndex = null;
@@ -244,7 +223,9 @@
         document.getElementById('invDate').valueAsDate = new Date();
         document.getElementById('startDate').valueAsDate = new Date();
         loadData();
-        incrementAppOpen();
+        if(document.querySelectorAll('#colorCardsContainer > div').length === 0) {
+            addColorCard();
+        }
     });
 
     function switchPage(pageNum) {
@@ -252,54 +233,60 @@
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('page' + pageNum).classList.add('active');
         document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
+        if(pageNum === 3) calculateBillingOnly();
     }
 
-    function addColorCard() {
+    function addColorCard(color='', pcs='', bags='', grossWt='', netWt='', scrap='') {
         let container = document.getElementById('colorCardsContainer');
         let cardDiv = document.createElement('div');
         cardDiv.style.cssText = "background:#f8f9fa; padding:8px; margin-bottom:8px; border:1px solid #ddd; border-radius:4px;";
         cardDiv.innerHTML = `
             <label>COLOR NAME:</label>
-            <input type="text" class="card-color" placeholder="E.G. RED, GREEN">
+            <input type="text" class="card-color" value="${color}" placeholder="E.G. RED, GREEN" oninput="calculateBillingOnly()">
             <label>PIECES PRODUCED:</label>
-            <input type="number" class="card-pcs" placeholder="0" oninput="calculateBillingOnly()">
+            <input type="number" class="card-pcs" value="${pcs}" placeholder="0" oninput="calculateBillingOnly()">
             <label>BAGS PACKED:</label>
-            <input type="number" class="card-bags" placeholder="0">
+            <input type="number" class="card-bags" value="${bags}" placeholder="0">
+            <label>GROSS WEIGHT (KG):</label>
+            <input type="number" class="card-grosswt" value="${grossWt}" placeholder="0.00" oninput="calculateBillingOnly()">
             <label>NET FINISHED WT (KG):</label>
-            <input type="number" class="card-netwt" placeholder="0.00" oninput="calculateBillingOnly()">
+            <input type="number" class="card-netwt" value="${netWt}" placeholder="0.00">
             <label>SCRAP / WASTE WT (KG):</label>
-            <input type="number" class="card-scrap" placeholder="0.00" oninput="calculateBillingOnly()">
+            <input type="number" class="card-scrap" value="${scrap}" placeholder="0.00">
             <button type="button" class="btn-danger" style="margin-top:5px;" onclick="this.parentElement.remove(); calculateBillingOnly();">REMOVE COLOR</button>
         `;
         container.appendChild(cardDiv);
+        calculateBillingOnly();
     }
 
     function calculateBillingOnly() {
-        let rate = parseFloat(document.getElementById('mouldingRate').value) || 0;
+        let ratePerHour = parseFloat(document.getElementById('ratePerHour').value) || 0;
+        let cycleTime = parseFloat(document.getElementById('cycleTime').value) || 0;
+        let cavities = parseFloat(document.getElementById('cavities').value) || 1;
         let colorCards = document.querySelectorAll('#colorCardsContainer > div');
         let billingBody = document.getElementById('billingTableBody');
         billingBody.innerHTML = '';
         let grandTotal = 0;
-        let totalNet = 0;
-        let totalScrap = 0;
 
         colorCards.forEach(card => {
             let color = card.querySelector('.card-color').value || 'UNSPECIFIED';
             let pcs = parseFloat(card.querySelector('.card-pcs').value) || 0;
             let bags = parseFloat(card.querySelector('.card-bags').value) || 0;
+            let grossWt = parseFloat(card.querySelector('.card-grosswt').value) || 0;
             let netWt = parseFloat(card.querySelector('.card-netwt').value) || 0;
             let scrap = parseFloat(card.querySelector('.card-scrap').value) || 0;
 
-            let amount = netWt * rate;
+            // Formula: (Rate Per Hour / 3600) * Cycle Time * Pieces / Cavities
+            let totalSeconds = (pcs * cycleTime) / cavities;
+            let amount = (ratePerHour / 3600) * totalSeconds;
             grandTotal += amount;
-            totalNet += netWt;
-            totalScrap += scrap;
 
             billingBody.innerHTML += `
                 <tr>
                     <td>${color}</td>
                     <td>${pcs}</td>
                     <td>${bags}</td>
+                    <td>${grossWt.toFixed(2)}</td>
                     <td>${netWt.toFixed(2)}</td>
                     <td>${scrap.toFixed(2)}</td>
                     <td>${amount.toFixed(2)}</td>
@@ -307,22 +294,6 @@
         });
 
         document.getElementById('grandTotalAmount').textContent = grandTotal.toFixed(2);
-
-        let totalConsumption = totalNet + totalScrap;
-        let selectedMaterial = document.getElementById('materialType').value;
-        let jobStartDate = document.getElementById('startDate').value;
-
-        transactions = transactions.filter(t => !(t.type === 'CONSUMPTION' && t.jobDate === jobStartDate));
-        if (selectedMaterial && totalConsumption > 0 && jobStartDate) {
-            transactions.push({
-                date: jobStartDate,
-                jobDate: jobStartDate,
-                type: 'CONSUMPTION',
-                material: selectedMaterial,
-                qty: totalConsumption
-            });
-        }
-        renderInventory();
     }
 
     function addInventoryTransaction() {
@@ -345,6 +316,7 @@
         }
 
         saveData();
+        renderInventory();
         document.getElementById('invMaterialName').value = '';
         document.getElementById('invQty').value = '';
     }
@@ -369,7 +341,13 @@
 
         let tbody = document.getElementById('inventorySummaryBody');
         tbody.innerHTML = '';
-        for (let mat in summary) {
+        let keys = Object.keys(summary);
+        if (keys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="color:red; font-weight:bold;">NO INVENTORY RECORDS FOUND</td></tr>`;
+            return;
+        }
+
+        keys.forEach(mat => {
             let closing = summary[mat].purchase - summary[mat].consumption;
             let originalIndex = transactions.findIndex(t => t.material === mat);
             tbody.innerHTML += `
@@ -383,18 +361,13 @@
                         <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteMaterial('${mat}')">DEL</button>
                     </td>
                 </tr>`;
-        }
+        });
     }
 
     function deleteMaterial(mat) {
         transactions = transactions.filter(t => t.material !== mat);
         saveData();
-    }
-
-    function saveJobSpecs() {
-        calculateBillingOnly();
-        alert('JOB SPECIFICATIONS AND BILLING SUCCESSFULLY UPDATED AND SYNCHRONIZED.');
-        switchPage(3);
+        renderInventory();
     }
 
     function addDailyProduction() {
@@ -495,63 +468,34 @@
     }
 
     function saveData() {
-        let dataToSave = { transactions, jobCards, dailyProductions, lotTrackers };
-        localStorage.setItem('mouldingAppData', JSON.stringify(dataToSave));
-
-        if (db) {
-            db.collection("mouldingApp").doc("masterData").set(dataToSave).then(() => {
-                document.getElementById('connectionStatus').className = "status-bar status-online";
-                document.getElementById('connectionStatus').textContent = "CLOUD & LOCAL SYNCED";
-            }).catch(err => {
-                document.getElementById('connectionStatus').className = "status-bar status-offline";
-                document.getElementById('connectionStatus').textContent = "OFFLINE MODE (SAVED LOCALLY)";
-            });
-        }
-        renderInventory();
-        renderDailyProduction();
-        renderLotTracker();
+        let dataToSave = { transactions, dailyProductions, lotTrackers };
+        localStorage.setItem('mouldingAppDataFinal', JSON.stringify(dataToSave));
     }
 
     function loadData() {
-        let localData = localStorage.getItem('mouldingAppData');
+        let localData = localStorage.getItem('mouldingAppDataFinal');
         if (localData) {
             let data = JSON.parse(localData);
             transactions = data.transactions || [];
-            jobCards = data.jobCards || [];
             dailyProductions = data.dailyProductions || [];
             lotTrackers = data.lotTrackers || [];
             renderInventory();
             renderDailyProduction();
             renderLotTracker();
         }
+    }
 
-        if (db) {
-            db.collection("mouldingApp").doc("masterData").get().then((doc) => {
-                if (doc.exists) {
-                    let data = doc.data();
-                    transactions = data.transactions || [];
-                    jobCards = data.jobCards || [];
-                    dailyProductions = data.dailyProductions || [];
-                    lotTrackers = data.lotTrackers || [];
-                    localStorage.setItem('mouldingAppData', JSON.stringify(data));
-                    renderInventory();
-                    renderDailyProduction();
-                    renderLotTracker();
-                }
-            }).catch(err => {});
+    function resetAppData() {
+        if(confirm('DO YOU WANT TO CLEAR ALL LOCAL DATA?')) {
+            localStorage.removeItem('mouldingAppDataFinal');
+            transactions = [];
+            dailyProductions = [];
+            lotTrackers = [];
+            renderInventory();
+            renderDailyProduction();
+            renderLotTracker();
+            alert('DATA RESET SUCCESSFUL.');
         }
-    }
-
-    function incrementAppOpen() {
-        let count = localStorage.getItem('appOpens') || 0;
-        count++;
-        localStorage.setItem('appOpens', count);
-        document.getElementById('appOpenCount').textContent = count;
-    }
-
-    function logoutUser() {
-        alert('SESSION CLOSED SECURELY.');
-        location.reload();
     }
 </script>
 </body>
