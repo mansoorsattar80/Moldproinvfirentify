@@ -108,7 +108,7 @@
             border: 1px solid #e2e8f0;
             padding: 8px 12px;
             border-radius: 6px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             font-size: 12px;
             font-weight: 600;
             color: #475569;
@@ -141,7 +141,8 @@
         }
 
         h2 { color: var(--primary-color); text-align: center; margin-bottom: 5px; font-size: 20px; }
-        .sync-status { text-align: center; font-size: 11px; color: var(--success-color); margin-bottom: 15px; font-weight: 600; }
+        .sync-status { text-align: center; font-size: 11px; color: var(--success-color); margin-bottom: 10px; font-weight: 600; }
+        .open-counter { text-align: center; font-size: 11px; color: #64748b; margin-bottom: 15px; font-weight: 600; }
         .section-title { font-size: 15px; font-weight: 600; color: var(--primary-color); margin-top: 20px; margin-bottom: 10px; border-bottom: 2px solid var(--secondary-color); padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
         .input-group { display: flex; flex-direction: column; }
@@ -197,6 +198,7 @@
 
     <h2>Moulding Production & Billing Software</h2>
     <div id="syncStatus" class="sync-status">Connecting to Cloud Database...</div>
+    <div id="visitCountDisplay" class="open-counter">📊 Total App Opens: Loading...</div>
 
     <div class="section-title">
         <span>Raw Material Inventory Ledger</span>
@@ -369,7 +371,7 @@
 
     function handleLogout() {
         auth.signOut().then(() => {
-            location.reload(); // Reloads the page to bring back the login gate
+            location.reload(); 
         });
     }
 
@@ -393,6 +395,18 @@
 
     function initializeAppLogic() {
         if (db) {
+            // Track and increment app open count in Firebase
+            const counterRef = db.ref('mouldingAppStats/totalOpens');
+            counterRef.transaction((currentValue) => {
+                return (currentValue || 0) + 1;
+            });
+
+            // Display total open count live
+            counterRef.on('value', (snapshot) => {
+                const count = snapshot.val() || 0;
+                document.getElementById('visitCountDisplay').innerText = "📊 Total App Opens: " + count;
+            });
+
             db.ref('mouldingApp').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data && !window.isLocalSaving) {
