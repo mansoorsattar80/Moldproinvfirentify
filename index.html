@@ -73,11 +73,13 @@
             margin-bottom: 3px;
         }
 
-        .form-group input {
+        .form-group input, 
+        .form-group select {
             padding: 5px;
             font-size: 12px;
             border: 1px solid var(--border-color);
             border-radius: 3px;
+            background-color: #fff;
         }
 
         .section-title {
@@ -185,10 +187,20 @@
             <label>DEMAND QUANTITY</label>
             <input type="text" value="10000 Pcs">
         </div>
+        
+        <!-- Material Combobox Connected to Inventory -->
         <div class="form-group">
-            <label>MATERIAL</label>
-            <input type="text" value="Crystal Hi Impact">
+            <label>MATERIAL (INVENTORY)</label>
+            <select id="materialSelect" onchange="checkNewMaterial(this)">
+                <option value="Crystal Hi Impact" selected>Crystal Hi Impact</option>
+                <option value="ABS Natural">ABS Natural</option>
+                <option value="Polypropylene (PP)">Polypropylene (PP)</option>
+                <option value="HDPE">HDPE</option>
+                <option value="GPPS">GPPS</option>
+                <option value="-- ADD NEW MATERIAL --">+ Add New Material...</option>
+            </select>
         </div>
+
         <div class="form-group">
             <label>ITEM GM.</label>
             <input type="text" value="44g">
@@ -258,6 +270,21 @@
 </div>
 
 <script>
+    function checkNewMaterial(selectElement) {
+        if (selectElement.value === "-- ADD NEW MATERIAL --") {
+            const newNodeName = prompt("Enter new material name from inventory:");
+            if (newNodeName && newNodeName.trim() !== "") {
+                const newOption = document.createElement("option");
+                newOption.value = newNodeName;
+                newOption.text = newNodeName;
+                selectElement.insertBefore(newOption, selectElement.lastElementChild);
+                selectElement.value = newNodeName;
+            } else {
+                selectElement.selectedIndex = 0;
+            }
+        }
+    }
+
     function addGoodsRow() {
         const tbody = document.getElementById('receivedGoodsBody');
         const rowCount = tbody.rows.length + 1;
@@ -284,7 +311,7 @@
     }
 
     function saveRecord() {
-        alert("Slip record saved successfully!");
+        alert("Slip record with selected inventory material saved successfully!");
     }
 </script>
 
