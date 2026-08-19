@@ -42,10 +42,9 @@
         
         .section-card { background: #fff; border: 1px solid #cbd5e1; padding: 8px; border-radius: 4px; margin-bottom: 8px; }
 
-        /* Highly Compact Print Styling to fit max data in minimum pages */
         @media print {
             .nav-tabs, button, .no-print, 
-            #page1, #page2, #page5, #page6 { display: none !important; }
+            #page1, #page2, #page5 { display: none !important; }
             #page3, #page4 { display: block !important; }
             body { background: white; padding: 0; font-size: 9.5px; }
             .container { box-shadow: none; padding: 0; width: 100%; }
@@ -62,20 +61,55 @@
     <div class="status-bar">RUNNING ON LOCAL DEVICE STORAGE</div>
     <h2>MOULDING PRODUCTION & BILLING SOFTWARE</h2>
 
-    <!-- Navigation Tabs -->
+    <!-- Navigation Tabs (5 Tabs total) -->
     <div class="nav-tabs">
-        <div class="nav-tab" onclick="switchPage(1)">1. INVENTORY</div>
+        <div class="nav-tab active" onclick="switchPage(1)">1. INVENTORY</div>
         <div class="nav-tab" onclick="switchPage(2)">2. JOB SPECS</div>
-        <div class="nav-tab active" onclick="switchPage(3)">3. BILLING</div>
-        <div class="nav-tab" onclick="switchPage(4)">4. DAILY PROD</div>
+        <div class="nav-tab" onclick="switchPage(3)">3. BILLING</div>
+        <div class="nav-tab" onclick="switchPage(4)">4. DAILY PROD & POWER</div>
         <div class="nav-tab" onclick="switchPage(5)">5. LOT TRACKER</div>
-        <div class="nav-tab" onclick="switchPage(6)">6. ELECTRICITY</div>
     </div>
 
     <!-- PAGE 1: INVENTORY -->
-    <div id="page1" class="page">
+    <div id="page1" class="page active">
         <h3>RAW MATERIAL INVENTORY</h3>
-        <button class="btn-success" onclick="alert('Inventory saved')">SAVE</button>
+        
+        <div class="section-card">
+            <label>Material Name / Granule Type:</label>
+            <input type="text" id="invMaterialName" placeholder="E.G. BLACK, PP, ABS">
+
+            <label>Transaction Type:</label>
+            <select id="invTxType">
+                <option value="PURCHASE">PURCHASE / OPENING STOCK (+)</option>
+                <option value="CONSUMED">CONSUMPTION (-)</option>
+            </select>
+
+            <label>Quantity (Kg):</label>
+            <input type="number" id="invQty" placeholder="E.G. 2500">
+
+            <label>Date:</label>
+            <input type="date" id="invDate">
+
+            <button class="btn-success" onclick="addInventoryEntry()">Add Inventory Entry</button>
+        </div>
+
+        <div class="section-card">
+            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Inventory Stock Summary</h4>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th>Opening/Purch</th>
+                            <th>Consumed</th>
+                            <th>Closing Balance</th>
+                            <th class="no-print">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- PAGE 2: JOB SPECS -->
@@ -84,11 +118,10 @@
         <button class="btn-success" onclick="alert('Job specs saved')">SAVE</button>
     </div>
 
-    <!-- PAGE 3: BILLING (COMPACT PROFESSIONAL REPORT) -->
-    <div id="page3" class="page active">
+    <!-- PAGE 3: BILLING -->
+    <div id="page3" class="page">
         <h2>Moulding Production & Billing Summary</h2>
 
-        <!-- Job & Machine Specifications Compact Grid -->
         <div class="section-card">
             <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Job & Machine Specifications</h4>
             <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; font-size:10px;">
@@ -127,7 +160,6 @@
             </div>
         </div>
 
-        <!-- Color Variations & Production Details Table -->
         <div class="section-card">
             <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Color Variations & Production Details</h4>
             <div class="table-responsive">
@@ -149,7 +181,6 @@
             <button class="btn-success no-print" style="background:var(--secondary); font-size:10px; padding:4px 8px; width:auto;" onclick="addBillingColorRow()">+ Add Color</button>
         </div>
 
-        <!-- Moulding Bill Summary Compact Grid -->
         <div class="section-card" style="background:#fcfdfd;">
             <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">Moulding Bill Summary</h4>
             <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:6px; font-size:10px; text-align:center;">
@@ -179,23 +210,25 @@
         <button class="btn-success no-print" style="margin-top:6px;" onclick="window.print()">Print / Save PDF</button>
     </div>
 
-    <!-- PAGE 4: DAILY PROD (COMPACT PROFESSIONAL REPORT) -->
+    <!-- PAGE 4: DAILY PROD & POWER LOG -->
     <div id="page4" class="page">
-        <h2>Moulding Machine Production Report</h2>
+        <h2>Daily Production & Power Report</h2>
 
-        <!-- Report Controls (Hidden on Print) -->
         <div class="section-card no-print" style="padding:6px;">
             <div style="display:flex; gap:6px; align-items:center;">
                 <div style="flex:1;"><label style="margin:0;">Select Report Date:</label></div>
                 <div style="flex:2;"><input type="date" id="reportDate" onchange="loadDailyProductionForDate()" style="margin:0; padding:3px;"></div>
-                <div style="flex:1;"><button class="btn-success" style="margin:0; padding:4px;" onclick="saveDailyProductionSheet()">Save</button></div>
+                <div style="flex:1;"><button class="btn-success" style="margin:0; padding:4px;" onclick="saveDailyProductionSheet()">Save All</button></div>
                 <div style="flex:1;"><button class="btn-warning" style="margin:0; padding:4px;" onclick="window.print()">Print</button></div>
             </div>
         </div>
 
-        <!-- Plant Electric Meter Log Compact Table -->
-        <div class="section-card">
-            <h4 style="margin:0 0 4px 0; color:var(--primary); font-size:11px; border-bottom:1px solid #cbd5e1; padding-bottom:2px;">⚡ Plant Electric Meter Log (24 Hours)</h4>
+        <!-- Integrated Main Electric Meter Log -->
+        <div class="section-card" style="background:#fdfefe;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <h4 style="margin:0; color:var(--primary); font-size:11px;">⚡ Main Electrical Meter Log</h4>
+                <div style="background:#e3f2fd; color:#0d47a1; padding:2px 6px; font-size:10px; font-weight:bold; border-radius:3px;" id="headerTotalUnits">Total Units Consumed: 0 KWH</div>
+            </div>
             <table>
                 <tr>
                     <th style="width:25%;">Previous Reading</th>
@@ -206,13 +239,12 @@
                 <tr>
                     <td><input type="number" id="elecPrev" placeholder="E.G. 150000" oninput="calculateDailyUnits()" style="margin:0; border:none; text-align:center; padding:2px;"></td>
                     <td><input type="number" id="elecCurr" placeholder="E.G. 150450" oninput="calculateDailyUnits()" style="margin:0; border:none; text-align:center; padding:2px;"></td>
-                    <td><span id="unitsConsumedDisplay" style="font-weight:bold; color:var(--secondary);">0</span></td>
+                    <td><span id="unitsConsumedDisplay" style="font-weight:bold; color:var(--secondary); font-size:12px;">0</span></td>
                     <td><span id="reportTimestampDisplay" style="font-size:9.5px;">-</span></td>
                 </tr>
             </table>
         </div>
 
-        <!-- Machine Production Breakdown Compact Table -->
         <div class="section-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                 <h4 style="margin:0; color:var(--primary); font-size:11px;">📊 Machine Production Breakdown</h4>
@@ -240,19 +272,20 @@
 
     <!-- PAGE 5: LOT TRACKER -->
     <div id="page5" class="page"><h3>LOT TRACKER</h3></div>
-    <!-- PAGE 6: ELECTRICITY -->
-    <div id="page6" class="page"><h3>ELECTRICITY</h3></div>
 </div>
 
 <script>
+    let inventoryData = JSON.parse(localStorage.getItem('moulding_inventory')) || [];
     let dailySheets = JSON.parse(localStorage.getItem('moulding_dailySheets')) || {};
 
     document.addEventListener("DOMContentLoaded", () => {
         let todayStr = new Date().toISOString().split('T')[0];
         document.getElementById('reportDate').value = todayStr;
+        document.getElementById('invDate').value = todayStr;
+        
+        renderInventoryTable();
         loadDailyProductionForDate();
 
-        // Initialize Page 3 default rows
         let sampleColors = [
             { color: "Blue", pcs: 2500, bags: 10, gross: 113.25, net: 112.25 },
             { color: "Green", pcs: 2500, bags: 10, gross: 114.10, net: 113.10 },
@@ -268,6 +301,74 @@
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('page' + pageNum).classList.add('active');
         document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
+    }
+
+    /* Page 1 Inventory Functions */
+    function addInventoryEntry() {
+        let name = document.getElementById('invMaterialName').value.trim();
+        let txType = document.getElementById('invTxType').value;
+        let qty = parseFloat(document.getElementById('invQty').value) || 0;
+        let date = document.getElementById('invDate').value;
+
+        if (!name || qty <= 0) {
+            alert("Please provide a valid material name and quantity.");
+            return;
+        }
+
+        inventoryData.push({ name, txType, qty, date });
+        localStorage.setItem('moulding_inventory', JSON.stringify(inventoryData));
+        
+        document.getElementById('invMaterialName').value = '';
+        document.getElementById('invQty').value = '';
+        renderInventoryTable();
+        alert("Inventory entry added successfully!");
+    }
+
+    function renderInventoryTable() {
+        let tbody = document.getElementById('inventoryTableBody');
+        tbody.innerHTML = '';
+
+        let summary = {};
+        inventoryData.forEach((item, index) => {
+            let key = item.name.toUpperCase();
+            if (!summary[key]) {
+                summary[key] = { purch: 0, consumed: 0, indices: [] };
+            }
+            if (item.txType === 'PURCHASE') {
+                summary[key].purch += item.qty;
+            } else {
+                summary[key].consumed += item.qty;
+            }
+            summary[key].indices.push(index);
+        });
+
+        let keys = Object.keys(summary);
+        if (keys.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="color:#777; padding:10px;">No inventory records found.</td></tr>`;
+            return;
+        }
+
+        keys.forEach(key => {
+            let data = summary[key];
+            let closing = data.purch - data.consumed;
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="font-weight:bold;">${key}</td>
+                <td>${data.purch.toLocaleString()} KG</td>
+                <td>${data.consumed.toLocaleString()} KG</td>
+                <td style="font-weight:bold; color:${closing >= 0 ? 'var(--success)' : 'var(--danger)'};">${closing.toLocaleString()} KG</td>
+                <td class="no-print"><button type="button" class="btn-danger" style="padding:1px 4px; font-size:8px; width:auto;" onclick="deleteMaterialGroup('${key}')">Clear</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function deleteMaterialGroup(materialName) {
+        if(confirm("Remove all entries for " + materialName + "?")) {
+            inventoryData = inventoryData.filter(item => item.name.toUpperCase() !== materialName);
+            localStorage.setItem('moulding_inventory', JSON.stringify(inventoryData));
+            renderInventoryTable();
+        }
     }
 
     /* Page 3 Functions */
@@ -291,7 +392,8 @@
 
     function updateSerialNumbers() {
         document.querySelectorAll('#billingRowsContainer tr').forEach((row, index) => {
-            row.querySelector('.row-sno').textContent = index + 1;
+            let snoEl = row.querySelector('.row-sno');
+            if(snoEl) snoEl.textContent = index + 1;
         });
     }
 
@@ -315,7 +417,7 @@
         document.getElementById('summaryTotalAmount').textContent = totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " PKR";
     }
 
-    /* Page 4 Functions */
+    /* Page 4 Functions (Daily Production & Power) */
     function addMachineReportRow(data = {}) {
         let tbody = document.getElementById('machineReportTableBody');
         let tr = document.createElement('tr');
@@ -369,6 +471,7 @@
         let curr = parseFloat(document.getElementById('elecCurr').value) || 0;
         let diff = curr >= prev ? curr - prev : 0;
         document.getElementById('unitsConsumedDisplay').textContent = diff.toFixed(2);
+        document.getElementById('headerTotalUnits').textContent = "Total Units Consumed: " + diff.toLocaleString() + " KWH";
     }
 
     function updateGrandTotals() {
@@ -405,7 +508,7 @@
 
         localStorage.setItem('moulding_dailySheets', JSON.stringify(dailySheets));
         document.getElementById('reportTimestampDisplay').textContent = timestamp;
-        alert("Daily report saved successfully!");
+        alert("Daily production and power report saved successfully!");
     }
 
     function loadDailyProductionForDate() {
