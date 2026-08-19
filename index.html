@@ -195,6 +195,7 @@
             <input type="number" id="prodGoodPcsB" placeholder="0">
         </div>
 
+        <!-- FIXED BUTTON CLICK EVENT -->
         <button class="btn-success" id="prodBtn" style="margin-top:15px;" onclick="saveDailyProduction()">ADD MACHINE</button>
 
         <h4 style="margin-top:20px; color:var(--primary);">PRODUCTION RECORDS GRID</h4>
@@ -261,7 +262,6 @@
             addColorCard();
         }
         
-        // Load main meter values
         document.getElementById('elecPrevUnits').value = mainMeter.elecPrevUnits || '';
         document.getElementById('elecCurrUnits').value = mainMeter.elecCurrUnits || '';
 
