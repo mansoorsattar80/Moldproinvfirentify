@@ -35,14 +35,14 @@
         .btn-warning { background: var(--warning); color: #fff; }
         .btn-edit { background: #e67e22; color: white; padding: 4px 8px; font-size: 11px; width: auto; margin-right: 3px; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+        table { width: 100% !important; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
         th, td { border: 1px solid #ddd; padding: 6px; text-align: center; vertical-align: middle; }
         th { background: var(--primary); color: white; }
         .table-responsive { overflow-x: auto; margin-bottom: 20px; }
         .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
         .header-elec-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
 
-        /* Report-only Mode: Hide inputs, labels, buttons, and setup sections entirely */
+        /* Report-only Mode: Hide inputs, labels, buttons, and setup sections entirely during print */
         @media print {
             .nav-tabs, button, .no-print, 
             .header-elec-box, .shift-box, 
@@ -50,14 +50,15 @@
             #page1 > h3:first-of-type,
             #page2 > h3:first-of-type,
             #page2 > h4,
+            #page3 > h3:first-of-type,
             #page4 > h4:not(#gridSectionTitle),
             #page5 > h3:first-of-type { display: none !important; }
             
             .page { display: none !important; }
             .page.active { display: block !important; }
             body { background: white; padding: 0; }
-            .container { box-shadow: none; padding: 0; }
-            table { font-size: 10px; }
+            .container { box-shadow: none; padding: 0; width: 100%; }
+            table { font-size: 10px; width: 100% !important; }
             th, td { padding: 4px; }
         }
     </style>
@@ -270,6 +271,7 @@
     let dailyProductions = JSON.parse(localStorage.getItem('moulding_dailyProd')) || [];
     let lotTrackers = JSON.parse(localStorage.getItem('moulding_lotTracker')) || [];
     let mainMeter = JSON.parse(localStorage.getItem('moulding_mainMeter')) || { elecPrevUnits: '', elecCurrUnits: '' };
+    let savedBillingData = JSON.parse(localStorage.getItem('moulding_billingData')) || { partyName: '---', items: [], grandTotal: 0 };
     
     let editingProdKey = null;
     let editingLotKey = null;
@@ -287,20 +289,7 @@
         renderInventory();
         renderDailyProduction();
         renderLotTracker();
-    });
-
-    window.addEventListener('afterprint', () => {
-        document.getElementById('slipNo').value = '';
-        document.getElementById('itemName').value = '';
-        document.getElementById('partyName').value = '';
-        document.getElementById('machineNo').value = '';
-        
-        document.getElementById('colorCardsContainer').innerHTML = '';
-        addColorCard();
-        
-        document.getElementById('displayPartyName').textContent = '---';
-        document.getElementById('billingTableBody').innerHTML = '';
-        document.getElementById('grandTotalAmount').textContent = '0.00';
+        renderBilling();
     });
 
     function switchPage(pageNum) {
@@ -308,7 +297,7 @@
         document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
         document.getElementById('page' + pageNum).classList.add('active');
         document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
-        if(pageNum === 3) calculateBillingOnly();
+        if(pageNum === 3) renderBilling();
     }
 
     function addColorCard(color='', pcs='', bags='', grossWt='', netWt='', scrap='') {
@@ -346,6 +335,7 @@
         let billingBody = document.getElementById('billingTableBody');
         billingBody.innerHTML = '';
         let grandTotal = 0;
+        let tempItems = [];
 
         colorCards.forEach(card => {
             let color = card.querySelector('.card-color').value || 'UNSPECIFIED';
@@ -358,6 +348,8 @@
             let totalSeconds = (pcs * cycleTime) / cavities;
             let amount = (ratePerHour / 3600) * totalSeconds;
             grandTotal += amount;
+
+            tempItems.push({ color, pcs, bags, grossWt, netWt, scrap, amount });
 
             billingBody.innerHTML += `
                 <tr>
@@ -372,6 +364,38 @@
         });
 
         document.getElementById('grandTotalAmount').textContent = grandTotal.toFixed(2);
+        
+        // Save current state persistently so it displays correctly on page switch or print
+        savedBillingData = { partyName, items: tempItems, grandTotal };
+        localStorage.setItem('moulding_billingData', JSON.stringify(savedBillingData));
+    }
+
+    function renderBilling() {
+        let partyName = savedBillingData.partyName || '---';
+        document.getElementById('displayPartyName').textContent = partyName;
+        let billingBody = document.getElementById('billingTableBody');
+        billingBody.innerHTML = '';
+
+        if (!savedBillingData.items || savedBillingData.items.length === 0) {
+            billingBody.innerHTML = `<tr><td colspan="7" style="color:red; font-weight:bold;">NO BILLING RECORDS FOUND. PLEASE CONFIGURE JOB SPECS.</td></tr>`;
+            document.getElementById('grandTotalAmount').textContent = '0.00';
+            return;
+        }
+
+        savedBillingData.items.forEach(item => {
+            billingBody.innerHTML += `
+                <tr>
+                    <td>${item.color}</td>
+                    <td>${item.pcs}</td>
+                    <td>${item.bags}</td>
+                    <td>${item.grossWt.toFixed(2)}</td>
+                    <td>${item.netWt.toFixed(2)}</td>
+                    <td>${item.scrap.toFixed(2)}</td>
+                    <td>${item.amount.toFixed(2)}</td>
+                </tr>`;
+        });
+
+        document.getElementById('grandTotalAmount').textContent = (savedBillingData.grandTotal || 0).toFixed(2);
     }
 
     function saveJobAndDeductInventory() {
