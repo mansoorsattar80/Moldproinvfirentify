@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MOULDING PRODUCTION & BILLING SOFTWARE</title>
+    <!-- Firebase App (compat) & Realtime Database SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
         :root {
             --primary: #2c3e50;
@@ -21,6 +22,7 @@
         h2 { text-align: center; color: var(--primary); font-size: 20px; margin-bottom: 5px; }
         .status-bar { text-align: center; font-size: 12px; font-weight: bold; padding: 5px; margin-bottom: 10px; border-radius: 4px; }
         .status-online { background: #d4edda; color: #155724; }
+        .status-offline { background: #f8d7da; color: #721c24; }
         
         .nav-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; background: #e9ecef; padding: 5px; border-radius: 6px; }
         .nav-tab { flex: 1; min-width: 90px; padding: 8px 5px; text-align: center; background: #fff; border: 1px solid #ced4da; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; color: #495057; }
@@ -41,7 +43,7 @@
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
         th, td { border: 1px solid #ddd; padding: 5px; text-align: center; }
         th { background: var(--primary); color: white; }
-        .table-responsive { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; margin-bottom: 20px; }
         .shift-box { background: #f8f9fa; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 4px; }
         .header-elec-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 10px; border-radius: 6px; margin-bottom: 15px; }
     </style>
@@ -49,11 +51,8 @@
 <body>
 
 <div class="container">
-    <div id="connectionStatus" class="status-bar status-online">SYSTEM READY</div>
+    <div id="connectionStatus" class="status-bar status-offline">CONNECTING TO REALTIME DATABASE...</div>
     <h2>MOULDING PRODUCTION & BILLING SOFTWARE</h2>
-    <div style="text-align:center; font-size:11px; color:#666; margin-bottom:10px;">
-        📊 TOTAL APP OPENS: <span id="appOpenCount">1</span> | <a href="#" onclick="resetAppData()" style="color:red; font-weight:bold;">RESET DATA</a>
-    </div>
 
     <!-- Navigation Tabs -->
     <div class="nav-tabs">
@@ -78,7 +77,7 @@
         <input type="number" id="invQty" placeholder="0.00">
         <label>DATE:</label>
         <input type="date" id="invDate">
-        <button class="btn-success" id="invBtn" onclick="addInventoryTransaction()">ADD INVENTORY ENTRY</button>
+        <button class="btn-success" id="invBtn" onclick="saveInventoryTransaction()">ADD INVENTORY ENTRY</button>
 
         <div class="table-responsive">
             <table>
@@ -107,7 +106,7 @@
         <input type="text" id="partyName" placeholder="CUSTOMER NAME">
         <label>MACHINE RATE PER HOUR (PKR):</label>
         <input type="number" id="ratePerHour" value="1250" oninput="calculateBillingOnly()">
-        <label>SELECT PP GRANULES (USED FOR INVENTORY DEDUCTION):</label>
+        <label>SELECT PP GRANULES (DEDUCTS FROM INVENTORY):</label>
         <select id="materialType">
             <option value="BLACK PP">BLACK PP</option>
             <option value="PURE PP">PURE PP</option>
@@ -158,7 +157,7 @@
     <div id="page4" class="page">
         <h3>DAILY PRODUCTION & ELECTRICITY LOG</h3>
 
-        <!-- HEADER: MAIN ELECTRICITY METER UNITS FOR ENTIRE PLANT -->
+        <!-- HEADER: MAIN ELECTRICITY METER UNITS AT THE VERY TOP -->
         <div class="header-elec-box">
             <h4 style="margin:0 0 5px 0; color:#856404; font-size:14px;">⚡ MAIN ELECTRICAL METER (ALL MACHINES)</h4>
             <div style="display: flex; gap: 10px;">
@@ -171,6 +170,7 @@
                     <input type="number" id="elecCurrUnits" placeholder="0.00">
                 </div>
             </div>
+            <button class="btn-warning" style="margin-top:8px;" onclick="saveMainElectricity()">SAVE / UPDATE MAIN METER</button>
         </div>
 
         <hr style="border:0; border-top:1px solid #ccc; margin:15px 0;">
@@ -200,8 +200,9 @@
             <input type="number" id="prodGoodPcsB" placeholder="0">
         </div>
 
-        <button class="btn-success" id="prodBtn" style="margin-top:15px;" onclick="addDailyProduction()">ADD MACHINE</button>
+        <button class="btn-success" id="prodBtn" style="margin-top:15px;" onclick="saveDailyProduction()">ADD MACHINE</button>
 
+        <h4 style="margin-top:20px; color:var(--primary);">PRODUCTION RECORDS GRID</h4>
         <div class="table-responsive">
             <table>
                 <thead>
@@ -250,20 +251,33 @@
 </div>
 
 <script>
+    // YOUR FIREBASE REALTIME DATABASE CONFIGURATION
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        databaseURL: "https://moldproinvfirentify-default-rtdb.firebaseio.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
     let transactions = [];
     let dailyProductions = [];
     let lotTrackers = [];
-    let editingInvIndex = null;
-    let editingProdIndex = null;
-    let editingLotIndex = null;
+    let editingProdKey = null;
+    let editingLotKey = null;
 
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('invDate').valueAsDate = new Date();
         document.getElementById('startDate').valueAsDate = new Date();
-        loadData();
         if(document.querySelectorAll('#colorCardsContainer > div').length === 0) {
             addColorCard();
         }
+        initRealtimeSync();
     });
 
     function switchPage(pageNum) {
@@ -272,6 +286,51 @@
         document.getElementById('page' + pageNum).classList.add('active');
         document.querySelectorAll('.nav-tab')[pageNum - 1].classList.add('active');
         if(pageNum === 3) calculateBillingOnly();
+    }
+
+    function initRealtimeSync() {
+        let statusEl = document.getElementById('connectionStatus');
+
+        // 1. Sync Inventory
+        database.ref('mouldingApp/inventory').on('value', (snapshot) => {
+            transactions = [];
+            snapshot.forEach((childSnapshot) => {
+                transactions.push({ key: childSnapshot.key, ...childSnapshot.val() });
+            });
+            renderInventory();
+            statusEl.textContent = "CONNECTED LIVE TO REALTIME DATABASE";
+            statusEl.className = "status-bar status-online";
+        }, (error) => {
+            statusEl.textContent = "DATABASE CONNECTION ERROR";
+            statusEl.className = "status-bar status-offline";
+        });
+
+        // 2. Sync Daily Production & Main Electricity Meter
+        database.ref('mouldingApp/dailyProduction').on('value', (snapshot) => {
+            dailyProductions = [];
+            snapshot.forEach((childSnapshot) => {
+                dailyProductions.push({ key: childSnapshot.key, ...childSnapshot.val() });
+            });
+            renderDailyProduction();
+        });
+
+        // Sync Main Meter Header Value independently
+        database.ref('mouldingApp/mainMeter').on('value', (snapshot) => {
+            let meter = snapshot.val();
+            if(meter) {
+                document.getElementById('elecPrevUnits').value = meter.elecPrevUnits || '';
+                document.getElementById('elecCurrUnits').value = meter.elecCurrUnits || '';
+            }
+        });
+
+        // 3. Sync Lot Tracker
+        database.ref('mouldingApp/lotTracker').on('value', (snapshot) => {
+            lotTrackers = [];
+            snapshot.forEach((childSnapshot) => {
+                lotTrackers.push({ key: childSnapshot.key, ...childSnapshot.val() });
+            });
+            renderLotTracker();
+        });
     }
 
     function addColorCard(color='', pcs='', bags='', grossWt='', netWt='', scrap='') {
@@ -351,21 +410,18 @@
         let totalConsumption = totalNetWt + totalScrap;
 
         if (totalConsumption > 0) {
-            // Automatically push a consumption transaction to the inventory ledger
-            transactions.push({
+            database.ref('mouldingApp/inventory').push({
                 material: materialType,
                 type: 'CONSUMPTION',
                 qty: totalConsumption,
                 date: document.getElementById('startDate').value || new Date().toISOString().split('T')[0]
             });
-            saveData();
-            renderInventory();
         }
 
-        switchPage(3); // Go to billing
+        switchPage(3);
     }
 
-    function addInventoryTransaction() {
+    function saveInventoryTransaction() {
         let material = document.getElementById('invMaterialName').value.trim().toUpperCase();
         let type = document.getElementById('invType').value;
         let qty = parseFloat(document.getElementById('invQty').value) || 0;
@@ -376,28 +432,9 @@
             return;
         }
 
-        if (editingInvIndex !== null) {
-            transactions[editingInvIndex] = { material, type, qty, date };
-            editingInvIndex = null;
-            document.getElementById('invBtn').textContent = "ADD INVENTORY ENTRY";
-        } else {
-            transactions.push({ material, type, qty, date });
-        }
-
-        saveData();
-        renderInventory();
+        database.ref('mouldingApp/inventory').push({ material, type, qty, date });
         document.getElementById('invMaterialName').value = '';
         document.getElementById('invQty').value = '';
-    }
-
-    function editInventory(index) {
-        let t = transactions[index];
-        document.getElementById('invMaterialName').value = t.material;
-        document.getElementById('invType').value = t.type;
-        document.getElementById('invQty').value = t.qty;
-        document.getElementById('invDate').value = t.date || '';
-        editingInvIndex = index;
-        document.getElementById('invBtn').textContent = "UPDATE INVENTORY ENTRY";
     }
 
     function renderInventory() {
@@ -418,7 +455,6 @@
 
         keys.forEach(mat => {
             let closing = summary[mat].purchase - summary[mat].consumption;
-            let originalIndex = transactions.findIndex(t => t.material === mat);
             tbody.innerHTML += `
                 <tr>
                     <td><b>${mat}</b></td>
@@ -426,22 +462,28 @@
                     <td style="color:red;">-${summary[mat].consumption.toFixed(2)}</td>
                     <td><b>${closing.toFixed(2)}</b></td>
                     <td>
-                        <button class="btn-edit" onclick="editInventory(${originalIndex})">EDIT</button>
-                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteMaterial('${mat}')">DEL</button>
+                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="deleteMaterialGroup('${mat}')">DEL</button>
                     </td>
                 </tr>`;
         });
     }
 
-    function deleteMaterial(mat) {
-        transactions = transactions.filter(t => t.material !== mat);
-        saveData();
-        renderInventory();
+    function deleteMaterialGroup(mat) {
+        if(confirm(`DELETE ALL RECORDS FOR ${mat}?`)) {
+            transactions.filter(t => t.material === mat).forEach(t => {
+                database.ref('mouldingApp/inventory/' + t.key).remove();
+            });
+        }
     }
 
-    function addDailyProduction() {
+    function saveMainElectricity() {
         let elecPrevUnits = parseFloat(document.getElementById('elecPrevUnits').value) || 0;
         let elecCurrUnits = parseFloat(document.getElementById('elecCurrUnits').value) || 0;
+        database.ref('mouldingApp/mainMeter').set({ elecPrevUnits, elecCurrUnits });
+        alert("MAIN METER READINGS SAVED!");
+    }
+
+    function saveDailyProduction() {
         let machineNo = document.getElementById('prodMachineNo').value.toUpperCase();
         let operator = document.getElementById('prodOperator').value.toUpperCase();
         let shotsA = parseFloat(document.getElementById('prodShotsA').value) || 0;
@@ -450,18 +492,22 @@
         let goodPcsB = parseFloat(document.getElementById('prodGoodPcsB').value) || 0;
         let date = new Date().toISOString().split('T')[0];
 
-        let consumedUnits = elecCurrUnits - elecPrevUnits;
-
-        if (editingProdIndex !== null) {
-            dailyProductions[editingProdIndex] = { date, elecPrevUnits, elecCurrUnits, consumedUnits, machineNo, operator, shotsA, goodPcsA, shotsB, goodPcsB };
-            editingProdIndex = null;
-            document.getElementById('prodBtn').textContent = "ADD MACHINE";
-        } else {
-            dailyProductions.push({ date, elecPrevUnits, elecCurrUnits, consumedUnits, machineNo, operator, shotsA, goodPcsA, shotsB, goodPcsB });
+        if (!machineNo) {
+            alert('PLEASE ENTER MACHINE NUMBER.');
+            return;
         }
 
-        saveData();
-        renderDailyProduction();
+        let data = { date, machineNo, operator, shotsA, goodPcsA, shotsB, goodPcsB };
+
+        if (editingProdKey !== null) {
+            database.ref('mouldingApp/dailyProduction/' + editingProdKey).set(data).then(() => {
+                editingProdKey = null;
+                document.getElementById('prodBtn').textContent = "ADD MACHINE";
+            });
+        } else {
+            database.ref('mouldingApp/dailyProduction').push(data);
+        }
+
         document.getElementById('prodMachineNo').value = '';
         document.getElementById('prodOperator').value = '';
         document.getElementById('prodShotsA').value = '';
@@ -470,36 +516,45 @@
         document.getElementById('prodGoodPcsB').value = '';
     }
 
-    function editProduction(index) {
-        let p = dailyProductions[index];
-        document.getElementById('elecPrevUnits').value = p.elecPrevUnits || '';
-        document.getElementById('elecCurrUnits').value = p.elecCurrUnits || '';
+    function editProduction(key) {
+        let p = dailyProductions.find(item => item.key === key);
+        if(!p) return;
         document.getElementById('prodMachineNo').value = p.machineNo || '';
         document.getElementById('prodOperator').value = p.operator || '';
         document.getElementById('prodShotsA').value = p.shotsA || '';
         document.getElementById('prodGoodPcsA').value = p.goodPcsA || '';
         document.getElementById('prodShotsB').value = p.shotsB || '';
         document.getElementById('prodGoodPcsB').value = p.goodPcsB || '';
-        editingProdIndex = index;
+        editingProdKey = key;
         document.getElementById('prodBtn').textContent = "UPDATE MACHINE";
     }
 
     function renderDailyProduction() {
         let tbody = document.getElementById('dailyProdTableBody');
         tbody.innerHTML = '';
-        dailyProductions.forEach((p, index) => {
-            let unitsText = (p.elecCurrUnits !== undefined && p.elecPrevUnits !== undefined) ? `${p.elecPrevUnits} - ${p.elecCurrUnits}<br><b style="color:#d9534f;">(Diff: ${p.consumedUnits !== undefined ? p.consumedUnits : (p.elecCurrUnits - p.elecPrevUnits)})</b>` : '---';
+        
+        let prev = parseFloat(document.getElementById('elecPrevUnits').value) || 0;
+        let curr = parseFloat(document.getElementById('elecCurrUnits').value) || 0;
+        let diff = curr - prev;
+        let meterDisplay = `${prev} - ${curr}<br><b style="color:#d9534f;">(Diff: ${diff})</b>`;
+
+        if (dailyProductions.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="color:red; font-weight:bold;">NO DAILY PRODUCTION RECORDS FOUND</td></tr>`;
+            return;
+        }
+
+        dailyProductions.forEach((p) => {
             tbody.innerHTML += `
                 <tr>
                     <td>${p.date}</td>
-                    <td>${unitsText}</td>
+                    <td>${meterDisplay}</td>
                     <td>${p.machineNo || '---'}</td>
                     <td>${p.operator || '---'}</td>
                     <td>A: ${p.shotsA || 0}<br>B: ${p.shotsB || 0}</td>
                     <td>A: ${p.goodPcsA || 0}<br>B: ${p.goodPcsB || 0}</td>
                     <td>
-                        <button class="btn-edit" onclick="editProduction(${index})">EDIT</button>
-                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="dailyProductions.splice(${index},1); saveData(); renderDailyProduction();">DEL</button>
+                        <button class="btn-edit" onclick="editProduction('${p.key}')">EDIT</button>
+                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="database.ref('mouldingApp/dailyProduction/${p.key}').remove()">DEL</button>
                     </td>
                 </tr>`;
         });
@@ -512,34 +567,36 @@
         let variance = actual - target;
         let status = variance === 0 ? "EXACT" : (variance > 0 ? `SURPLUS (+${variance})` : `SHORT (${variance})`);
 
-        if (editingLotIndex !== null) {
-            lotTrackers[editingLotIndex] = { lotRef, target, actual, variance, status };
-            editingLotIndex = null;
-            document.getElementById('lotBtn').textContent = "SAVE LOT RECORD";
+        let data = { lotRef, target, actual, variance, status };
+
+        if (editingLotKey !== null) {
+            database.ref('mouldingApp/lotTracker/' + editingLotKey).set(data).then(() => {
+                editingLotKey = null;
+                document.getElementById('lotBtn').textContent = "SAVE LOT RECORD";
+            });
         } else {
-            lotTrackers.push({ lotRef, target, actual, variance, status });
+            database.ref('mouldingApp/lotTracker').push(data);
         }
 
-        saveData();
-        renderLotTracker();
         document.getElementById('lotRef').value = '';
         document.getElementById('lotTargetQty').value = '';
         document.getElementById('lotActualQty').value = '';
     }
 
-    function editLot(index) {
-        let l = lotTrackers[index];
+    function editLot(key) {
+        let l = lotTrackers.find(item => item.key === key);
+        if(!l) return;
         document.getElementById('lotRef').value = l.lotRef;
         document.getElementById('lotTargetQty').value = l.target;
         document.getElementById('lotActualQty').value = l.actual;
-        editingLotIndex = index;
+        editingLotKey = key;
         document.getElementById('lotBtn').textContent = "UPDATE LOT RECORD";
     }
 
     function renderLotTracker() {
         let tbody = document.getElementById('lotTrackerTableBody');
         tbody.innerHTML = '';
-        lotTrackers.forEach((l, index) => {
+        lotTrackers.forEach((l) => {
             tbody.innerHTML += `
                 <tr>
                     <td><b>${l.lotRef}</b></td>
@@ -548,42 +605,11 @@
                     <td>${l.variance}</td>
                     <td style="color:${l.variance >= 0 ? 'green':'red'}; font-weight:bold;">${l.status}</td>
                     <td>
-                        <button class="btn-edit" onclick="editLot(${index})">EDIT</button>
-                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="lotTrackers.splice(${index},1); saveData(); renderLotTracker();">DEL</button>
+                        <button class="btn-edit" onclick="editLot('${l.key}')">EDIT</button>
+                        <button class="btn-danger" style="padding:2px 5px; font-size:10px; width:auto;" onclick="database.ref('mouldingApp/lotTracker/${l.key}').remove()">DEL</button>
                     </td>
                 </tr>`;
         });
-    }
-
-    function saveData() {
-        let dataToSave = { transactions, dailyProductions, lotTrackers };
-        localStorage.setItem('mouldingAppDataFinal', JSON.stringify(dataToSave));
-    }
-
-    function loadData() {
-        let localData = localStorage.getItem('mouldingAppDataFinal');
-        if (localData) {
-            let data = JSON.parse(localData);
-            transactions = data.transactions || [];
-            dailyProductions = data.dailyProductions || [];
-            lotTrackers = data.lotTrackers || [];
-            renderInventory();
-            renderDailyProduction();
-            renderLotTracker();
-        }
-    }
-
-    function resetAppData() {
-        if(confirm('DO YOU WANT TO CLEAR ALL LOCAL DATA?')) {
-            localStorage.removeItem('mouldingAppDataFinal');
-            transactions = [];
-            dailyProductions = [];
-            lotTrackers = [];
-            renderInventory();
-            renderDailyProduction();
-            renderLotTracker();
-            alert('DATA RESET SUCCESSFUL.');
-        }
     }
 </script>
 </body>
