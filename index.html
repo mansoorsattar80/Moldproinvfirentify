@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -458,20 +459,11 @@
         firebase.initializeApp(firebaseConfig);
         db = firebase.database();
         auth = firebase.auth();
+        // FORCE SIGN OUT ON EVERY PAGE LOAD SO IT ALWAYS ASKS FOR PASSWORD
+        auth.signOut();
         document.getElementById('syncStatus').innerText = "🟢 Connected to Real-Time Cloud Database";
     } catch (e) {
         document.getElementById('syncStatus').innerText = "⚠️ Running Offline";
-    }
-
-    // Check if user is already logged in from a previous session
-    if (auth) {
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'block';
-                initializeAppLogic();
-            }
-        });
     }
 
     function handleLogin() {
